@@ -24,9 +24,9 @@ Este repositório contém o desenvolvimento do **Sistema de Ocorrências** da es
 ---
 
 ## 👥 Equipe Técnica
-- Lucas: Líder, Back-End  
+- Lucas: Scrum Master, Back-End  
 - Yuri: Front-End  
-- Carlos: Secretário *  
+- Carlos: Product Owner *  
 - Karlos: Back-End, Front-End *  
 - Victor: Front-End, Banco de Dados *  
 - Joeldson: Banco de Dados *  
@@ -34,8 +34,8 @@ Este repositório contém o desenvolvimento do **Sistema de Ocorrências** da es
 - Arthur: Back-End, Banco de Dados *  
 - Miguel: Front-End  
 - Patricia: Banco de Dados *  
-- Rosângela: Banco de Dados *  
-- Paulo: Back-End *  
+- Rosângela: Banco de Dados, REquisitos (Wireframes)*  
+- Paulo: Back-End, Requisitos (Revisao doc)*  
 - Pietro: Front-End, Back-End *  
 - Luiz: Banco de Dados, Back-End *  
 
