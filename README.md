@@ -26,17 +26,17 @@ Este repositório contém o desenvolvimento do **Sistema de Ocorrências** da es
 ---
 
 ## 👥 Equipe Técnica
-- Lucas: Scrum Master, Back-End  
+- Lucas: Scrum Master 
 - Yuri: Front-End  
 - Carlos: Product Owner *  
 - Karlos: Back-End, Front-End *  
 - Victor: Front-End, Banco de Dados *  
-- Joeldson: Banco de Dados *  
+- Joeldson: Banco de Dados, Product Owner *  
 - Brayan: Banco de Dados *  
 - Arthur: Back-End, Banco de Dados *  
 - Miguel: Front-End  
 - Patricia: Banco de Dados *  
-- Rosângela: Banco de Dados, REquisitos (Wireframes)*  
+- Rosângela: Banco de Dados, REquisitos (Wireframes), Product Owner *  
 - Paulo: Back-End, Requisitos (Revisao doc)*  
 - Pietro: Front-End, Back-End *  
 - Luiz: Banco de Dados, Back-End *  
