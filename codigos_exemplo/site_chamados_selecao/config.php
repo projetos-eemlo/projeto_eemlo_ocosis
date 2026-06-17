@@ -1,0 +1,21 @@
+<?php
+// Configuração da conexão ao banco MySQL usando MySQLi
+
+$host = 'localhost';
+$user = 'rot';
+$password = ' ';
+$database = 'misc';
+$port = 3306;
+
+$conn = new mysqli($host, $user, $password, $database, $port);
+
+if ($conn->connect_error) {
+    die("Erro na conexão com o banco de dados: " . $conn->connect_error);
+}
+
+// Define charset para evitar problemas de acentuação
+$conn->set_charset('utf8mb4');
+
+// Define timezone para São Paulo
+date_default_timezone_set('America/Sao_Paulo');
+?>

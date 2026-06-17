@@ -2,6 +2,8 @@
 
 Este repositório contém o desenvolvimento do **Sistema de Ocorrências** da escola, incluindo requisitos funcionais, parte técnica e observações da direção.
 
+![CAPA.png](assets/CAPA.png)
+
 ---
 
 ## 📌 Funcionalidades Principais
