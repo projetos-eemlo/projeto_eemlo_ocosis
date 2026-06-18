@@ -1,7 +1,8 @@
 <?php
 session_start();
-require 'conexao.php';
 require 'config.php';
+//require 'conexao.php';
+
 //require 'config.php';
 
 // Se o usuário já estiver logado, redireciona para o painel
