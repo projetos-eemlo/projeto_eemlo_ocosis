@@ -1,16 +1,15 @@
-/* Configuração Geral */
+
 body {
     margin: 0;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #f0f0f0; /* Fundo cinza claro */
+    background-color: #f0f0f0;
 }
 
-/* Barra de Navegação Azul */
 nav {
-    background-color: #3b82f6; /* Azul da imagem */
+    background-color: #3b82f6; 
     padding: 1.5rem;
     display: flex;
     justify-content: center;
@@ -24,7 +23,7 @@ nav a {
     text-decoration: none;
 }
 
-/* Centralização */
+
 main {
     flex: 1;
     display: flex;
@@ -32,9 +31,8 @@ main {
     align-items: center;
 }
 
-/* Caixa de Login (Card) */
 .login-container {
-    background: #fcfcfc; /* Branco quase cinza */
+    background: #fcfcfc; 
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -44,7 +42,7 @@ main {
 h2 { margin-top: 0; font-size: 22px; }
 h3 { color: #333; font-size: 18px; margin-bottom: 20px; }
 
-/* Formulário */
+
 form { display: flex; flex-direction: column; }
 
 label { font-weight: bold; margin-bottom: 5px; font-size: 14px; }
@@ -56,14 +54,14 @@ input {
     border-radius: 4px;
 }
 
-/* Grupo de Botões (Lado a Lado) */
+
 .button-group {
     display: flex;
     gap: 15px;
     margin-top: 10px;
 }
 
-/* Estilo comum aos botões */
+
 .btn-entrar, .btn-cadastro {
     flex: 1;
     padding: 10px;
@@ -74,13 +72,12 @@ input {
     font-weight: bold;
 }
 
-/* Cor Botão Entrar (Verde) */
 .btn-entrar {
     background-color: #10b981; 
     color: white;
 }
 
-/* Cor Botão Cadastro (Cinza) */
+
 .btn-cadastro {
     background-color: #a0a0a0;
     color: white;
