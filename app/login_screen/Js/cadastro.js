@@ -21,5 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Se passar por aqui, o formulário segue o curso normal
         console.log("Cadastro realizado com sucesso para: " + nome);
+
+        
     });
 });
