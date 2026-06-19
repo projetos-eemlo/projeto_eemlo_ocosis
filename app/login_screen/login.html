@@ -24,7 +24,10 @@
                 <input type="text" id="username" name="username" placeholder="Digite seu e-mail " required>
 
                 <label for="password">Senha:</label>
-                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+                <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
+                    <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 50%; transform: translateY(-50%); height: calc(100% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
+                </div>
 
                 <div class="button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
