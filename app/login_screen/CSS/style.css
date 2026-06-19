@@ -82,3 +82,14 @@ input {
     background-color: #a0a0a0;
     color: white;
 }
+
+a {
+    text-decoration: none;
+    text-align: center;
+}
+
+h2, h3 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}

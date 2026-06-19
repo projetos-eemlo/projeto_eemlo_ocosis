@@ -13,13 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (senha.length < 6) {
-            alert("Sua senha é muito curta. Use pelo menos 6 caracteres.");
+        if (senha.length < 8) {
+            alert("Sua senha é muito curta. Use pelo menos 8 caracteres.");
             event.preventDefault(); // Impede o envio
             return;
         }
 
         // Se passar por aqui, o formulário segue o curso normal
-        console.log("Cadastro validado com sucesso para: " + nome);
+        console.log("Cadastro realizado com sucesso para: " + nome);
     });
 });
