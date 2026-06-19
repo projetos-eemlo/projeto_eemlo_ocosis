@@ -2,9 +2,9 @@
 // Configuração da conexão ao banco MySQL usando MySQLi
 
 $host = 'localhost';
-$user = 'rot';
-$password = ' ';
-$database = 'misc';
+$user = 'root';
+$password = '';
+$database = 'sistema_ocorrencia';
 $port = 3306;
 
 $conn = new mysqli($host, $user, $password, $database, $port);

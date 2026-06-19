@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="CSS/style.css">
+</head>
+<body>
+    <nav>
+        <a>Login/ Cadastro</a>
+        <a>Cadastro Usuário</a>
+        <a>Nova Ocorrência</a>
+        <a>Pesquise e Turmas</a>
+        <a>Perfil do Aluno</a>
+    </nav>
+
+    <main>
+        <div class="login-container">
+            <h2>1. Acesso ao Sistema</h2>
+            <h3>Entrar</h3>
+            <form action="#" method="POST">
+                <label for="username">E-mail ou Matricula:</label>
+                <input type="text" id="username" name="username" placeholder="Digite seu e-mail " required>
+
+                <label for="password">Senha:</label>
+                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-entrar">Entrar</button>
+                    <a href="cadastro.html" class="btn-cadastro"> Solicitar Cadastro</a>
+                </div>
+            </form>
+        </div>
+    </main>    
+    <script src="JS/login.js"></script>
+</body>
+</html>

@@ -2,11 +2,11 @@
 // conexao.php
 date_default_timezone_set('America/Sao_Paulo');
 
-//$host = '********'; usuario do localhost 
-//$user = '**********'; usuario root
-//$password = '*********'; senha (pode colocar em branco xampp)
-//$database = '**********'; pode usar nova ou reutilizar
-//$port = 3306;
+$host = 'localhost';
+$user = 'root';
+$password = ' ';
+$database = 'sistema_ocorrencia';
+$port = 3306;
 
 $conn = new mysqli($host, $user, $password, $database, $port);
 
