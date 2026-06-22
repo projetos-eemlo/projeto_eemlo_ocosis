@@ -16,37 +16,37 @@
         </header>
         <section class="conteudo">
             <h2>3.Pesquisa e Gestão de Turmas (Direção / Supervisão)</h2>
-            <div>
-                <div>
-                    <h3>Selecione a turma</h3>
-                    <select required>
-                        <option>turma1</option>
+            <div class="pesquisa">
+                <div class="campos">
+                    <h3>Selecione a turma:</h3>
+                    <select required class="pesquisas_input">
+                        <option>1° ano A(Ensino Médio)</option>
                         <option>turma2</option>
                         <option>turma3</option>
                     </select>
                 </div>
-                <div>
-                    <h3>Data / Período</h3>
-                    <input type="date">
-                    <input type="date">
+                <div class="campos">
+                    <h3>Data / Período:</h3>
+                    <input type="date" class="pesquisas_input">
+                    <input type="date" class="pesquisas_input">
                 </div>
-                <div>
-                    <h3>Tipo de infração</h3>
-                    <select>
+                <div class="campos">
+                    <h3>Tipo de infração:</h3>
+                    <select required class="pesquisas_input">
                         <option>Todas</option>
-                        <option>infração</option>
+                        <option>Infração</option>
+                        <option>Desrespeito à autoridade</option>
                     </select>
                 </div>
-                <div>
-                    <div>
-
-                    </div>
-                    <div>
-
-                    </div>
+            </div>
+            <div class="alunos">
+                <div class="nome_alunos">
+                    <h2>Lista de Alunos</h2>
+                </div>
+                <div class="detalhe_aluno">
+                    <h2>Ocorrências Encontradas</h2>
                 </div>
             </div>
-            
         </section>
         <script src="Script/turmas.js"></script>
     </body>
