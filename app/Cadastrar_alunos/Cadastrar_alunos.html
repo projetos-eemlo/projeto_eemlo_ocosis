@@ -3,36 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastrar_alunos</title>
+    <title>Cadastrar Alunos</title>
     <link rel="stylesheet" href="Cadastrar_alunos.css">
-    
 </head>
 <body>
     <div class="Header">
         <a href="../login_page/login.html">1.Login\Cadastro</a>
-        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
-        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar alunos</a>
-        <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrencia</a>
-        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil do aluno</a>
-    </div>
+        <a href="../turmas_page/turmas.html">2.Nova Pesquisa</a> <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar Alunos</a>
+        <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrência</a>
+        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil</a> </div>
     
-    <button class="upload">Upload <br>CSV</button>
-    <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
-    <select id="turmas" class="turmas" aria-label="Turmas" >
-        <option value="">Turma</option>
-        <option value="">Turma2</option>
-    </select>
+    <div class="main-controls">
+        <button class="upload">Upload CSV</button> <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
+        <select id="turmas" class="turmas" aria-label="Turmas" >
+            <option value="">Turma</option>
+            <option value="T1">Turma 1</option>
+            <option value="T2">Turma 2</option>
+        </select>
+    </div>
     
     <div class="alunos">
-        <input type="checkbox" id="aluno" name="contrato" value="aceito">
-        <label for="aluno">Todos</label>
+        <div class="aluno-header">
+            <input type="checkbox" id="aluno-todos" name="aluno-todos">
+            <label for="aluno-todos">Selecionar Todos</label>
+        </div>
+        <div class="aluno-item">
+            <input type="checkbox" name="aluno" value="aluno1">
+            <span>Nome do Aluno 1</span>
+        </div>
     </div>
+
     <div class="botoes-inferiores">
-    <button>Salvar</button>
-    <button>Editar</button>
-    <button>Excluir</button>
-    <button>Trocar de Turma</button>
+        <button id="btn-salvar" class="btn-primary">Salvar</button>
+        <button class="btn-secondary">Editar</button>
+        <button class="btn-danger">Excluir</button>
+        <button class="btn-info">Trocar de Turma</button>
     </div>
+    
     <script src="Cadastrar_alunos.js"></script>
 </body>
 </html>
