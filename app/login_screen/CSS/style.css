@@ -9,6 +9,22 @@ body {
 }
 
 
+nav {
+    background-color: #3b82f6; 
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    color: white;
+    font-weight: bold;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+}
+
+
 
 
 main {
