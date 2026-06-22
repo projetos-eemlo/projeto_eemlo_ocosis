@@ -28,6 +28,8 @@ body{
     padding: 10px;
     cursor: pointer;
     box-shadow: 3px black;
+    text-decoration: none;
+    color: white;
 }
 .Header a:hover{
     background-color: rgb(39, 89, 255);
@@ -42,8 +44,8 @@ body{
     cursor: pointer;
     box-shadow: 3px black;
     border-width: 2px;
-    margin-left: 40px;
-    margin-right: 40px;
+    margin-left: 160px;
+    margin-right: 80px;
 }
 .search{
     padding: 10px;
@@ -52,8 +54,8 @@ body{
     box-shadow: 3px black;
     border-width: 2px;
     align-self: center;
-    width: 70%;
-    margin-right: 40px;
+    width: 50%;
+    margin-right: 80px;
 }
 select{
     padding: 10px;
@@ -67,4 +69,19 @@ select{
 option{
     padding: 10px;
     size: 13px;
+    height: 30px;
+}
+.alunos{
+   border-color: black;
+   border-style: solid ;
+   border-radius: 5px;
+   border-width: 2px;
+   margin: 20px;
+   width: 73%;
+   height: 500px;
+   display: flex;
+   justify-self: center;
+   background-color: rgb(223, 245, 255);
+   box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+   
 }
