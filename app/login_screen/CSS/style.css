@@ -8,20 +8,7 @@ body {
     background-color: #f0f0f0;
 }
 
-nav {
-    background-color: #3b82f6; 
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    color: white;
-    font-weight: bold;
-}
 
-nav a {
-    color: white;
-    text-decoration: none;
-}
 
 
 main {
@@ -46,8 +33,7 @@ h3 { color: #333; font-size: 18px; margin-bottom: 20px; }
 form { display: flex; flex-direction: column; }
 
 label { font-weight: bold; 
-       margin-bottom: 5px; font-size: 14px; 
-      display: block;}
+       margin-bottom: 5px; font-size: 14px; }
 
 input {
     padding: 10px;
