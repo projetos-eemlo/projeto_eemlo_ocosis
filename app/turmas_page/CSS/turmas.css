@@ -1,0 +1,23 @@
+body{
+    background-color: rgb(230, 230, 230);
+/*======================
+        Header
+=======================
+*/
+}
+header{
+    height: 40px;
+    border-color: black;
+    border-style: solid ;
+    border-width: 2px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: 20px;
+    padding: 3px;
+    background-color: rgb(20, 75, 253);
+    color: rgba(255, 255, 255, 0.863);
+     box-shadow: 10px  ;
+     box-shadow: 10px 10px 5px #33333375;
+}
