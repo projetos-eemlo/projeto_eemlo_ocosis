@@ -9,12 +9,15 @@
 <body>
     <div class="Header">
         <a href="../login_page/login.html">1.Login\Cadastro</a>
-        <a href="../turmas_page/turmas.html">2.Nova Pesquisa</a> <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar Alunos</a>
+        <a href="../turmas_page/turmas.html">2.Nova Pesquisa</a>
+        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar Alunos</a>
         <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrência</a>
-        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil</a> </div>
+        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil</a>
+    </div>
     
     <div class="main-controls">
-        <button class="upload">Upload CSV</button> <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
+        <button id="btn-upload" class="upload">Upload CSV</button>
+        <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
         <select id="turmas" class="turmas" aria-label="Turmas" >
             <option value="">Turma</option>
             <option value="T1">Turma 1</option>
@@ -22,22 +25,44 @@
         </select>
     </div>
     
-    <div class="alunos">
+    <div class="alunos" id="container-alunos">
         <div class="aluno-header">
             <input type="checkbox" id="aluno-todos" name="aluno-todos">
-            <label for="aluno-todos">Selecionar Todos</label>
+            <label for="aluno-todos" id="label-todos">Selecionar Todos</label>
+        </div>
+        
+        <div class="aluno-item">
+            <input type="checkbox" name="aluno" value="aluno1" class="check-aluno">
+            <span>João Silva Sauro</span>
         </div>
         <div class="aluno-item">
-            <input type="checkbox" name="aluno" value="aluno1">
-            <span>Nome do Aluno 1</span>
+            <input type="checkbox" name="aluno" value="aluno2" class="check-aluno">
+            <span>Maria Fernanda</span>
+        </div>
+        <div class="aluno-item">
+            <input type="checkbox" name="aluno" value="aluno3" class="check-aluno">
+            <span>Carlos Eduardo</span>
         </div>
     </div>
 
     <div class="botoes-inferiores">
         <button id="btn-salvar" class="btn-primary">Salvar</button>
-        <button class="btn-secondary">Editar</button>
+        <button id="btn-editar" class="btn-secondary">Editar</button>
         <button class="btn-danger">Excluir</button>
         <button class="btn-info">Trocar de Turma</button>
+    </div>
+
+    <div id="modal-periodo" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Selecione o Período e Semestre</h3>
+            <p>Escolha a versão da turma selecionada:</p>
+            <div class="opcoes-periodo">
+                <button class="btn-periodo">1° reg 1 2026/1° semestre</button>
+                <button class="btn-periodo">1° reg 1 2026/2° semestre</button>
+                <button class="btn-periodo">1° reg 2 2026/1° semestre</button>
+            </div>
+            <button id="fechar-modal" class="btn-danger">Cancelar Seleção</button>
+        </div>
     </div>
     
     <script src="Cadastrar_alunos.js"></script>

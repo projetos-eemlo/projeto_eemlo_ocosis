@@ -9,22 +9,15 @@
 }
 
 :root {
-    /* Paleta Azul e Branco fiel à imagem */
-    --color-bg-light: #f8f9fa;       /* Fundo claro/branco da página */
-    --color-text-dark: #212529;      /* Texto escuro padrão */
-    --color-text-light: #ffffff;     /* Texto branco */
-    --color-border: #dee2e6;         /* Bordas suaves */
-    
-    /* Tons de Azul da Imagem */
-    --color-primary: #1d52d4;        /* Azul royal idêntico ao menu superior da imagem */
-    --color-primary-dark: #113ca4;   /* Azul mais escuro para o efeito hover */
-    --color-blue-light: #edf2ff;     /* Azul bem claro para fundos de destaque */
-    
-    /* Verde solicitado para o botão de Upload (baseado no seu original) */
-    --color-upload-green: #7fff00;   /* Chartreuse vibrante original */
-    --color-upload-hover: #6ee600;   /* Tom ligeiramente mais escuro para o hover */
-
-    /* Outras cores de ação ajustadas */
+    --color-bg-light: #f8f9fa;
+    --color-text-dark: #212529;
+    --color-text-light: #ffffff;
+    --color-border: #dee2e6;
+    --color-primary: #1d52d4;
+    --color-primary-dark: #113ca4;
+    --color-blue-light: #edf2ff;
+    --color-upload-green: #7fff00;
+    --color-upload-hover: #6ee600;
     --color-secondary: #f1f3f5;
     --color-danger: #dc3545;
     
@@ -45,13 +38,11 @@ body {
     padding: 20px;
 }
 
-/* =========================================
-   Header (Barra de Navegação - Azul da Imagem)
-   ========================================= */
+/* Header */
 .Header {
     width: 100%;
     max-width: 1200px;
-    background-color: var(--color-primary); /* Azul royal da imagem */
+    background-color: var(--color-primary);
     border-radius: var(--border-radius-sm);
     display: flex;
     align-items: center;
@@ -61,9 +52,8 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin-bottom: 25px;
 }
-
 .Header a {
-    color: var(--color-text-light); /* Texto branco */
+    color: var(--color-text-light);
     text-decoration: none;
     padding: 8px 16px;
     border-radius: var(--border-radius-sm);
@@ -71,14 +61,11 @@ body {
     font-weight: 500;
     transition: var(--transition);
 }
-
 .Header a:hover {
-    background-color: var(--color-primary-dark); /* Destaque azul escuro */
+    background-color: var(--color-primary-dark);
 }
 
-/* =========================================
-   Controles Principais (Upload, Busca, Select)
-   ========================================= */
+/* Controles Principais */
 .main-controls {
     width: 100%;
     max-width: 1200px;
@@ -89,11 +76,9 @@ body {
     margin-bottom: 25px;
     flex-wrap: wrap;
 }
-
-/* Botão Upload CSV (Verde Chartreuse solicitado) */
 .upload {
-    background-color: var(--color-upload-green); /* Verde de volta! */
-    color: #000000; /* Texto preto para garantir boa leitura no fundo brilhante */
+    background-color: var(--color-upload-green);
+    color: #000000;
     padding: 12px 24px;
     border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: var(--border-radius-sm);
@@ -103,13 +88,10 @@ body {
     box-shadow: var(--shadow-soft);
     transition: var(--transition);
 }
-
 .upload:hover {
     background-color: var(--color-upload-hover);
     transform: translateY(-1px);
 }
-
-/* Campo Pesquisar */
 .search {
     flex: 1;
     min-width: 250px;
@@ -120,14 +102,11 @@ body {
     transition: var(--transition);
     background-color: #ffffff;
 }
-
 .search:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
 }
-
-/* Select Turmas */
 select.turmas {
     min-width: 140px;
     padding: 12px;
@@ -137,21 +116,18 @@ select.turmas {
     cursor: pointer;
     transition: var(--transition);
 }
-
 select.turmas:focus {
     outline: none;
     border-color: var(--color-primary);
 }
 
-/* =========================================
-   Lista de Alunos (Área Central)
-   ========================================= */
+/* Área de Alunos */
 .alunos {
     width: 100%;
     max-width: 1200px;
     min-height: 450px;
     margin-bottom: 25px;
-    background-color: #ffffff; /* Fundo totalmente limpo e moderno */
+    background-color: #ffffff;
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-soft);
@@ -162,17 +138,30 @@ select.turmas:focus {
     position: relative;
 }
 
+/* ESCONDENDO CHECKBOXES POR PADRÃO */
+.alunos input[type="checkbox"], 
+.alunos label#label-todos {
+    display: none;
+}
+
+/* MOSTRANDO CHECKBOXES QUANDO NO MODO DE EDIÇÃO */
+.alunos.modo-edicao input[type="checkbox"], 
+.alunos.modo-edicao label#label-todos {
+    display: inline-block;
+    cursor: pointer;
+}
+
 .aluno-header {
     display: flex;
     align-items: center;
     gap: 10px;
     padding-bottom: 12px;
     border-bottom: 2px solid var(--color-bg-light);
-    color: var(--color-primary); /* Texto em azul */
+    color: var(--color-primary);
     font-weight: bold;
     font-size: 14px;
+    min-height: 35px; /* Mantém a altura mesmo sem o checkbox visível */
 }
-
 .aluno-item {
     display: flex;
     align-items: center;
@@ -182,12 +171,100 @@ select.turmas:focus {
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
 }
-
 .aluno-item:hover {
-    background-color: var(--color-blue-light); /* Destaque em azul sutil ao passar o mouse */
+    background-color: var(--color-blue-light);
 }
 
-/* Notificação em azul para o JavaScript */
+/* Botões Inferiores */
+.botoes-inferiores {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.botoes-inferiores button {
+    padding: 12px 24px;
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+.btn-primary { background-color: var(--color-primary); color: var(--color-text-light); }
+.btn-primary:hover { background-color: var(--color-primary-dark); }
+.btn-secondary { background-color: #ffffff; color: var(--color-primary); border-color: var(--color-primary) !important; }
+.btn-secondary:hover { background-color: var(--color-blue-light); }
+.btn-info { background-color: var(--color-blue-light); color: var(--color-primary-dark); }
+.btn-info:hover { background-color: #dbe4ff; }
+.btn-danger { background-color: var(--color-danger); color: white; }
+.btn-danger:hover { background-color: #bd2130; }
+
+/* =========================================
+   Modal de Seleção de Período
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: var(--transition);
+}
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+.modal-content {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: var(--border-radius-md);
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    text-align: center;
+}
+.modal-content h3 {
+    color: var(--color-primary);
+    margin-bottom: 10px;
+}
+.modal-content p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+.opcoes-periodo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.btn-periodo {
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    color: var(--color-text-dark);
+}
+.btn-periodo:hover {
+    background-color: var(--color-blue-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
 .confirm-message {
     position: absolute;
     bottom: 20px;
@@ -202,62 +279,4 @@ select.turmas:focus {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     font-size: 14px;
-}
-
-/* =========================================
-   Botões Inferiores (Centralizados)
-   ========================================= */
-.botoes-inferiores {
-    width: 100%;
-    max-width: 1200px;
-    display: flex;
-    justify-content: center; /* Alterado de volta para o CENTRO conforme solicitado */
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.botoes-inferiores button {
-    padding: 12px 24px;
-    border-radius: var(--border-radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: var(--transition);
-    box-shadow: var(--shadow-soft);
-}
-
-/* Estilo Azul e Branco para os botões de ação */
-.btn-primary {
-    background-color: var(--color-primary); /* Azul da imagem */
-    color: var(--color-text-light);
-}
-.btn-primary:hover {
-    background-color: var(--color-primary-dark);
-}
-
-.btn-secondary {
-    background-color: #ffffff;
-    color: var(--color-primary);
-    border-color: var(--color-primary) !important; /* Borda azul no botão branco */
-}
-.btn-secondary:hover {
-    background-color: var(--color-blue-light);
-}
-
-.btn-info {
-    background-color: var(--color-blue-light);
-    color: var(--color-primary-dark);
-}
-.btn-info:hover {
-    background-color: #dbe4ff;
-}
-
-.btn-danger {
-    background-color: var(--color-danger);
-    color: white;
-}
-.btn-danger:hover {
-    background-color: #bd2130;
 }
