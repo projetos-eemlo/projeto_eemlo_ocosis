@@ -9,28 +9,30 @@
 }
 
 :root {
-    /* Paleta baseada na imagem enviada */
-    --color-bg-light: #f4f6f9;
-    --color-text-dark: #333;
-    --color-text-light: #fff;
-    --color-border: #dbe2e8;
+    /* Paleta Azul e Branco fiel à imagem */
+    --color-bg-light: #f8f9fa;       /* Fundo claro/branco da página */
+    --color-text-dark: #212529;      /* Texto escuro padrão */
+    --color-text-light: #ffffff;     /* Texto branco */
+    --color-border: #dee2e6;         /* Bordas suaves */
     
-    /* Tons de Azul/Verde (Inspirados na imagem) */
-    --color-accent: #6cd1c8; /* Tom turquesa claro */
-    --color-primary: #5c7f99; /* Tom azul acinzentado médio */
-    --color-primary-dark: #45617a; /* Tom mais escuro */
-    --color-info: #95c1d6; /* Azul claro suave */
+    /* Tons de Azul da Imagem */
+    --color-primary: #1d52d4;        /* Azul royal idêntico ao menu superior da imagem */
+    --color-primary-dark: #113ca4;   /* Azul mais escuro para o efeito hover */
+    --color-blue-light: #edf2ff;     /* Azul bem claro para fundos de destaque */
     
-    /* Cores de Ação (Ajustadas para paleta) */
-    --color-secondary: #f0f2f5;
-    --color-danger: #e74c3c;
-    --color-success: #2ecc71;
+    /* Verde solicitado para o botão de Upload (baseado no seu original) */
+    --color-upload-green: #7fff00;   /* Chartreuse vibrante original */
+    --color-upload-hover: #6ee600;   /* Tom ligeiramente mais escuro para o hover */
+
+    /* Outras cores de ação ajustadas */
+    --color-secondary: #f1f3f5;
+    --color-danger: #dc3545;
     
     --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
-    --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.1) inset;
+    --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.08) inset;
     --border-radius-sm: 4px;
     --border-radius-md: 8px;
-    --transition: all 0.3s ease;
+    --transition: all 0.2s ease-in-out;
 }
 
 body {
@@ -44,40 +46,38 @@ body {
 }
 
 /* =========================================
-   Header (Barra de Navegação)
+   Header (Barra de Navegação - Azul da Imagem)
    ========================================= */
 .Header {
     width: 100%;
     max-width: 1200px;
-    height: auto; /* Mais flexível */
-    background-color: var(--color-primary);
-    border-radius: var(--border-radius-md);
+    background-color: var(--color-primary); /* Azul royal da imagem */
+    border-radius: var(--border-radius-sm);
     display: flex;
     align-items: center;
-    justify-content: center; /* Alinhamento central */
-    gap: 15px;
-    padding: 10px 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
 }
 
 .Header a {
-    color: var(--color-text-light);
+    color: var(--color-text-light); /* Texto branco */
     text-decoration: none;
-    padding: 8px 12px;
+    padding: 8px 16px;
     border-radius: var(--border-radius-sm);
     font-size: 14px;
+    font-weight: 500;
     transition: var(--transition);
 }
 
-.Header a:hover,
-.Header a:focus {
-    background-color: var(--color-primary-dark);
-    transform: translateY(-2px);
+.Header a:hover {
+    background-color: var(--color-primary-dark); /* Destaque azul escuro */
 }
 
 /* =========================================
-   Controles Principais (Abaixo do Header)
+   Controles Principais (Upload, Busca, Select)
    ========================================= */
 .main-controls {
     width: 100%;
@@ -86,59 +86,61 @@ body {
     justify-content: space-between;
     align-items: center;
     gap: 15px;
-    margin-bottom: 20px;
-    flex-wrap: wrap; /* Responsivo */
+    margin-bottom: 25px;
+    flex-wrap: wrap;
 }
 
-/* Botão Upload CSV */
+/* Botão Upload CSV (Verde Chartreuse solicitado) */
 .upload {
-    background-color: var(--color-info);
-    color: var(--color-text-dark);
-    padding: 12px 20px;
-    border: none;
+    background-color: var(--color-upload-green); /* Verde de volta! */
+    color: #000000; /* Texto preto para garantir boa leitura no fundo brilhante */
+    padding: 12px 24px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     border-radius: var(--border-radius-sm);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: bold;
     cursor: pointer;
     box-shadow: var(--shadow-soft);
     transition: var(--transition);
 }
 
 .upload:hover {
-    background-color: #8bbdd3;
+    background-color: var(--color-upload-hover);
+    transform: translateY(-1px);
 }
 
 /* Campo Pesquisar */
 .search {
-    flex: 1; /* Ocupa espaço disponível */
-    min-width: 200px;
-    padding: 12px;
-    border-radius: 25px; /* Mais arredondado e limpo */
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 20px;
+    border-radius: 25px;
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-input);
     transition: var(--transition);
+    background-color: #ffffff;
 }
 
 .search:focus {
     outline: none;
-    border-color: var(--color-accent);
-    box-shadow: 0 0 5px rgba(108, 209, 200, 0.5);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
 }
 
 /* Select Turmas */
 select.turmas {
-    width: auto;
-    min-width: 120px;
+    min-width: 140px;
     padding: 12px;
     border-radius: var(--border-radius-sm);
     border: 1px solid var(--color-border);
-    background-color: #fff;
+    background-color: #ffffff;
+    cursor: pointer;
     transition: var(--transition);
 }
 
 select.turmas:focus {
     outline: none;
-    border-color: var(--color-accent);
+    border-color: var(--color-primary);
 }
 
 /* =========================================
@@ -147,26 +149,27 @@ select.turmas:focus {
 .alunos {
     width: 100%;
     max-width: 1200px;
-    min-height: 400px;
-    margin-bottom: 20px;
-    background-color: #fff;
-    border-radius: var(--border-radius-md);
+    min-height: 450px;
+    margin-bottom: 25px;
+    background-color: #ffffff; /* Fundo totalmente limpo e moderno */
+    border-radius: var(--border-radius-sm);
     border: 1px solid var(--color-border);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-    padding: 20px;
+    box-shadow: var(--shadow-soft);
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    position: relative; /* Para mensagem de confirmação */
+    gap: 12px;
+    position: relative;
 }
 
 .aluno-header {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     border-bottom: 2px solid var(--color-bg-light);
-    color: #666;
+    color: var(--color-primary); /* Texto em azul */
+    font-weight: bold;
     font-size: 14px;
 }
 
@@ -174,75 +177,87 @@ select.turmas:focus {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 10px;
+    padding: 12px;
     border-radius: var(--border-radius-sm);
+    border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
 }
 
 .aluno-item:hover {
-    background-color: var(--color-bg-light);
+    background-color: var(--color-blue-light); /* Destaque em azul sutil ao passar o mouse */
 }
 
-/* Estilo para a mensagem de confirmação do JS */
+/* Notificação em azul para o JavaScript */
 .confirm-message {
     position: absolute;
     bottom: 20px;
-    left: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background-color: var(--color-primary);
     color: white;
-    padding: 15px;
-    border-radius: var(--border-radius-md);
+    padding: 12px 30px;
+    border-radius: var(--border-radius-sm);
     text-align: center;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    transition: opacity 0.3s ease-in-out;
+    font-size: 14px;
 }
 
 /* =========================================
-   Botões Inferiores
+   Botões Inferiores (Centralizados)
    ========================================= */
 .botoes-inferiores {
     width: 100%;
     max-width: 1200px;
     display: flex;
-    justify-content: flex-end; /* Botões à direita */
-    gap: 10px;
-    flex-wrap: wrap; /* Responsivo */
+    justify-content: center; /* Alterado de volta para o CENTRO conforme solicitado */
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
 
 .botoes-inferiores button {
-    padding: 10px 18px;
+    padding: 12px 24px;
     border-radius: var(--border-radius-sm);
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 600;
     cursor: pointer;
-    border: none;
-    box-shadow: var(--shadow-soft);
+    border: 1px solid transparent;
     transition: var(--transition);
+    box-shadow: var(--shadow-soft);
 }
 
-/* Estilos de botão baseados na função e paleta */
+/* Estilo Azul e Branco para os botões de ação */
 .btn-primary {
-    background-color: var(--color-accent);
-    color: var(--color-primary-dark);
+    background-color: var(--color-primary); /* Azul da imagem */
+    color: var(--color-text-light);
 }
-.btn-primary:hover { background-color: #5bb3ab; }
+.btn-primary:hover {
+    background-color: var(--color-primary-dark);
+}
 
 .btn-secondary {
-    background-color: var(--color-secondary);
+    background-color: #ffffff;
+    color: var(--color-primary);
+    border-color: var(--color-primary) !important; /* Borda azul no botão branco */
+}
+.btn-secondary:hover {
+    background-color: var(--color-blue-light);
+}
+
+.btn-info {
+    background-color: var(--color-blue-light);
     color: var(--color-primary-dark);
 }
-.btn-secondary:hover { background-color: #dfe1e5; }
+.btn-info:hover {
+    background-color: #dbe4ff;
+}
 
 .btn-danger {
     background-color: var(--color-danger);
     color: white;
 }
-.btn-danger:hover { background-color: #c9302c; }
-
-.btn-info {
-    background-color: var(--color-info);
-    color: white;
+.btn-danger:hover {
+    background-color: #bd2130;
 }
-.btn-info:hover { background-color: #79a6ba; }
