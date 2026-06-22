@@ -1,10 +1,7 @@
 body{
     background-color: rgb(230, 230, 230);
-/*======================
-        Header
-=======================
-*/
 }
+
 header{
     height: 40px;
     border-color: black;
@@ -20,4 +17,9 @@ header{
     color: rgba(255, 255, 255, 0.863);
      box-shadow: 10px  ;
      box-shadow: 10px 10px 5px #33333375;
+}
+
+header a{
+    text-decoration: none;
+    color: #ffffff;
 }
