@@ -23,3 +23,20 @@ header a{
     text-decoration: none;
     color: #ffffff;
 }
+
+header a:hover{
+    text-decoration: none;
+    color: #b6c20e;
+}
+
+section{
+    align-self: center;
+    align-items: center;
+    margin-top: 5%;
+    margin-bottom: 5%;
+    box-shadow: #b6b6b6 0px 0px 3px 3px;
+    width: 80%;
+    border: 1px solid #c7c7c7;
+    border-radius: 15px;
+    justify-self: center;
+}
