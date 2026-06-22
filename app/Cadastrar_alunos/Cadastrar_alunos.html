@@ -9,19 +9,23 @@
 </head>
 <body>
     <div class="Header">
-        <a>1.Login\Cadastro</a>
-        <a>2.Nova Pesquisa e Turma</a>
-        <a>3.Nova Ocorrencia</a>
-        <a>4.Perfil do aluno</a>
+        <a href="../login_page/login.html">1.Login\Cadastro</a>
+        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
+        <a href="cadastrar_alunos.html">3.Cadastrar alunos</a>
+        <a>4.Nova Ocorrencia</a>s
+        <a>5.Perfil do aluno</a>
     </div>
-    <div class="Section2">
+    
     <button class="upload">Upload <br>CSV</button>
-    <input aria-label="Pesquisar nome" type="search" >
-    <select id="turmas" class="turmas" aria-label="Turmas"></select>
+    <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
+    <select id="turmas" class="turmas" aria-label="Turmas" >
+        <option value="">Turma</option>
+        <option value="">Turma2</option>
+    </select>
+    
     <div>
         <input type="checkbox" id="aluno" name="contrato" value="aceito">
-        <label for="aluno">Li e concordo com os termos.</label>
-    </div>
+        <label for="aluno">Todos</label>
     </div>
     <button>Salvar</button>
     <button>Editar</button>

@@ -19,6 +19,7 @@ body{
     color: rgba(255, 255, 255, 0.863);
      box-shadow: 10px  ;
      box-shadow: 10px 10px 5px #33333375;
+     border-width: 2px;
 }
 .Header a {
     background-color: rgb(1, 60, 255);
@@ -35,11 +36,35 @@ body{
 .upload{
     background-color: chartreuse;
     padding: 20px 25px 20px 25px;
-    margin-bottom: 100px;
     border: solid black;
     border-radius: 5px;
-    font: size 13px;;
+    font: size 13px;
+    cursor: pointer;
+    box-shadow: 3px black;
+    border-width: 2px;
+    margin-left: 40px;
+    margin-right: 40px;
 }
-.Section2 input{
-
+.search{
+    padding: 10px;
+    border-radius: 20px;
+    border: solid black;
+    box-shadow: 3px black;
+    border-width: 2px;
+    align-self: center;
+    width: 70%;
+    margin-right: 40px;
+}
+select{
+    padding: 10px;
+    border-radius: 5px;
+    border: solid black;
+    box-shadow: 3px black;
+    border-width: 2px;
+    align-self: center;
+    width: 10%;
+}
+option{
+    padding: 10px;
+    size: 13px;
 }
