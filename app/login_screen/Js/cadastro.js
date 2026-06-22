@@ -26,4 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
 });
- 
+         const togglePasswordBtn = document.querySelector('.toggle-password');
+        const passwordInput = document.querySelector('#password');
+        if (togglePasswordBtn && passwordInput) {
+            togglePasswordBtn.addEventListener('click', () => {
+                const isPasswordVisible = passwordInput.type === 'text';
+                passwordInput.type = isPasswordVisible ? 'password' : 'text';
+                togglePasswordBtn.textContent = isPasswordVisible ? 'Mostrar' : 'Ocultar';
+            });
+        }

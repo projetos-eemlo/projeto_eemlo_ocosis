@@ -39,9 +39,10 @@
                     
                 </select>
 
-                <label for="senha">Digite sua senha</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
-
+                 <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
+                    <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
+                </div>
                 <button type="submit" class="btn-entrar">Cadastrar</button>
             </form>
         </div>
