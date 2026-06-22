@@ -83,5 +83,20 @@ option{
    justify-self: center;
    background-color: rgb(223, 245, 255);
    box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
-   
+}
+.botoes-inferiores{
+    display: flex;
+    gap: 20px;
+    margin-left: 20px;
+    justify-self: center;
+}
+.botoes-inferiores button{
+    background-color: rgb(1, 60, 255);
+    padding: 10px;
+    border-radius: 5px;
+    font: size 13px;
+    cursor: pointer;
+    box-shadow: 3px black;
+    border-width: 2px;
+    color: white;
 }
