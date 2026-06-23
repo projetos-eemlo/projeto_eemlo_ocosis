@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro Usuarios</title>
+
+
     <link rel="stylesheet" href="CSS/style.css">
+
 </head>
 <body>
 
     <nav>
-        <a href="login.html" >Login</a>
+        <a href="login.html">Login/ Cadastro</a>
         <a>Cadastro Usuário</a>
         <a>Nova Ocorrência</a>
         <a>Pesquise e Turmas</a>
@@ -17,26 +20,26 @@
         </nav>
      <main>
         <div class="login-container">
-            <h2>1. Cadastro de Usuário</h2>
+            <h2>2. Cadastro de Usuário</h2>
             <h3> Cadastrar Funcionario </h3>
-            <form action="#" method="POST">
+            <form id="FormCadastro" action="cadastro2.php" method="POST">
                 <label for="nome">Nome do funcionário</label>
                 <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
 
                 <label for="cargo">Cargo / Permissão </label>
                 <select id="cargo" name="cargo" required>
                     <option value="">Selecione o cargo</option>
-                    <option value="admin">Direção (Acesso Total)</option>
-                    <option value="professor">Professor</option>
-                    <option value="secretaria">Supervisor</option>
+                    <option value="">Direção(Acesso Total)</option>
+                    <option value="">Professor(Acesso Limitado)</option>
+                    <option value="">Supervisão(Acesso Total)</option>
+                    
                 </select>
 
-                <label for="senha">Digite sua senha</label>
-                <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required>
-                <div class="button-group">
-                <button type="submit" class="btn-entrar">Cadastrar</button>
-               
+                 <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
+                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
+                    <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
                 </div>
+                <button type="submit" class="btn-entrar">Cadastrar</button>
             </form>
         </div>
     </main>    
