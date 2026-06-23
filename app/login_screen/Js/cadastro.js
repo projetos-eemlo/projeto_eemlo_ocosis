@@ -23,6 +23,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         console.log("Cadastro realizado com sucesso para: " + nome);
+        
+        alert("Cadastro realizado com sucesso para: " + nome);
     });
 
     
