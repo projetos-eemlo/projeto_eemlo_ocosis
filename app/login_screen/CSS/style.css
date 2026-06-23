@@ -66,7 +66,7 @@ input {
 }
 
 
-.btn-entrar, .btn-cadastro {
+.btn-entrar, .btn-cadastro, .btn-cadastrar {
     flex: 1;
     padding: 10px;
     border: none;
@@ -103,4 +103,16 @@ select {
     margin-bottom: 20px;
     border: 1px solid #ccc;
     border-radius: 4px;
+}
+
+
+.btn-cadastrar.bloqueado {
+    background-color: #ccc;
+    color: #fff;
+
+}
+
+.btn-cadastrar.ativo{
+    background-color: #10b981;
+    cursor: pointer;
 }
