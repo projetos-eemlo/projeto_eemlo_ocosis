@@ -9,19 +9,17 @@
 <body>
     <div class="Header">
         <a href="../login_page/login.html">1.Login\Cadastro</a>
-        <a href="../turmas_page/turmas.html">2.Nova Pesquisa</a>
-        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar Alunos</a>
+        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
+        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar alunos</a>
         <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrência</a>
-        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil</a>
+        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil do aluno</a>
     </div>
     
     <div class="main-controls">
         <button id="btn-upload" class="upload">Upload CSV</button>
         <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
-        <select id="turmas" class="turmas" aria-label="Turmas" >
-            <option value="">Turma</option>
-            <option value="T1">Turma 1</option>
-            <option value="T2">Turma 2</option>
+        <select id="turmas" class="turmas" aria-label="Turmas">
+            <option value="">Selecione uma Turma</option>
         </select>
     </div>
     
@@ -30,20 +28,7 @@
             <input type="checkbox" id="aluno-todos" name="aluno-todos">
             <label for="aluno-todos" id="label-todos">Selecionar Todos</label>
         </div>
-        
-        <div class="aluno-item">
-            <input type="checkbox" name="aluno" value="aluno1" class="check-aluno">
-            <span>João Silva Sauro</span>
         </div>
-        <div class="aluno-item">
-            <input type="checkbox" name="aluno" value="aluno2" class="check-aluno">
-            <span>Maria Fernanda</span>
-        </div>
-        <div class="aluno-item">
-            <input type="checkbox" name="aluno" value="aluno3" class="check-aluno">
-            <span>Carlos Eduardo</span>
-        </div>
-    </div>
 
     <div class="botoes-inferiores">
         <button id="btn-salvar" class="btn-primary">Salvar</button>
@@ -54,13 +39,10 @@
 
     <div id="modal-periodo" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3>Selecione o Período e Semestre</h3>
-            <p>Escolha a versão da turma selecionada:</p>
-            <div class="opcoes-periodo">
-                <button class="btn-periodo">1° reg 1 2026/1° semestre</button>
-                <button class="btn-periodo">1° reg 1 2026/2° semestre</button>
-                <button class="btn-periodo">1° reg 2 2026/1° semestre</button>
-            </div>
+            <h3>Selecione a Versão da Turma</h3>
+            <p>Identificamos múltiplos registros. Qual o período correto?</p>
+            <div class="opcoes-periodo" id="opcoes-periodo">
+                </div>
             <button id="fechar-modal" class="btn-danger">Cancelar Seleção</button>
         </div>
     </div>
