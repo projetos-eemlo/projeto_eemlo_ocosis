@@ -6,49 +6,114 @@ document.addEventListener('DOMContentLoaded', function() {
     const containerAlunos = document.getElementById('container-alunos');
     
     const checkboxTodos = document.getElementById('aluno-todos');
-    const checkboxesAlunos = document.querySelectorAll('.check-aluno');
+    let checkboxesAlunos = document.querySelectorAll('.check-aluno'); 
     
     const selectTurmas = document.getElementById('turmas');
     const modalPeriodo = document.getElementById('modal-periodo');
     const fecharModalBtn = document.getElementById('fechar-modal');
     const botoesPeriodo = document.querySelectorAll('.btn-periodo');
 
+    // --- CRIA O INPUT FILE ESCONDIDO (Para o CSV) ---
+    const inputFile = document.createElement('input');
+    inputFile.type = 'file';
+    inputFile.accept = '.csv';
+    inputFile.style.display = 'none';
+    document.body.appendChild(inputFile);
+
     // --- FUNÇÃO DE MODO DE EDIÇÃO (MOSTRAR CHECKBOXES) ---
-    function alternarModoEdicao() {
-        containerAlunos.classList.toggle('modo-edicao');
+    function alternarModoEdicao(forcarAtivo = false) {
+        if (forcarAtivo) {
+            containerAlunos.classList.add('modo-edicao');
+        } else {
+            containerAlunos.classList.toggle('modo-edicao');
+        }
         
-        // Verifica se a classe foi adicionada ou removida para mudar o texto
         if (containerAlunos.classList.contains('modo-edicao')) {
             btnEditar.textContent = 'Cancelar';
-            btnEditar.style.backgroundColor = 'var(--color-danger)'; // Fica vermelho ao cancelar
+            btnEditar.style.backgroundColor = 'var(--color-danger)'; 
             btnEditar.style.color = 'white';
         } else {
             btnEditar.textContent = 'Editar';
-            btnEditar.style.backgroundColor = '#ffffff'; // Volta ao normal
+            btnEditar.style.backgroundColor = '#ffffff'; 
             btnEditar.style.color = 'var(--color-primary)';
             
-            // Ao cancelar a edição, desmarca todos os checkboxes por garantia
-            checkboxTodos.checked = false;
+            // Desmarca tudo ao cancelar
+            if (checkboxTodos) checkboxTodos.checked = false;
             checkboxesAlunos.forEach(cb => cb.checked = false);
         }
     }
 
-    // O botão "Editar" alterna o modo
-    if (btnEditar) {
-        btnEditar.addEventListener('click', alternarModoEdicao);
-    }
+    if (btnEditar) btnEditar.addEventListener('click', () => alternarModoEdicao(false));
 
-    // O botão "Upload CSV" também ativa o modo edição (mostra os checkboxes) se já não estiver ativo
+    // --- LÓGICA DE UPLOAD CSV (Frontend -> PHP Universal) ---
     if (btnUpload) {
         btnUpload.addEventListener('click', function() {
-            if (!containerAlunos.classList.contains('modo-edicao')) {
-                alternarModoEdicao();
-            }
-            // Aqui você pode adicionar a lógica real de Upload de CSV no futuro
+            inputFile.click(); 
         });
     }
 
-    // --- FUNÇÃO SELECIONAR TODOS ---
+    inputFile.addEventListener('change', async function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('acao', 'upload_csv');
+        formData.append('arquivo_csv', file);
+
+        exibirMensagem('Processando arquivo...', false);
+
+        try {
+            // Ajustado para coincidir com o nome exato do seu arquivo na imagem: Backend.php
+            const response = await fetch('Backend.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+
+            if (result.sucesso) {
+                renderizarAlunos(result.dados);
+                exibirMensagem('✅ Alunos carregados com sucesso!');
+            } else {
+                exibirMensagem('❌ ' + result.erro);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            exibirMensagem('❌ Erro ao conectar com o servidor PHP. Verifique o WAMP.');
+        }
+
+        this.value = ''; 
+    });
+
+    // --- RENDERIZAR ALUNOS DO CSV NA TELA ---
+    function renderizarAlunos(alunos) {
+        const headerHTML = containerAlunos.querySelector('.aluno-header').outerHTML;
+        containerAlunos.innerHTML = headerHTML;
+
+        alunos.forEach(aluno => {
+            const div = document.createElement('div');
+            div.className = 'aluno-item';
+            div.innerHTML = `
+                <input type="checkbox" name="aluno" value="${aluno.simade}" class="check-aluno">
+                <span><strong>${aluno.nome}</strong> — SIMADE: ${aluno.simade} | Nasc: ${aluno.nascimento}</span>
+            `;
+            containerAlunos.appendChild(div);
+        });
+
+        checkboxesAlunos = document.querySelectorAll('.check-aluno');
+        
+        const novoCheckboxTodos = document.getElementById('aluno-todos');
+        if (novoCheckboxTodos) {
+            novoCheckboxTodos.addEventListener('change', function(e) {
+                const isChecked = e.target.checked;
+                checkboxesAlunos.forEach(cb => cb.checked = isChecked);
+            });
+        }
+
+        alternarModoEdicao(true);
+    }
+
+    // --- FUNÇÃO SELECIONAR TODOS (Inicial) ---
     if (checkboxTodos) {
         checkboxTodos.addEventListener('change', function(e) {
             const isChecked = e.target.checked;
@@ -59,8 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // --- LÓGICA DO MODAL DE TURMAS ---
-    
-    // Quando escolhe uma turma no select, abre o modal
     if (selectTurmas) {
         selectTurmas.addEventListener('change', function(e) {
             if (e.target.value !== "") {
@@ -69,30 +132,25 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Fecha o modal pelo botão Cancelar
     if (fecharModalBtn) {
         fecharModalBtn.addEventListener('click', function() {
             modalPeriodo.classList.add('hidden');
-            selectTurmas.value = ""; // Reseta o select para o estado padrão
+            selectTurmas.value = ""; 
         });
     }
 
-    // Simula a escolha de um período dentro do modal
     if (botoesPeriodo) {
         botoesPeriodo.forEach(botao => {
             botao.addEventListener('click', function() {
                 const escolha = this.textContent;
-                // Fecha o modal
                 modalPeriodo.classList.add('hidden');
-                
-                // Exibe uma mensagem provisória com a escolha (aproveitando a função do código anterior)
                 exibirMensagem(`Turma selecionada: ${escolha}`);
             });
         });
     }
 
-    // Função auxiliar para exibir notificação na tela
-    function exibirMensagem(texto) {
+    // --- FUNÇÃO DE MENSAGENS (NOTIFICAÇÕES) ---
+    function exibirMensagem(texto, autoApagar = true) {
         const mensagemExistente = document.querySelector('.confirm-message');
         if (mensagemExistente) mensagemExistente.remove();
 
@@ -100,15 +158,17 @@ document.addEventListener('DOMContentLoaded', function() {
         mensagem.className = 'confirm-message';
         mensagem.innerHTML = `<p>${texto}</p>`;
         
-        containerAlunos.appendChild(mensagem);
+        document.body.appendChild(mensagem);
         
         requestAnimationFrame(() => {
             mensagem.style.opacity = '1';
         });
 
-        setTimeout(() => {
-            mensagem.style.opacity = '0';
-            setTimeout(() => mensagem.remove(), 500);
-        }, 3000);
+        if (autoApagar) {
+            setTimeout(() => {
+                mensagem.style.opacity = '0';
+                setTimeout(() => mensagem.remove(), 500);
+            }, 3000);
+        }
     }
 });
