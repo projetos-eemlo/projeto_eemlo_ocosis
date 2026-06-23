@@ -7,11 +7,7 @@
 
 
     <link rel="stylesheet" href="CSS/style.css">
-<<<<<<< HEAD
-    <link rel="stylesheet" href="CSS/Nav.css">
 
-=======
->>>>>>> 4f6f99fbf02e10a07424a0392b2bfbbb8a6497c0
 </head>
 <body>
 
@@ -26,16 +22,16 @@
         <div class="login-container">
             <h2>2. Cadastro de Usuário</h2>
             <h3> Cadastrar Funcionario </h3>
-            <form action="#" method="POST">
+            <form id="FormCadastro" action="cadastro2.php" method="POST">
                 <label for="nome">Nome do funcionário</label>
                 <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
 
                 <label for="cargo">Cargo / Permissão </label>
                 <select id="cargo" name="cargo" required>
                     <option value="">Selecione o cargo</option>
-                    <option value="admin">Direção (Acesso Total)</option>
-                    <option value="professor">Professor</option>
-                    <option value="secretaria">Supervisor</option>
+                    <option value="">Direção(Acesso Total)</option>
+                    <option value="">Professor(Acesso Limitado)</option>
+                    <option value="">Supervisão(Acesso Total)</option>
                     
                 </select>
 
