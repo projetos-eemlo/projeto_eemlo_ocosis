@@ -19,18 +19,19 @@
         <div class="login-container">
             <h2>1. Acesso ao Sistema</h2>
             <h3>Entrar</h3>
-            <form action="#" method="POST">
-                <label for="username">E-mail ou Matricula:</label>
-                <input type="text" id="username" name="username" placeholder="Digite seu e-mail " required>
+
+            <form id="form-login" method="POST">
+                <label for="username">E-mail ou Matrícula:</label>
+                <input type="text" id="username" name="usuario" placeholder="Digite seu e-mail" required>
 
                 <label for="password">Senha:</label>
 
-                <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
-                    <input type="password" id="password" name="password" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
+                <div class="password-field" style="position: relative; width: 100%; max-width: 420px; margin-bottom: 5px;">
+                    <input type="password" id="password" name="senha" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
                     <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
                 </div>
-
-              
+                
+                <div id="mensagem-erro" style="color: red; margin-bottom: 15px; font-size: 0.9rem; display: none;"></div>
 
                 <div class="button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
@@ -39,6 +40,41 @@
             </form>
         </div>
     </main>    
+    
     <script src="JS/login.js"></script>
+
+    <script>
+    document.getElementById('form-login').addEventListener('submit', function(e) {
+        e.preventDefault(); // Impede o HTML de recarregar a tela
+
+        const formData = new FormData(this);
+        const erroDiv = document.getElementById('mensagem-erro');
+        erroDiv.style.display = 'none'; // Esconde o erro antes de tentar de novo
+
+        // Faz o envio invisível para o arquivo PHP
+        fetch('PHP/login.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            const resposta = data.trim(); // Limpa espaços em branco da resposta
+
+            // O JS só redireciona se o PHP responder EXATAMENTE a palavra "sucesso"
+            if (resposta === "sucesso") {
+                window.location.href = "about:blank";
+            } else {
+                // Mostra a mensagem de erro que o PHP enviou embaixo da senha
+                erroDiv.innerText = resposta;
+                erroDiv.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            erroDiv.innerText = "Erro de conexão. Verifique se o servidor PHP está rodando.";
+            erroDiv.style.display = 'block';
+        });
+    });
+    </script>
 </body>
 </html>
