@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastrar Alunos</title>
-    <link rel="stylesheet" href="Cadastrar_alunos.css">
+    
+    <link rel="stylesheet" href="Cadastrar_alunos.css?v=1">
 </head>
 <body>
     <div class="Header">
@@ -25,9 +26,16 @@
     
     <div class="alunos" id="container-alunos">
         <div class="aluno-header">
-            <input type="checkbox" id="aluno-todos" name="aluno-todos">
-            <label for="aluno-todos" id="label-todos">Selecionar Todos</label>
+            
+            <div class="header-left">
+                <input type="checkbox" id="aluno-todos" name="aluno-todos">
+                <label for="aluno-todos" id="label-todos">Selecionar Todos</label>
+            </div>
+            
+            <div id="turma-selecionada-info" class="turma-info-badge"></div>
+            
         </div>
+        
         </div>
 
     <div class="botoes-inferiores">
@@ -47,6 +55,6 @@
         </div>
     </div>
     
-    <script src="Cadastrar_alunos.js"></script>
+    <script src="Cadastrar_alunos.js?v=1"></script>
 </body>
 </html>
