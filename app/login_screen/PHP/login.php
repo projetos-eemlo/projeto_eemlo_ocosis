@@ -13,7 +13,7 @@ if (isset($_POST['usuario']) && isset($_POST['senha'])) {
         
         $funcionario = $sql_query->fetch_assoc();
         
-        // Verifica a senha
+
         if (password_verify($senha_digitada, $funcionario['senha_hash'])) {
             // Se acertou a senha, devolve apenas a palavra "sucesso"
             echo "sucesso";

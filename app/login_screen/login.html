@@ -45,27 +45,25 @@
 
     <script>
     document.getElementById('form-login').addEventListener('submit', function(e) {
-        e.preventDefault(); // Impede o HTML de recarregar a tela
+        e.preventDefault(); 
 
         const formData = new FormData(this);
         const erroDiv = document.getElementById('mensagem-erro');
-        erroDiv.style.display = 'none'; // Esconde o erro antes de tentar de novo
+        erroDiv.style.display = 'none'; 
 
-        // Faz o envio invisível para o arquivo PHP
+    
         fetch('PHP/login.php', {
             method: 'POST',
             body: formData
         })
         .then(response => response.text())
         .then(data => {
-            const resposta = data.trim(); // Limpa espaços em branco da resposta
+            const resposta = data.trim();
 
-            // O JS só redireciona se o PHP responder EXATAMENTE a palavra "sucesso"
             if (resposta === "sucesso") {
                 window.location.href = "about:blank";
             } else {
-                // Mostra a mensagem de erro que o PHP enviou embaixo da senha
-                erroDiv.innerText = resposta;
+                erroDiv.innerText = "E-mail ou senha incorreta";
                 erroDiv.style.display = 'block';
             }
         })
