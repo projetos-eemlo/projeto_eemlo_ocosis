@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form");
     const nomeInput = document.getElementById("nome");
+    const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("senha"); 
     const cargoSelect = document.getElementById("cargo");
     const btnCadastrar = document.querySelector(".btn-cadastrar");
@@ -54,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
    
     nomeInput.addEventListener("input", validarFormularioPreenchido);
+    emailInput.addEventListener("input", validarFormularioPreenchido);
     passwordInput.addEventListener("input", validarFormularioPreenchido);
     cargoSelect.addEventListener("change", validarFormularioPreenchido);
 });

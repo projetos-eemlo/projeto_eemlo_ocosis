@@ -16,6 +16,7 @@
     --color-primary: #1d52d4;
     --color-primary-dark: #113ca4;
     --color-blue-light: #edf2ff;
+    --color-info: #95c1d6;
     --color-upload-green: #7fff00;
     --color-upload-hover: #6ee600;
     --color-secondary: #f1f3f5;
@@ -38,7 +39,9 @@ body {
     padding: 20px;
 }
 
-/* Header */
+/* =========================================
+   Header (Barra de Navegação)
+   ========================================= */
 .Header {
     width: 100%;
     max-width: 1200px;
@@ -52,6 +55,7 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     margin-bottom: 25px;
 }
+
 .Header a {
     color: var(--color-text-light);
     text-decoration: none;
@@ -61,11 +65,14 @@ body {
     font-weight: 500;
     transition: var(--transition);
 }
+
 .Header a:hover {
     background-color: var(--color-primary-dark);
 }
 
-/* Controles Principais */
+/* =========================================
+   Controles Principais
+   ========================================= */
 .main-controls {
     width: 100%;
     max-width: 1200px;
@@ -76,6 +83,7 @@ body {
     margin-bottom: 25px;
     flex-wrap: wrap;
 }
+
 .upload {
     background-color: var(--color-upload-green);
     color: #000000;
@@ -88,10 +96,12 @@ body {
     box-shadow: var(--shadow-soft);
     transition: var(--transition);
 }
+
 .upload:hover {
     background-color: var(--color-upload-hover);
     transform: translateY(-1px);
 }
+
 .search {
     flex: 1;
     min-width: 250px;
@@ -102,11 +112,13 @@ body {
     transition: var(--transition);
     background-color: #ffffff;
 }
+
 .search:focus {
     outline: none;
     border-color: var(--color-primary);
     box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
 }
+
 select.turmas {
     min-width: 140px;
     padding: 12px;
@@ -116,12 +128,15 @@ select.turmas {
     cursor: pointer;
     transition: var(--transition);
 }
+
 select.turmas:focus {
     outline: none;
     border-color: var(--color-primary);
 }
 
-/* Área de Alunos */
+/* =========================================
+   Área de Alunos
+   ========================================= */
 .alunos {
     width: 100%;
     max-width: 1200px;
@@ -151,17 +166,46 @@ select.turmas:focus {
     cursor: pointer;
 }
 
+/* =========================================
+   CABEÇALHO DOS ALUNOS (Lógica Flexbox)
+   ========================================= */
 .aluno-header {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: space-between; /* LÓGICA: Empurra o grupo 1 pra esquerda e o grupo 2 pra direita */
     padding-bottom: 12px;
     border-bottom: 2px solid var(--color-bg-light);
     color: var(--color-primary);
     font-weight: bold;
     font-size: 14px;
-    min-height: 35px; /* Mantém a altura mesmo sem o checkbox visível */
+    min-height: 35px;
+    width: 100%;
 }
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* LÓGICA DE ESPECIFICIDADE: Usando ID para ser impossível de ser subjugado */
+#turma-selecionada-info {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: bold;
+    display: none; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    border: none;
+    white-space: nowrap;
+}
+
+#turma-selecionada-info.visivel {
+    display: block !important; 
+}
+
 .aluno-item {
     display: flex;
     align-items: center;
@@ -171,11 +215,14 @@ select.turmas:focus {
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
 }
+
 .aluno-item:hover {
     background-color: var(--color-blue-light);
 }
 
-/* Botões Inferiores */
+/* =========================================
+   Botões Inferiores
+   ========================================= */
 .botoes-inferiores {
     width: 100%;
     max-width: 1200px;
@@ -185,6 +232,7 @@ select.turmas:focus {
     flex-wrap: wrap;
     margin-bottom: 20px;
 }
+
 .botoes-inferiores button {
     padding: 12px 24px;
     border-radius: var(--border-radius-sm);
@@ -195,12 +243,16 @@ select.turmas:focus {
     transition: var(--transition);
     box-shadow: var(--shadow-soft);
 }
+
 .btn-primary { background-color: var(--color-primary); color: var(--color-text-light); }
 .btn-primary:hover { background-color: var(--color-primary-dark); }
+
 .btn-secondary { background-color: #ffffff; color: var(--color-primary); border-color: var(--color-primary) !important; }
 .btn-secondary:hover { background-color: var(--color-blue-light); }
-.btn-info { background-color: var(--color-blue-light); color: var(--color-primary-dark); }
-.btn-info:hover { background-color: #dbe4ff; }
+
+.btn-info { background-color: var(--color-info); color: white; }
+.btn-info:hover { background-color: #79a6ba; }
+
 .btn-danger { background-color: var(--color-danger); color: white; }
 .btn-danger:hover { background-color: #bd2130; }
 
@@ -220,11 +272,13 @@ select.turmas:focus {
     z-index: 1000;
     transition: var(--transition);
 }
+
 .modal-overlay.hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
 }
+
 .modal-content {
     background-color: #ffffff;
     padding: 30px;
@@ -234,21 +288,25 @@ select.turmas:focus {
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     text-align: center;
 }
+
 .modal-content h3 {
     color: var(--color-primary);
     margin-bottom: 10px;
 }
+
 .modal-content p {
     color: #666;
     margin-bottom: 20px;
     font-size: 14px;
 }
+
 .opcoes-periodo {
     display: flex;
     flex-direction: column;
     gap: 10px;
     margin-bottom: 20px;
 }
+
 .btn-periodo {
     background-color: var(--color-secondary);
     border: 1px solid var(--color-border);
@@ -259,14 +317,18 @@ select.turmas:focus {
     transition: var(--transition);
     color: var(--color-text-dark);
 }
+
 .btn-periodo:hover {
     background-color: var(--color-blue-light);
     border-color: var(--color-primary);
     color: var(--color-primary);
 }
 
+/* =========================================
+   Mensagens de Notificação
+   ========================================= */
 .confirm-message {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
@@ -279,4 +341,5 @@ select.turmas:focus {
     opacity: 0;
     transition: opacity 0.3s ease-in-out;
     font-size: 14px;
+    z-index: 9999;
 }

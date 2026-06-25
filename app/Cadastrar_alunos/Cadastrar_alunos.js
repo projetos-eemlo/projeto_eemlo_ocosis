@@ -11,10 +11,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalPeriodo = document.getElementById('modal-periodo');
     const containerOpcoesPeriodo = document.getElementById('opcoes-periodo');
     const fecharModalBtn = document.getElementById('fechar-modal');
+    
+    // Elemento visual da mini div
+    const infoTurmaBadge = document.getElementById('turma-selecionada-info');
 
-    // Variáveis para controlar o Modal e a Turma final escolhida
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
+
+    // --- FUNÇÕES DA NOVA DIV VISUAL ---
+    function exibirInfoTurma(turma) {
+        const sem = turma.semestre_letivo ? `${turma.semestre_letivo}ºSem` : '-';
+        const tri = turma.trimestre_letivo ? `${turma.trimestre_letivo}ºTri` : '-';
+        
+        // Formatação exata solicitada:
+        infoTurmaBadge.textContent = `Cadastro/Transferência para a: ${turma.desc_turma}\\${turma.ano_letivo}\\ ${sem}\\${tri}`;
+        
+        infoTurmaBadge.classList.add('visivel');
+    }
+
+    function ocultarInfoTurma() {
+        infoTurmaBadge.textContent = '';
+        infoTurmaBadge.classList.remove('visivel');
+    }
 
     // --- CARREGAR E AGRUPAR TURMAS ---
     async function carregarTurmas() {
@@ -27,14 +45,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (result.sucesso) {
                 todasTurmasDoBanco = result.dados;
-                
-                // Extrai apenas os nomes únicos (ex: tira duplicatas do "1º Ano A")
                 const nomesUnicos = [...new Set(todasTurmasDoBanco.map(t => t.desc_turma))];
                 
                 selectTurmas.innerHTML = '<option value="">Selecione uma Turma</option>';
                 nomesUnicos.forEach(nome => {
                     const option = document.createElement('option');
-                    option.value = nome; // O value agora é o NOME (desc_turma)
+                    option.value = nome; 
                     option.textContent = nome;
                     selectTurmas.appendChild(option);
                 });
@@ -45,57 +61,52 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error(error);
         }
     }
-    
     carregarTurmas();
 
-    // --- LÓGICA DO MODAL DE TURMAS (A Mágica Acontece Aqui) ---
+    // --- LÓGICA DO MODAL DE TURMAS ---
     selectTurmas.addEventListener('change', function(e) {
-        idTurmaDefinitiva = null; // Reseta a turma escolhida
-        const nomeSelecionado = e.target.value;
+        idTurmaDefinitiva = null; 
+        ocultarInfoTurma(); 
 
+        const nomeSelecionado = e.target.value;
         if (!nomeSelecionado) return;
 
-        // Filtra todas as versões dessa turma no banco
         const versoes = todasTurmasDoBanco.filter(t => t.desc_turma === nomeSelecionado);
 
         if (versoes.length > 1) {
-            // Tem mais de uma versão? Monta o modal e exibe!
-            containerOpcoesPeriodo.innerHTML = ''; // Limpa os botões antigos
+            containerOpcoesPeriodo.innerHTML = ''; 
 
             versoes.forEach(v => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-periodo';
                 
-                // Formata o texto do botão (Ex: 2026 / 1º Semestre - Manhã)
                 const semestreTexto = v.semestre_letivo ? `${v.semestre_letivo}º Semestre` : 'Anual';
                 btn.textContent = `${v.ano_letivo} / ${semestreTexto} (${v.turno})`;
                 
-                // Ação ao clicar no botão gerado
                 btn.addEventListener('click', () => {
-                    idTurmaDefinitiva = v.id_turma; // Salva o ID real
-                    modalPeriodo.classList.add('hidden'); // Fecha modal
-                    exibirMensagem(`✅ Turma confirmada: ${v.desc_turma} - ${btn.textContent}`);
+                    idTurmaDefinitiva = v.id_turma; 
+                    modalPeriodo.classList.add('hidden'); 
+                    exibirInfoTurma(v); 
+                    exibirMensagem(`✅ Turma confirmada.`);
                 });
                 
                 containerOpcoesPeriodo.appendChild(btn);
             });
-
             modalPeriodo.classList.remove('hidden');
 
         } else if (versoes.length === 1) {
-            // Se só tem uma versão no banco, não precisa de modal. Seleciona direto.
             idTurmaDefinitiva = versoes[0].id_turma;
-            const v = versoes[0];
-            const semestreTexto = v.semestre_letivo ? `${v.semestre_letivo}º Sem` : 'Anual';
-            exibirMensagem(`✅ Turma única confirmada: ${v.desc_turma} (${v.ano_letivo}/${semestreTexto})`);
+            exibirInfoTurma(versoes[0]); 
+            exibirMensagem(`✅ Turma confirmada.`);
         }
     });
 
     if (fecharModalBtn) {
         fecharModalBtn.addEventListener('click', () => {
             modalPeriodo.classList.add('hidden');
-            selectTurmas.value = ""; // Reseta o select caso ele cancele
+            selectTurmas.value = ""; 
             idTurmaDefinitiva = null;
+            ocultarInfoTurma();
         });
     }
 
@@ -157,8 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- RENDERIZAR NA TELA ---
     function renderizarAlunos(alunos) {
-        const headerHTML = containerAlunos.querySelector('.aluno-header').outerHTML;
-        containerAlunos.innerHTML = headerHTML;
+        const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
+        itensAntigos.forEach(item => item.remove());
 
         alunos.forEach(aluno => {
             const div = document.createElement('div');
@@ -175,20 +186,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
         checkboxesAlunos = document.querySelectorAll('.check-aluno');
         
-        const novoCheckboxTodos = document.getElementById('aluno-todos');
-        if (novoCheckboxTodos) {
-            novoCheckboxTodos.addEventListener('change', function(e) {
-                const isChecked = e.target.checked;
-                checkboxesAlunos.forEach(cb => cb.checked = isChecked);
-            });
-        }
         alternarModoEdicao(true);
+    }
+
+    // --- SELECIONAR TODOS ---
+    if (checkboxTodos) {
+        checkboxTodos.addEventListener('change', function(e) {
+            const isChecked = e.target.checked;
+            checkboxesAlunos.forEach(cb => cb.checked = isChecked);
+        });
     }
 
     // --- SALVAR NO BANCO DE DADOS ---
     if (btnSalvar) {
         btnSalvar.addEventListener('click', async function() {
-            // Verifica a nova variável idTurmaDefinitiva em vez do selectTurmas.value
             if (!idTurmaDefinitiva) {
                 exibirMensagem('⚠️ Atenção: Você precisa selecionar uma turma e confirmar o período!');
                 return;
@@ -214,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const formData = new FormData();
             formData.append('acao', 'salvar_alunos_csv');
-            formData.append('id_turma', idTurmaDefinitiva); // Usando o ID real!
+            formData.append('id_turma', idTurmaDefinitiva); 
             formData.append('alunos', JSON.stringify(alunosParaSalvar)); 
 
             try {
