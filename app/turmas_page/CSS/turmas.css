@@ -46,6 +46,7 @@ section{
     border-radius: 15px;
     justify-self: center;
     justify-content: center;
+    background-color: white; /* Adicionado para contraste do conteúdo */
 }
 
 section h2{
@@ -63,6 +64,7 @@ section h2{
     justify-content: center;
     border-radius: 10px;
     background-color: #b6b6b6;
+    padding: 10px 0;
 }
 
 .campos{
@@ -70,6 +72,11 @@ section h2{
     justify-content: center;
     text-align: center;
     padding-bottom: 2%;
+}
+
+.datas_flex {
+    display: flex;
+    gap: 10px;
 }
 
 .pesquisas_input{
@@ -82,6 +89,8 @@ section h2{
 .alunos{
     display: flex;
     flex-direction: row;
+    margin-top: 2%;
+    padding-bottom: 3%;
 }
 
 .nome_alunos{
@@ -90,6 +99,74 @@ section h2{
     border-right: 1px solid rgb(182, 182, 182);
 }
 
+.subtitulo_clique {
+    font-size: 85%;
+    color: #555;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.lista_nomes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.lista_nomes li {
+    margin-bottom: 10px;
+}
+
+.aluno_link {
+    text-decoration: none;
+    color: #144bfd;
+    font-size: 110%;
+    display: block;
+    padding: 5px;
+}
+
+.aluno_link:hover {
+    color: #0b2b9c;
+}
+
+.aluno_link.ativo {
+    background-color: #e2e8f0;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
 .detalhe_aluno{
     margin-left: 4%;
+    flex: 1;
+}
+
+/* Tabela de Ocorrências baseada na imagem */
+.tabela_ocorrencias {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.tabela_ocorrencias th, .tabela_ocorrencias td {
+    border: 1px solid #cbcbcb;
+    padding: 10px;
+    text-align: left;
+}
+
+.tabela_ocorrencias th {
+    background-color: #f3f4f6;
+    color: #333;
+}
+
+.btn_detalhes {
+    background-color: #0e7490;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn_detalhes:hover {
+    background-color: #0891b2;
 }
