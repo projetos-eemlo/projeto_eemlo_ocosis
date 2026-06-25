@@ -6,10 +6,10 @@
     <title>Acesso ao Sistema</title>
     <link rel="stylesheet" href="CSS_login_screen/login.css">
     <style>
-        /* Garante que a mensagem de erro comece escondida */
+       
         #error-msg {
             display: none;
-            color: red; /* Caso seu CSS base não tenha essa cor definida */
+            color: red; 
             margin-top: 10px;
         }
     </style>
@@ -59,7 +59,7 @@
     </main>
 
     <script>
-        // Sua função original de mostrar/ocultar senha
+       
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.btn-show-password');
@@ -72,16 +72,16 @@
             }
         }
 
-        // Nova lógica de validação do formulário
+
         document.getElementById('loginForm').addEventListener('submit', function(event) {
-            // Impede a página de recarregar
+            
             event.preventDefault(); 
 
-            // Defina aqui as credenciais corretas para teste
+           
             const emailCorreto = "usuario@gmail.com";
             const senhaCorreta = "123456";
 
-            // Pega os valores que o usuário digitou
+     
             const emailDigitado = document.getElementById('email').value;
             const senhaDigitada = document.getElementById('password').value;
             const erroMensagem = document.getElementById('error-msg');
@@ -89,10 +89,10 @@
             // Validação
             if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
                 alert('Login efetuado com sucesso!');
-                erroMensagem.style.display = 'none'; // Esconde o erro caso estivesse visível
-                // Redirecione o usuário aqui se desejar, ex: window.location.href = "dashboard.html";
+                erroMensagem.style.display = 'none'; 
+               
             } else {
-                // Se errar, exibe o bloco de texto com a mensagem de erro
+            
                 erroMensagem.style.display = 'block';
             }
         });
