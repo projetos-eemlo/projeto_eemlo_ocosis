@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
     <head>
         <link rel="stylesheet" href="CSS/turmas.css"/>
         <meta charset="UTF-8">
@@ -18,7 +18,7 @@
             <h2>3.Pesquisa e Gestão de Turmas (Direção / Supervisão)</h2>
             <div class="pesquisa">
                 <div class="campos">
-                    <h3>Selecione a turma:</h3>
+                    <h3>1. Selecione a turma:</h3>
                     <select required class="pesquisas_input">
                         <option>1° ano A(Ensino Médio)</option>
                         <option>turma2</option>
@@ -26,12 +26,14 @@
                     </select>
                 </div>
                 <div class="campos">
-                    <h3>Data / Período:</h3>
-                    <input type="date" class="pesquisas_input">
-                    <input type="date" class="pesquisas_input">
+                    <h3>2. Data / Período:</h3>
+                    <div class="datas_flex">
+                        <input type="date" class="pesquisas_input">
+                        <input type="date" class="pesquisas_input">
+                    </div>
                 </div>
                 <div class="campos">
-                    <h3>Tipo de infração:</h3>
+                    <h3>3. Tipo de infração:</h3>
                     <select required class="pesquisas_input">
                         <option>Todas</option>
                         <option>Infração</option>
@@ -42,9 +44,41 @@
             <div class="alunos">
                 <div class="nome_alunos">
                     <h2>Lista de Alunos</h2>
+                    <span class="subtitulo_clique">(Clique no nome para filtrar)</span>
+                    <ul class="lista_nomes">
+                        <li><a href="#" class="aluno_link">➔ Alessandra Vieira</a></li>
+                        <li><a href="#" class="aluno_link">➔ Bruno Henrique</a></li>
+                        <li><a href="#" class="aluno_link ativo">➔ João Silva Sauro</a></li>
+                        <li><a href="#" class="aluno_link">➔ Maria Eduarda</a></li>
+                        <li><a href="#" class="aluno_link">➔ Ricardo Souza</a></li>
+                    </ul>
                 </div>
                 <div class="detalhe_aluno">
                     <h2>Ocorrências Encontradas</h2>
+                    <table class="tabela_ocorrencias">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Aluno</th>
+                                <th>Infrações</th>
+                                <th>Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>15/04/2026</td>
+                                <td>João Silva Sauro</td>
+                                <td>Uso de celular</td>
+                                <td><button class="btn_detalhes">Ver Detalhes</button></td>
+                            </tr>
+                            <tr>
+                                <td>10/04/2026</td>
+                                <td>João Silva Sauro</td>
+                                <td>Atraso</td>
+                                <td><button class="btn_detalhes">Ver Detalhes</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
