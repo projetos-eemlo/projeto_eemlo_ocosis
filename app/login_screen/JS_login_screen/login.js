@@ -44,3 +44,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 togglePasswordBtn.textContent = isPasswordVisible ? 'Mostrar' : 'Ocultar';
             });
         }
+    
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.btn-show-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = 'Ocultar';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = 'Mostrar';
+            }
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('login-error');
+
+            const validEmail = 'usuario@exemplo.com';
+            const validPassword = 'senha123';
+
+            if (email !== validEmail || password !== validPassword) {
+                errorMessage.textContent = 'Gmail ou senha incorreta';
+                return;
+            }
+
+            errorMessage.textContent = '';
+            alert('Login realizado com sucesso!');
+        });
