@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
+    <script src="js_login_screen/login.js" defer></script>
     <link rel="stylesheet" href="CSS_login_screen/login.css">
     <style>
        
@@ -15,14 +17,14 @@
     </style>
 </head>
 <body>
-
+    
     <nav class="navbar">
-        <a href="#">1. Login / Cadastro</a>
-        <a href="#">2. Cadastro Usuario</a>
-        <a href="#">3. Nova Ocorrência</a>
-        <a href="#">4. Pesquisa e Turmas</a>
-        <a href="#">5. Perfil do Aluno</a>
-    </nav>
+    <a href="#">Login/ Cadastro</a>
+    <a href="cadastro.html">Cadastro Usuário</a> 
+    <a href="#">Nova Ocorrência</a>
+    <a href="#">Pesquise e Turmas</a>
+    <a href="#">Perfil do Aluno</a>
+</nav>
 
     <main class="container">
         <div class="login-card login-container">
@@ -52,7 +54,7 @@
 
                 <div class="actions button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
-                    <button type="button" class="btn-cadastro">Solicitar Cadastro</button>
+                   <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
@@ -72,7 +74,7 @@
             }
         }
 
-
+       
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             
             event.preventDefault(); 
@@ -86,7 +88,6 @@
             const senhaDigitada = document.getElementById('password').value;
             const erroMensagem = document.getElementById('error-msg');
 
-            // Validação
             if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
                 alert('Login efetuado com sucesso!');
                 erroMensagem.style.display = 'none'; 
