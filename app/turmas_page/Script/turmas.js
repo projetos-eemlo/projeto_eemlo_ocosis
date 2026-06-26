@@ -1,95 +1,126 @@
-// Mock de banco de dados para testar duplicidade (CA05 e RN08)
-let turmasCadastradas = [
-    { nome: "1° Ano A", anoLetivo: "2026", turno: "Manha" }
+// Simulando as turmas que já existem no banco (Para testar o CA05 - Duplicidade)
+let turmasBanco = [
+    { desc_turma: "3° Reg 1", ano_letivo: "2026", turno: "Manhã" }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ---------------------------------------------------------
-    // 1. INTERATIVIDADE DA TELA (Layout HU0X)
-    // ---------------------------------------------------------
-    const alunos = document.querySelectorAll('.aluno_link');
+    // --- Lógica de Buscar Turma (Caixa Cinza) ---
+    const btnBuscarTurmaFiltros = document.getElementById('btnBuscarTurmaFiltros');
+    
+    btnBuscarTurmaFiltros.addEventListener('click', () => {
+        const turma = document.getElementById('filtroSelectTurma').value;
+        // Aqui entrará a requisição AJAX/Fetch para o PHP buscar os dados da turma
+        alert(`Buscando dados para: ${turma}\n(Integração com backend pendente)`);
+    });
 
+    // --- Lógica de Selecionar Aluno na Lista ---
+    const alunos = document.querySelectorAll('.aluno_link');
     alunos.forEach(aluno => {
         aluno.addEventListener('click', (e) => {
             e.preventDefault();
-            
-            // Remove o destaque visual de todos os alunos
             alunos.forEach(a => a.classList.remove('ativo'));
-            
-            // Aplica o destaque no aluno clicado
             aluno.classList.add('ativo');
         });
     });
 
-    // ---------------------------------------------------------
-    // 2. REGRAS DE NEGÓCIO DA SPRINT (RFU-006 / Modal de Cadastro)
-    // ---------------------------------------------------------
-    
-    // Captura o formulário do modal (quando for adicionado ao HTML)
-    const formTurma = document.getElementById("formTurma");
-    
-    if (formTurma) {
-        formTurma.addEventListener('submit', function(e) {
-            e.preventDefault();
+    // --- Lógica de Pesquisa de Aluno (Acima da Lista) ---
+    const inputPesquisaAluno = document.getElementById('inputPesquisaAluno');
+    const btnBuscarAluno = document.getElementById('btnBuscarAluno');
+    const itensListaAlunos = document.querySelectorAll('#listaAlunos li');
 
-            // Captura dos valores do formulário
-            const nomeTurma = document.getElementById('nomeTurma').value.trim();
-            const anoLetivo = document.getElementById('anoLetivo').value.trim();
-            const turno = document.getElementById('turnoTurma').value;
-            const capacidade = parseInt(document.getElementById('capacidade').value);
-            const tipo = document.getElementById('tipoTurma').value;
-            
-            // RN05 - Aviso de erro do preenchimento (Mensagem exata da sprint)
-            if (!nomeTurma) {
-                alert("Campo Nome da Turma Preenchido incorretamente, conferira as informações devidamente");
-                return;
+    function filtrarAlunos() {
+        const termoBusca = inputPesquisaAluno.value.toLowerCase();
+        
+        itensListaAlunos.forEach(li => {
+            const textoAluno = li.textContent.toLowerCase();
+            if (textoAluno.includes(termoBusca)) {
+                li.style.display = ""; 
+            } else {
+                li.style.display = "none"; 
             }
-            if (!anoLetivo || anoLetivo.length !== 4) {
-                alert("Campo Ano Letivo Preenchido incorretamente, conferira as informações devidamente");
-                return;
-            }
-            
-            // RN07 - Limite de Capacidade
-            if (!capacidade || capacidade <= 0) {
-                alert("Campo Capacidade Preenchido incorretamente, conferira as informações devidamente");
-                return;
-            }
-
-            // CA05 e RN08 - Prevenção de Duplicidade (Nome da turma no mesmo ano letivo)
-            const turmaDuplicada = turmasCadastradas.find(t => 
-                t.nome.toLowerCase() === nomeTurma.toLowerCase() && 
-                t.anoLetivo === anoLetivo
-            );
-
-            if (turmaDuplicada) {
-                alert("Erro: Esta turma já está cadastrada para este ano letivo!");
-                return;
-            }
-
-            // RN10 - Formato do Código da Turma (ex: ANO-TURMA-TURNO)
-            // Remove espaços do nome da turma para gerar o código padrão
-            const nomeFormatado = nomeTurma.replace(/\s+/g, '').toUpperCase();
-            const turnoFormatado = turno.charAt(0).toUpperCase();
-            const codigoTurma = `${anoLetivo}-${nomeFormatado}-${turnoFormatado}`;
-
-            // CA04 - Cadastro de Turma com Dados Válidos
-            const novaTurma = {
-                codigo: codigoTurma,
-                nome: nomeTurma,
-                anoLetivo: anoLetivo,
-                turno: turno,
-                capacidade: capacidade,
-                tipo: tipo,
-                status: "Ativa" // RN11 - Status inicial padrão
-            };
-
-            turmasCadastradas.push(novaTurma);
-            
-            // Mensagem de sucesso
-            alert(`Turma registrada com sucesso! Código gerado: ${codigoTurma}`);
-            
-            // Limpa o formulário após o cadastro
-            formTurma.reset();
         });
     }
+
+    btnBuscarAluno.addEventListener('click', filtrarAlunos);
+    inputPesquisaAluno.addEventListener('keyup', filtrarAlunos);
+
+    // --- Lógica do Modal de Cadastro de Turma ---
+    const modal = document.getElementById("modalTurma");
+    const btnAbrir = document.getElementById("btnNovaTurma");
+    const btnFechar = document.querySelector(".fechar_modal");
+    const form = document.getElementById("formCadastroTurma");
+
+    // Abrir o Modal
+    btnAbrir.addEventListener('click', () => {
+        modal.style.display = "block";
+    });
+
+    // Fechar no X
+    btnFechar.addEventListener('click', () => {
+        modal.style.display = "none";
+    });
+
+    // Fechar clicando no fundo escuro
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+    // Validar e Salvar Formulário
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); 
+
+        const descTurma = document.getElementById('descTurma').value.trim();
+        const anoLetivo = document.getElementById('anoLetivo').value;
+        const semestreLetivo = document.getElementById('semestreLetivo').value;
+        const turno = document.getElementById('turno').value;
+        const capacidade = document.getElementById('capacidade').value;
+        const status = document.getElementById('status').value;
+
+        // RN05 - Aviso de erro de preenchimento
+        if (descTurma === "") {
+            alert("Campo Nome / Descrição Preenchido incorretamente, confira as informações devidamente.");
+            return;
+        }
+
+        // RN07 - Capacidade Máxima
+        if (capacidade <= 0) {
+            alert("Campo Capacidade Preenchido incorretamente, a capacidade deve ser maior que 0.");
+            return;
+        }
+
+        // Prepara os dados para enviar ao PHP
+        const dadosTurma = {
+            descTurma: descTurma,
+            anoLetivo: anoLetivo,
+            semestreLetivo: semestreLetivo,
+            turno: turno,
+            capacidade: capacidade,
+            status: status
+        };
+
+        // Faz a requisição para o PHP (agora na mesma pasta)
+        fetch('cadastrar_turma.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosTurma)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                alert(data.mensagem); 
+                form.reset();
+                modal.style.display = "none";
+            } else {
+                alert("Erro: " + data.mensagem); 
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao conectar com o servidor.');
+        });
+    });
 });

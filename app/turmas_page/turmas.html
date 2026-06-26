@@ -16,36 +16,54 @@
         </header>
         <section class="conteudo">
             <h2>3.Pesquisa e Gestão de Turmas (Direção / Supervisão)</h2>
+            
+            <!-- Caixa Cinza Ajustada -->
             <div class="pesquisa">
-                <div class="campos">
-                    <h3>1. Selecione a turma:</h3>
-                    <select required class="pesquisas_input">
-                        <option>1° ano A(Ensino Médio)</option>
-                        <option>turma2</option>
-                        <option>turma3</option>
-                    </select>
-                </div>
-                <div class="campos">
-                    <h3>2. Data / Período:</h3>
-                    <div class="datas_flex">
-                        <input type="date" class="pesquisas_input">
-                        <input type="date" class="pesquisas_input">
+                <!-- Linha dos Inputs -->
+                <div class="filtros_turma">
+                    <div class="campos">
+                        <h3>1. Selecione a turma:</h3>
+                        <select required class="pesquisas_input" id="filtroSelectTurma">
+                            <option>1° ano A(Ensino Médio)</option>
+                            <option>turma2</option>
+                            <option>turma3</option>
+                        </select>
+                    </div>
+                    <div class="campos">
+                        <h3>2. Data / Período:</h3>
+                        <div class="datas_flex">
+                            <input type="date" class="pesquisas_input" id="filtroDataInicial">
+                            <input type="date" class="pesquisas_input" id="filtroDataFinal">
+                        </div>
+                    </div>
+                    <div class="campos">
+                        <h3>3. Tipo de infração:</h3>
+                        <select required class="pesquisas_input" id="filtroTipoInfracao">
+                            <option>Todas</option>
+                            <option>Infração</option>
+                            <option>Desrespeito à autoridade</option>
+                        </select>
                     </div>
                 </div>
-                <div class="campos">
-                    <h3>3. Tipo de infração:</h3>
-                    <select required class="pesquisas_input">
-                        <option>Todas</option>
-                        <option>Infração</option>
-                        <option>Desrespeito à autoridade</option>
-                    </select>
+                <!-- Linha dos Botões (Buscar Turma e Nova Turma) -->
+                <div class="acoes_turma">
+                    <button id="btnBuscarTurmaFiltros" class="btn_buscar_turma">Buscar</button>
+                    <button id="btnNovaTurma" class="btn_nova_turma">+ Nova Turma</button>
                 </div>
             </div>
+
             <div class="alunos">
                 <div class="nome_alunos">
                     <h2>Lista de Alunos</h2>
                     <span class="subtitulo_clique">(Clique no nome para filtrar)</span>
-                    <ul class="lista_nomes">
+                    
+                    <!-- Barra de pesquisa de aluno movida para cá -->
+                    <div class="busca_aluno">
+                        <input type="text" id="inputPesquisaAluno" placeholder="Pesquisar aluno...">
+                        <button id="btnBuscarAluno" class="btn_buscar_aluno">Buscar</button>
+                    </div>
+
+                    <ul class="lista_nomes" id="listaAlunos">
                         <li><a href="#" class="aluno_link">➔ Alessandra Vieira</a></li>
                         <li><a href="#" class="aluno_link">➔ Bruno Henrique</a></li>
                         <li><a href="#" class="aluno_link ativo">➔ João Silva Sauro</a></li>
@@ -82,6 +100,63 @@
                 </div>
             </div>
         </section>
+
+        <!-- MODAL DE CADASTRO DE TURMA -->
+        <div id="modalTurma" class="modal_fundo">
+            <div class="modal_conteudo">
+                <span class="fechar_modal">&times;</span>
+                <h2>Cadastrar Nova Turma</h2>
+                
+                <form id="formCadastroTurma">
+                    <div class="linha_form">
+                        <div class="col_form">
+                            <label>Nome / Descrição (ex: 3° Reg 1):</label>
+                            <input type="text" id="descTurma" class="input_modal" required>
+                        </div>
+                        <div class="col_form">
+                            <label>Ano Letivo:</label>
+                            <input type="number" id="anoLetivo" class="input_modal" required min="2024">
+                        </div>
+                    </div>
+
+                    <div class="linha_form">
+                        <div class="col_form">
+                            <label>Semestre Letivo:</label>
+                            <select id="semestreLetivo" class="input_modal" required>
+                                <option value="1">1º Semestre</option>
+                                <option value="2">2º Semestre</option>
+                            </select>
+                        </div>
+                        <div class="col_form">
+                            <label>Turno:</label>
+                            <select id="turno" class="input_modal" required>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="linha_form">
+                        <div class="col_form">
+                            <label>Capacidade Máxima (RN07):</label>
+                            <input type="number" id="capacidade" class="input_modal" required min="1">
+                        </div>
+                        <div class="col_form">
+                            <label>Status (RN11):</label>
+                            <select id="status" class="input_modal" required>
+                                <option value="Ativa">Ativa</option>
+                                <option value="Suspensa">Suspensa</option>
+                                <option value="Encerrada">Encerrada</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn_salvar_turma">Salvar Turma</button>
+                </form>
+            </div>
+        </div>
+
         <script src="Script/turmas.js"></script>
     </body>
 </html>
