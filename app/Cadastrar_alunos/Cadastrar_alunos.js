@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnUpload = document.getElementById('btn-upload');
     const btnSalvar = document.getElementById('btn-salvar');
     const btnExcluir = document.getElementById('btn-excluir');
+    const inputPesquisa = document.getElementById('input-pesquisa'); 
     const containerAlunos = document.getElementById('container-alunos');
     const checkboxTodos = document.getElementById('aluno-todos');
     let checkboxesAlunos = document.querySelectorAll('.check-aluno'); 
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
     let isModoCSV = false;
+    let debounceTimeout; 
 
     // ==========================================
     // LÓGICA DE ESTADO DOS BOTÕES
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     carregarTurmas();
 
-    // --- LÓGICA DO MODAL DE TURMAS COM FILTRO DE DUPLICATAS ---
+    // --- LÓGICA DO MODAL DE TURMAS ---
     selectTurmas.addEventListener('change', function(e) {
         idTurmaDefinitiva = null; 
         ocultarInfoTurma(); 
@@ -99,7 +101,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!nomeSelecionado) return;
 
         const versoesBrutas = todasTurmasDoBanco.filter(t => t.desc_turma === nomeSelecionado);
-
         const versoes = [];
         const chavesVistas = new Set();
 
@@ -117,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
             versoes.forEach(v => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-periodo';
-                
                 const semestreTexto = v.semestre_letivo ? `${v.semestre_letivo}º Semestre` : 'Anual';
                 btn.textContent = `${v.ano_letivo} / ${semestreTexto} (${v.turno})`;
                 
@@ -148,41 +148,98 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // ==========================================
+    // FUNÇÃO: LIMPAR TELA E CANCELAR OPERAÇÕES
+    // ==========================================
+    function limparTelaECancelar() {
+        containerAlunos.classList.remove('modo-edicao');
+        btnEditar.textContent = 'Editar';
+        btnEditar.style.backgroundColor = '#ffffff'; 
+        btnEditar.style.color = 'var(--color-primary)';
+        
+        const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
+        itensAntigos.forEach(item => item.remove());
+        
+        if (checkboxTodos) checkboxTodos.checked = false;
+        checkboxesAlunos = document.querySelectorAll('.check-aluno'); 
+        
+        if (inputPesquisa) inputPesquisa.value = ''; 
+        isModoCSV = false; 
+        atualizarEstadoBotoes();
+    }
+
+    // ==========================================
+    // LÓGICA DO BOTÃO EDITAR / CANCELAR
+    // ==========================================
+    if (btnEditar) {
+        btnEditar.addEventListener('click', () => {
+            if (containerAlunos.classList.contains('modo-edicao')) {
+                // Se já está editando, o clique significa CANCELAR e LIMPAR TELA
+                limparTelaECancelar();
+            } else {
+                // Se NÃO está editando, o clique ativa as CAIXINHAS para selecionar
+                const itensNaTela = containerAlunos.querySelectorAll('.aluno-item').length;
+                if (itensNaTela > 0) {
+                    containerAlunos.classList.add('modo-edicao');
+                    btnEditar.textContent = 'Cancelar';
+                    btnEditar.style.backgroundColor = 'var(--color-danger)'; 
+                    btnEditar.style.color = 'white';
+                }
+            }
+        });
+    }
+
+    // ==========================================
+    // LÓGICA DE PESQUISA DINÂMICA (LIVE SEARCH)
+    // ==========================================
+    if (inputPesquisa) {
+        inputPesquisa.addEventListener('input', function(e) {
+            const termo = e.target.value.trim();
+
+            clearTimeout(debounceTimeout);
+
+            if (termo.length === 0) {
+                limparTelaECancelar();
+                return;
+            }
+
+            debounceTimeout = setTimeout(async () => {
+                const formData = new FormData();
+                formData.append('acao', 'pesquisar_alunos');
+                formData.append('termo', termo);
+
+                try {
+                    const response = await fetch('Backend.php', { method: 'POST', body: formData });
+                    const result = await response.json();
+
+                    if (result.sucesso) {
+                        isModoCSV = false; 
+                        
+                        if (result.dados.length > 0) {
+                            // false = Renderiza no modo Consulta (sem caixinhas abertas)
+                            renderizarAlunos(result.dados, false); 
+                        } else {
+                            limparTelaECancelar(); 
+                            exibirMensagem('Nenhum aluno encontrado.', true);
+                        }
+                    } else {
+                        exibirMensagem('❌ ' + result.erro);
+                    }
+                } catch (error) {
+                    exibirMensagem('❌ Erro na pesquisa.');
+                }
+            }, 400); 
+        });
+    }
+
+    // ==========================================
+    // UPLOAD CSV
+    // ==========================================
     const inputFile = document.createElement('input');
     inputFile.type = 'file';
     inputFile.accept = '.csv';
     inputFile.style.display = 'none';
     document.body.appendChild(inputFile);
-
-    // ==========================================
-    // FUNÇÃO: MODO DE EDIÇÃO E CANCELAMENTO GERAL
-    // ==========================================
-    function alternarModoEdicao(forcarAtivo = false) {
-        if (forcarAtivo) containerAlunos.classList.add('modo-edicao');
-        else containerAlunos.classList.toggle('modo-edicao');
-        
-        if (containerAlunos.classList.contains('modo-edicao')) {
-            btnEditar.textContent = 'Cancelar';
-            btnEditar.style.backgroundColor = 'var(--color-danger)'; 
-            btnEditar.style.color = 'white';
-        } else {
-            // "CANCELAR": Restaura os botões, limpa e esconde tudo
-            btnEditar.textContent = 'Editar';
-            btnEditar.style.backgroundColor = '#ffffff'; 
-            btnEditar.style.color = 'var(--color-primary)';
-            
-            const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
-            itensAntigos.forEach(item => item.remove());
-            
-            if (checkboxTodos) checkboxTodos.checked = false;
-            checkboxesAlunos = document.querySelectorAll('.check-aluno'); 
-            
-            isModoCSV = false; 
-            atualizarEstadoBotoes();
-        }
-    }
-
-    if (btnEditar) btnEditar.addEventListener('click', () => alternarModoEdicao(false));
 
     if (btnUpload) btnUpload.addEventListener('click', () => inputFile.click());
 
@@ -194,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('acao', 'upload_csv');
         formData.append('arquivo_csv', file);
 
-        exibirMensagem('Processando ficheiro...', false);
+        exibirMensagem('A processar ficheiro...', false);
 
         try {
             const response = await fetch('Backend.php', { method: 'POST', body: formData });
@@ -202,8 +259,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (result.sucesso) {
                 isModoCSV = true; 
-                renderizarAlunos(result.dados);
-                exibirMensagem('✅ Alunos extraídos do CSV. Selecione e salve.');
+                if (inputPesquisa) inputPesquisa.value = ''; 
+                // true = Renderiza já forçando a edição (caixinhas abertas)
+                renderizarAlunos(result.dados, true); 
+                exibirMensagem('✅ Alunos extraídos do CSV. Selecione e guarde.');
             } else {
                 exibirMensagem('❌ ' + result.erro);
             }
@@ -213,25 +272,45 @@ document.addEventListener('DOMContentLoaded', function() {
         this.value = ''; 
     });
 
-    function renderizarAlunos(alunos) {
+    // ==========================================
+    // RENDERIZAÇÃO INTELIGENTE DE ALUNOS NA TELA
+    // ==========================================
+    function renderizarAlunos(alunos, forcarEdicao) {
         const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
         itensAntigos.forEach(item => item.remove());
 
         alunos.forEach(aluno => {
             const div = document.createElement('div');
             div.className = 'aluno-item';
+            
+            const infoTurmaContexto = aluno.desc_turma ? ` | Atual: ${aluno.desc_turma}` : '';
+
             div.innerHTML = `
                 <input type="checkbox" name="aluno" class="check-aluno" 
                        value="${aluno.simade}" 
                        data-nome="${aluno.nome}" 
                        data-nascimento="${aluno.nascimento}">
-                <span><strong>${aluno.nome}</strong> — SIMADE: ${aluno.simade} | Nasc: ${aluno.nascimento}</span>
+                <span><strong>${aluno.nome}</strong> — SIMADE: ${aluno.simade} | Nasc: ${aluno.nascimento}${infoTurmaContexto}</span>
             `;
             containerAlunos.appendChild(div);
         });
 
         checkboxesAlunos = document.querySelectorAll('.check-aluno');
-        alternarModoEdicao(true);
+        
+        // Define o visual com base na origem (Pesquisa vs CSV)
+        if (forcarEdicao) {
+            containerAlunos.classList.add('modo-edicao');
+            btnEditar.textContent = 'Cancelar';
+            btnEditar.style.backgroundColor = 'var(--color-danger)'; 
+            btnEditar.style.color = 'white';
+        } else {
+            containerAlunos.classList.remove('modo-edicao');
+            btnEditar.textContent = 'Editar';
+            btnEditar.style.backgroundColor = '#ffffff'; 
+            btnEditar.style.color = 'var(--color-primary)';
+            if (checkboxTodos) checkboxTodos.checked = false;
+        }
+
         atualizarEstadoBotoes();
     }
 
@@ -263,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (alunosParaSalvar.length === 0) return; 
 
-            exibirMensagem('A guardar no banco...', false);
+            exibirMensagem('A guardar na base de dados...', false);
             
             const formData = new FormData();
             formData.append('acao', 'salvar_alunos_csv');
@@ -295,7 +374,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     setTimeout(() => {
                         if (todosForamSalvos) {
-                            alternarModoEdicao(false); 
+                            limparTelaECancelar(); 
                         } else {
                             checkboxesAlunos = document.querySelectorAll('.check-aluno');
                             if (checkboxTodos) checkboxTodos.checked = false;
