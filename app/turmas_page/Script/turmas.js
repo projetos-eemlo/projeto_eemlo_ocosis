@@ -73,8 +73,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const descTurma = document.getElementById('descTurma').value.trim();
         const anoLetivo = document.getElementById('anoLetivo').value;
+        const semestreLetivo = document.getElementById('semestreLetivo').value;
         const turno = document.getElementById('turno').value;
         const capacidade = document.getElementById('capacidade').value;
+        const status = document.getElementById('status').value;
 
         // RN05 - Aviso de erro de preenchimento
         if (descTurma === "") {
@@ -88,23 +90,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // CA05 e RN08 - Prevenção de Duplicidade
-        const duplicada = turmasBanco.find(t => 
-            t.desc_turma.toLowerCase() === descTurma.toLowerCase() && 
-            t.ano_letivo === anoLetivo
-        );
+        // Prepara os dados para enviar ao PHP
+        const dadosTurma = {
+            descTurma: descTurma,
+            anoLetivo: anoLetivo,
+            semestreLetivo: semestreLetivo,
+            turno: turno,
+            capacidade: capacidade,
+            status: status
+        };
 
-        if (duplicada) {
-            alert(`Aviso: A turma "${descTurma}" já está cadastrada para o ano de ${anoLetivo}!`);
-            return;
-        }
-
-        // CA04 - Cadastro com Dados Válidos (Sucesso)
-        turmasBanco.push({ desc_turma: descTurma, ano_letivo: anoLetivo, turno: turno });
-        
-        alert("Turma registrada com sucesso!");
-        
-        form.reset();
-        modal.style.display = "none";
+        // Faz a requisição para o PHP (agora na mesma pasta)
+        fetch('cadastrar_turma.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dadosTurma)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                alert(data.mensagem); 
+                form.reset();
+                modal.style.display = "none";
+            } else {
+                alert("Erro: " + data.mensagem); 
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            alert('Erro ao conectar com o servidor.');
+        });
     });
 });
