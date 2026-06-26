@@ -1,29 +1,35 @@
 <?php
+// Inicia a sessão antes de qualquer output HTML
+session_start();
 include("conexao.php");
 
 $exibirErro = false;
 $mensagemErro = "";
 $loginSucesso = false;
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['usuario']) && isset($_POST['senha'])) {
-        
+       
         $email = $conexao->real_escape_string($_POST['usuario']);
-        $senha_digitada = $_POST['senha']; 
+        $senha_digitada = $_POST['senha'];
 
-        
         $sql_code = "SELECT * FROM funcionarios WHERE email_funcionario = '$email'";
         $sql_query = $conexao->query($sql_code);
 
         if ($sql_query && $sql_query->num_rows == 1) {
             $funcionario = $sql_query->fetch_assoc();
-            
-          
+           
             if (password_verify($senha_digitada, $funcionario['senha_hash'])) {
                 $loginSucesso = true;
                 
-             
+                // SALVA OS DADOS NA SESSÃO
+                $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; // Ajuste o nome da coluna id se necessário
+                $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario']; // Ajuste o nome da coluna nome se necessário
+                
+                // REDIRECIONA PARA A PÁGINA INTERNA (substitua pelo nome do seu arquivo)
+                header("Location: painel.php");
+                exit;
+     
             } else {
                 $exibirErro = true;
                 $mensagemErro = "E-mail ou senha incorretos.";
@@ -44,19 +50,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
-    <script src="js_login_screen/login.js" defer></script>
     <link rel="stylesheet" href="CSS_login_screen/login.css">
     <style>
-      
         #error-msg {
             display: <?php echo $exibirErro ? 'block' : 'none'; ?>;
-            color: red; 
+            color: red;
             margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    
+
     <nav class="navbar">
         <a href="#">Login/ Cadastro</a>
         <a href="cadastro.html">Cadastro Usuário</a> 
@@ -69,16 +73,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="login-card login-container">
             <h2>1. Acesso ao Sistema</h2>
             <hr class="divider">
-            
+           
             <h3 class="subtitle">Entrar</h3>
             <hr class="divider">
-
-            <?php if ($loginSucesso): ?>
-                <script>
-                    alert('Login efetuado com sucesso!');
-                  
-                </script>
-            <?php endif; ?>
 
             <form id="loginForm" method="POST" action="">
                 <div class="input-group">
@@ -107,7 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </main>
 
     <script>
-       
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.btn-show-password');
@@ -122,3 +118,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 </body>
 </html>
+
