@@ -33,7 +33,7 @@ try {
 $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
 
-    $stmt = $pdo->prepare("INSERT INTO funcionarios (email_funcionario, id_tipo_func, nome_funcionario, senha_hash ) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO funcionarios (email_funcionario, id_tipo_func, nome_funcionario, senha_hash ) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("sssis", $nome, $email, $hashSenha, $id_tipo_func, $nome_cargo);
     $stmt->execute();
     
