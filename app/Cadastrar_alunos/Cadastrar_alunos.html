@@ -18,7 +18,9 @@
     
     <div class="main-controls">
         <button id="btn-upload" class="upload">Upload CSV</button>
-        <input aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
+        
+        <input id="input-pesquisa" aria-label="Pesquisar nome" type="search" class="search" placeholder="Pesquisar nome">
+        
         <select id="turmas" class="turmas" aria-label="Turmas">
             <option value="">Selecione uma Turma</option>
         </select>
@@ -39,9 +41,9 @@
         </div>
 
     <div class="botoes-inferiores">
-        <button id="btn-salvar" class="btn-primary">Salvar</button>
+        <button id="btn-salvar" class="btn-primary" disabled>Salvar</button>
         <button id="btn-editar" class="btn-secondary">Editar</button>
-        <button class="btn-danger">Excluir</button>
+        <button id="btn-excluir" class="btn-danger" disabled>Excluir</button>
         <button class="btn-info">Trocar de Turma</button>
     </div>
 
@@ -55,6 +57,6 @@
         </div>
     </div>
     
-    <script src="Cadastrar_alunos.js?v=1"></script>
+    <script src="Cadastrar_alunos.js?v=2"></script>
 </body>
 </html>

@@ -1,78 +1,102 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
+   
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <title>Acesso ao Sistema</title>
+    <script src="js_login_screen/login.js" defer></script>
+    <link rel="stylesheet" href="CSS_login_screen/login.css">
+    <style>
+       
+        #error-msg {
+            display: none;
+            color: red; 
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <nav>
-        <a href="login.html">Login/ Cadastro</a>
-        <a>Cadastro Usuário</a>
-        <a>Nova Ocorrência</a>
-        <a>Pesquise e Turmas</a>
-        <a>Perfil do Aluno</a>
-    </nav>
+    
+    <nav class="navbar">
+    <a href="#">Login/ Cadastro</a>
+    <a href="cadastro.html">Cadastro Usuário</a> 
+    <a href="#">Nova Ocorrência</a>
+    <a href="#">Pesquise e Turmas</a>
+    <a href="#">Perfil do Aluno</a>
+</nav>
 
-    <main>
-        <div class="login-container">
+    <main class="container">
+        <div class="login-card login-container">
             <h2>1. Acesso ao Sistema</h2>
-            <h3>Entrar</h3>
+            <hr class="divider">
+            
+            <h3 class="subtitle">Entrar</h3>
+            <hr class="divider">
 
-            <form id="form-login" method="POST">
-                <label for="username">E-mail ou Matrícula:</label>
-                <input type="text" id="username" name="usuario" placeholder="Digite seu e-mail" required>
-
-                <label for="password">Senha:</label>
-
-                <div class="password-field" style="position: relative; width: 100%; max-width: 420px; margin-bottom: 5px;">
-                    <input type="password" id="password" name="senha" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
-                    <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="email">E-mail ou Matricula:</label>
+                    <input type="text" id="email" placeholder="Digite seu e-mail" required>
                 </div>
-                
-                <div id="mensagem-erro" style="color: red; margin-bottom: 15px; font-size: 0.9rem; display: none;"></div>
 
-                <div class="button-group">
+                <div class="input-group">
+                    <label for="password">Senha:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="Digite sua senha" required>
+                        <button type="button" class="btn-show-password" onclick="togglePassword()">Mostrar</button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="error-msg">
+                    Usuário ou senha incorretos.
+                </div>
+
+                <div class="actions button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
-                    <a href="cadastro.html" class="btn-cadastro"> Solicitar Cadastro</a>
+                   <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
-    </main>    
-    
-    <script src="JS/login.js"></script>
+    </main>
 
     <script>
-    document.getElementById('form-login').addEventListener('submit', function(e) {
-        e.preventDefault(); 
-
-        const formData = new FormData(this);
-        const erroDiv = document.getElementById('mensagem-erro');
-        erroDiv.style.display = 'none'; 
-
-    
-        fetch('PHP/login.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.text())
-        .then(data => {
-            const resposta = data.trim();
-
-            if (resposta === "sucesso") {
-                window.location.href = "about:blank";
+       
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.btn-show-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = 'Ocultar';
             } else {
-                erroDiv.innerText = "E-mail ou senha incorreta";
-                erroDiv.style.display = 'block';
+                passwordInput.type = 'password';
+                toggleButton.textContent = 'Mostrar';
             }
-        })
-        .catch(error => {
-            console.error('Erro:', error);
-            erroDiv.innerText = "Erro de conexão. Verifique se o servidor PHP está rodando.";
-            erroDiv.style.display = 'block';
+        }
+
+       
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            
+            event.preventDefault(); 
+
+           
+            const emailCorreto = "usuario@gmail.com";
+            const senhaCorreta = "123456";
+
+     
+            const emailDigitado = document.getElementById('email').value;
+            const senhaDigitada = document.getElementById('password').value;
+            const erroMensagem = document.getElementById('error-msg');
+
+            if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
+                alert('Login efetuado com sucesso!');
+                erroMensagem.style.display = 'none'; 
+               
+            } else {
+            
+                erroMensagem.style.display = 'block';
+            }
         });
-    });
     </script>
 </body>
 </html>

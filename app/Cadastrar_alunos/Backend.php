@@ -2,16 +2,15 @@
 header('Content-Type: application/json');
 
 // ==========================================
-// CONEXÃO COM O BANCO DE DADOS (PDO)
+// CONEXÃO COM A BASE DE DADOS (PDO)
 // ==========================================
 $host = 'localhost';
-$dbname = 'sistema_ocorrencia';
-$user = 'root'; // Usuário padrão do WAMP
-$pass = '';     // Senha padrão do WAMP
+$dbname = 'ocosis'; // Base de dados corrigida para a oficial
+$user = 'root'; 
+$pass = '';     
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-    // Configura o PDO para lançar exceções em caso de erros
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     echo json_encode(['sucesso' => false, 'erro' => 'Falha na conexão com o banco: ' . $e->getMessage()]);
@@ -23,11 +22,10 @@ $acao = isset($_POST['acao']) ? $_POST['acao'] : '';
 switch ($acao) {
     
     // ==========================================
-    // BUSCAR TURMAS PARA O SELECT E MODAL
+    // BUSCAR TURMAS
     // ==========================================
     case 'listar_turmas':
         try {
-            // Busca as turmas com todos os detalhes necessários, incluindo trimestre
             $sql = "SELECT id_turma, desc_turma, turno, ano_letivo, semestre_letivo, trimestre_letivo 
                     FROM turma 
                     ORDER BY desc_turma ASC, ano_letivo DESC, semestre_letivo DESC";
@@ -40,31 +38,76 @@ switch ($acao) {
         break;
 
     // ==========================================
-    // UPLOAD E EXTRAÇÃO DE DADOS DO CSV
+    // PESQUISA DINÂMICA DE ALUNOS (LIVE SEARCH)
+    // ==========================================
+    case 'pesquisar_alunos':
+        $termo = isset($_POST['termo']) ? trim($_POST['termo']) : '';
+
+        if (strlen($termo) === 0) {
+            echo json_encode(['sucesso' => true, 'dados' => []]);
+            exit;
+        }
+
+        try {
+            // Busca o aluno pelo nome e faz um JOIN para descobrir o nome da turma dele
+            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma 
+                    FROM alunos a
+                    LEFT JOIN turma t ON a.id_turma = t.id_turma
+                    WHERE a.nome_aluno LIKE :termo
+                    ORDER BY a.nome_aluno ASC 
+                    LIMIT 50"; // Limite de segurança para não travar o navegador
+            
+            $stmt = $pdo->prepare($sql);
+            // O operador % permite buscar em qualquer parte do nome (ex: "jo" acha "joeldson")
+            $stmt->execute(['termo' => '%' . $termo . '%']);
+            $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode(['sucesso' => true, 'dados' => $alunos]);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao pesquisar alunos: ' . $e->getMessage()]);
+        }
+        break;
+
+    // ==========================================
+    // UPLOAD E TRATAMENTO DO CSV
     // ==========================================
     case 'upload_csv':
         if (isset($_FILES['arquivo_csv'])) {
             $file = $_FILES['arquivo_csv'];
 
             if ($file['error'] !== UPLOAD_ERR_OK) {
-                echo json_encode(['sucesso' => false, 'erro' => 'Erro ao fazer o upload do arquivo.']);
+                echo json_encode(['sucesso' => false, 'erro' => 'Erro ao fazer o upload do ficheiro.']);
                 exit;
             }
 
             $extensao = pathinfo($file['name'], PATHINFO_EXTENSION);
             if (strtolower($extensao) !== 'csv') {
-                echo json_encode(['sucesso' => false, 'erro' => 'Formato inválido. Envie um arquivo .csv']);
+                echo json_encode(['sucesso' => false, 'erro' => 'Formato inválido. Envie um ficheiro .csv']);
                 exit;
             }
 
             $alunos = [];
             if (($handle = fopen($file['tmp_name'], "r")) !== FALSE) {
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                    // Verifica se a linha tem as 3 colunas exigidas
                     if (count($data) >= 3) {
-                        // Converte a data do formato BR (DD/MM/YYYY) para SQL (YYYY-MM-DD)
-                        $dataBR = trim($data[2]);
-                        $dataSQL = implode('-', array_reverse(explode('/', $dataBR)));
+                        
+                        $dataCrua = trim($data[2]);
+                        $dataSQL = $dataCrua; 
+
+                        // TRADUTOR DE DATAS
+                        if (strpos($dataCrua, '/') !== false) {
+                            $partes = explode('/', $dataCrua);
+                            if (strlen($partes[0]) == 4) {
+                                $dataSQL = $partes[0] . '-' . $partes[1] . '-' . $partes[2];
+                            } else if (strlen($partes[2]) == 4) {
+                                $dataSQL = $partes[2] . '-' . $partes[1] . '-' . $partes[0];
+                            }
+                        } else if (strpos($dataCrua, '-') !== false) {
+                            $partes = explode('-', $dataCrua);
+                            if (strlen($partes[2]) == 4) {
+                                $dataSQL = $partes[2] . '-' . $partes[1] . '-' . $partes[0];
+                            }
+                        }
 
                         $alunos[] = [
                             'nome' => trim($data[0]),
@@ -77,12 +120,12 @@ switch ($acao) {
             }
             echo json_encode(['sucesso' => true, 'dados' => $alunos]);
         } else {
-            echo json_encode(['sucesso' => false, 'erro' => 'Nenhum arquivo recebido pelo servidor.']);
+            echo json_encode(['sucesso' => false, 'erro' => 'Nenhum ficheiro recebido pelo servidor.']);
         }
         break;
 
     // ==========================================
-    // SALVAR ALUNOS NO BANCO DE DADOS
+    // GUARDAR ALUNOS NA BASE DE DADOS
     // ==========================================
     case 'salvar_alunos_csv':
         $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
@@ -90,47 +133,48 @@ switch ($acao) {
         $alunos_selecionados = json_decode($alunos_json, true);
 
         if ($id_turma === 0 || empty($alunos_selecionados)) {
-            echo json_encode(['sucesso' => false, 'erro' => 'Turma inválida ou nenhum aluno selecionado.']);
+            echo json_encode(['sucesso' => false, 'erro' => 'Operação cancelada: Nenhuma turma válida foi identificada.']);
             exit;
         }
 
         $sucessos = 0;
-        $erros_simade = [];
+        $erros_detalhados = [];
 
-        // Prepara a query de inserção
         $sql = "INSERT INTO alunos (id_turma, nome_aluno, num_simade, dt_nascimento) VALUES (?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
 
-        // Percorre o array de alunos enviados pelo JS
         foreach ($alunos_selecionados as $aluno) {
+            $nomeAluno = isset($aluno['nome']) ? $aluno['nome'] : '';
+            $numSimade = isset($aluno['simade']) ? $aluno['simade'] : '';
+            $dtNascimento = isset($aluno['nascimento']) ? $aluno['nascimento'] : '';
+
             try {
-                $stmt->execute([$id_turma, $aluno['nome'], $aluno['simade'], $aluno['nascimento']]);
+                $stmt->execute([$id_turma, $nomeAluno, $numSimade, $dtNascimento]);
                 $sucessos++;
             } catch (PDOException $e) {
-                // Código 23000 = Violação de Constraint (UNIQUE KEY do SIMADE)
                 if ($e->getCode() == 23000) {
-                    $erros_simade[] = $aluno['nome'] . " (SIMADE já cadastrado)";
+                    if (strpos($e->getMessage(), 'foreign key') !== false || strpos($e->getMessage(), 'Constraint') !== false) {
+                        $erros_detalhados[] = "A turma com ID $id_turma não foi encontrada no banco de dados.";
+                    } else {
+                        $erros_detalhados[] = $nomeAluno . " (O número de SIMADE $numSimade já pertence a outro registo ativo).";
+                    }
                 } else {
-                    $erros_simade[] = "Erro crítico em: " . $aluno['nome'];
+                    $erros_detalhados[] = "Falha crítica no banco: " . $e->getMessage();
                 }
             }
         }
 
-        // Retornos personalizados baseados no resultado da operação
-        if ($sucessos > 0 && count($erros_simade) == 0) {
-            echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos aluno(s) cadastrado(s) com sucesso na turma!"]);
-        } else if ($sucessos > 0 && count($erros_simade) > 0) {
-            echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos aluno(s) salvo(s). Falha nos seguintes: " . implode(", ", $erros_simade)]);
+        if ($sucessos > 0 && count($erros_detalhados) == 0) {
+            echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos aluno(s) guardado(s) com sucesso!"]);
+        } else if ($sucessos > 0 && count($erros_detalhados) > 0) {
+            echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos guardado(s). Problemas encontrados: " . implode(", ", $erros_detalhados)]);
         } else {
-            echo json_encode(['sucesso' => false, 'erro' => "Nenhum aluno foi salvo. Motivos: " . implode(", ", $erros_simade)]);
+            echo json_encode(['sucesso' => false, 'erro' => "Falha na gravação. Motivo: " . implode(", ", $erros_detalhados)]);
         }
         break;
 
-    // ==========================================
-    // DEFAULT
-    // ==========================================
     default:
-        echo json_encode(['sucesso' => false, 'erro' => 'Ação inválida ou não especificada.']);
+        echo json_encode(['sucesso' => false, 'erro' => 'Ação inválida.']);
         break;
 }
 ?>
