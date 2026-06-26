@@ -1,6 +1,7 @@
 <?php
 session_start();
-require 'Connection.php';
+
+require ('Connection.php');
 
 
 /*if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['cargo_funcionario'] !== 'Direcao'){}
@@ -16,39 +17,38 @@ $sucesso='';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
      $nome = $_POST['nome'] ?? '';
-     $cargo = $_POST['cargo'] ?? '';
-     $senha = $_POST['password'] ?? '';
+     $senha = $_POST['senha'] ?? '';
      $email = $_POST['email'] ?? '';
-     
+     $id_tipo_func = 1;
+     $nome_cargo = 'Direção';
 
-     if (empty($nome) || empty($cargo) || empty($senha) || empty($email)){
+     if (empty($nome) || empty($senha) || empty($email)){
 
         $erro="Preencha todos os campos";
      } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
         $erro = "O email está invalido";
      } else {
+      
+try {
+$hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
 
-     $stmt = $conn->prepare("SELECT id_funcionario FROM funcionarios WHERE email_funcionario=?");
-     $stmt->bind_param("s", $email);
-     $stmt->execute();
-     $result = $stmt->get_result();
-
-if ($result->num_rows > 0){
-   $erro = "Esse email já está cadastrado no sistema";
-}else { 
-   $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
-   $stmt = $conn->prepare("INSERT INTO funcionarios (nome_funcionario, email_funcionario, senha_hash, cargo_funcionario) VALUES (?, ?, ?, ?)");
-      $stmt->bind_param("ssss", $nome, $email, $hashSenha, $cargo);
-      if ($stmt->execute()) {
-        $sucesso = "Funcionário cadastrado com sucesso!";
-        $_POST = []; // Limpa os campos
-      } else {
-        $erro = "Erro ao cadastrar funcionário: " . $conn->error;
-      }
-
+    $stmt = $pdo->prepare("INSERT INTO funcionarios (email_funcionario, id_tipo_func, nome_funcionario, senha_hash ) VALUES (?, ?, ?, ?)");
+    $stmt->bind_param("sssis", $nome, $email, $hashSenha, $id_tipo_func, $nome_cargo);
+    $stmt->execute();
+    
+    // Redireciona para evitar duplicidade caso o usuário aperte F5 (Refresh)
+    $sucesso = "Cadastro realizado com sucesso!";
+    $_POST = []; // Esse comando limpa os campos do formulário
+    
+} catch (mysqli_sql_exception $e) {
+    if ($e->getCode() == 23000) { // Código de violação de chave única/estrangeira
+        echo "Este e-mail já está cadastrado no sistema.";
+    } else {
+        echo "Erro ao cadastrar: " . $e->getMessage();
+    }
 }
-}
+     }
 }
 
 

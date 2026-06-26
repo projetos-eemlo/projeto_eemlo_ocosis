@@ -19,6 +19,7 @@
         <a>Perfil do Aluno</a>
         </nav>
      <main>
+
         <div class="login-container">
             <h2>2. Cadastro de Usuário</h2>
             <h3> Cadastrar Funcionario </h3>
@@ -34,14 +35,13 @@
                    
 
                 <label for="cargo">Cargo / Permissão </label>
-                <select id="cargo" name="cargo" required>
+                <select type="text" id="cargo" name="cargo" required>
                     <option value="">Selecione o cargo</option>
-                    <option value="Direcao">Direção(Acesso Total)</option>
-                    <option value="Professor">Professor(Acesso Limitado)</option>
-                    <option value="Supervisao">Supervisão(Acesso Total)</option>
+                    <option value="Direção">Direção</option>
+                    
                     
                 </select>
-                <label for="Senha">Senha </label>
+                <label for="senha">Senha </label>
                  <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
                     <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
                     <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
@@ -52,5 +52,6 @@
     </main>    
 
     <script src="JS_login_screen/cadastro.js"></script>
+   
 </body>
 </html>
