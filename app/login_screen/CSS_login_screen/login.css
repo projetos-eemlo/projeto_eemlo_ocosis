@@ -1,6 +1,4 @@
-/* ==========================================
-   CONFIGURAÇÕES GLOBAIS E RESET
-   ========================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -17,9 +15,7 @@ body {
     padding: 20px;
 }
 
-/* ==========================================
-   BARRA DE NAVEGAÇÃO (NAVBAR)
-   ========================================== */
+
 nav {
 
     background-color: #3b82f6; 
@@ -53,9 +49,7 @@ nav a {
 
 
 
-/* ==========================================
-   ESTRUTURA PRINCIPAL (CONTAINER)
-   ========================================== */
+
 main, .container {
     width: 100%;
     display: flex;
@@ -73,9 +67,6 @@ main, .container {
     box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* ==========================================
-   TIPOGRAFIA E DIVISORES
-   ========================================== */
 h2 {
     font-size: 24px;
     font-weight: bold;
@@ -100,9 +91,7 @@ h3, .subtitle {
     border-top: 1px solid #dcdcdc;
 }
 
-/* ==========================================
-   FORMULÁRIO E INPUTS
-   ========================================== */
+
 form {
     display: flex;
     flex-direction: column;
@@ -112,7 +101,7 @@ form {
 .input-group {
     margin-bottom: 20px;
     display: flex;
-    flex-direction: column; /* Mantém as barras embaixo do texto */
+    flex-direction: column; 
 }
 
 label {
@@ -137,7 +126,7 @@ input::placeholder {
     font-weight: bold;
 }
 
-/* Container específico da Senha + Botão Mostrar */
+
 .password-wrapper {
     position: relative;
     width: 100%;
@@ -147,11 +136,11 @@ input::placeholder {
     padding-right: 90px;
 }
 
-/* AJUSTADO: Botão "Mostrar" um pouco mais para cima */
+
 .password-wrapper .btn-show-password {
     position: absolute;
     right: 8px;
-    top: 45%; /* Alterado de 50% para 45% para subir levemente */
+    top: 45%; 
     transform: translateY(-50%);
     border: none;
     background: transparent;
@@ -162,9 +151,7 @@ input::placeholder {
     font-size: 14px;
 }
 
-/* ==========================================
-   MENSAGEM DE ERRO
-   ========================================== */
+
 .error-message {
     display: none;
     color: #e53935;
@@ -179,9 +166,7 @@ input::placeholder {
     display: block;
 }
 
-/* ==========================================
-   BOTÕES DE AÇÃO
-   ========================================== */
+
 .actions, .button-group {
     display: flex;
     justify-content: space-between;

@@ -1,25 +1,34 @@
 <?php
+// Inicia a sessão antes de qualquer output HTML
+session_start();
 include("conexao.php");
 
 $exibirErro = false;
 $mensagemErro = "";
 $loginSucesso = false;
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST['usuario']) && isset($_POST['senha'])) {
-        
+       
         $email = $conexao->real_escape_string($_POST['usuario']);
-        $senha_digitada = $_POST['senha']; 
+        $senha_digitada = $_POST['senha'];
 
         $sql_code = "SELECT * FROM funcionarios WHERE email_funcionario = '$email'";
         $sql_query = $conexao->query($sql_code);
 
         if ($sql_query && $sql_query->num_rows == 1) {
             $funcionario = $sql_query->fetch_assoc();
-            
+           
             if (password_verify($senha_digitada, $funcionario['senha_hash'])) {
                 $loginSucesso = true;
+                
+                // SALVA OS DADOS NA SESSÃO
+                $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; // Ajuste o nome da coluna id se necessário
+                $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario']; // Ajuste o nome da coluna nome se necessário
+                
+                // REDIRECIONA PARA A PÁGINA INTERNA (substitua pelo nome do seu arquivo)
+                header("Location: painel.php");
+                exit;
      
             } else {
                 $exibirErro = true;
@@ -41,9 +50,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
-    <link rel="stylesheet" href="CSS_login_screen/login.css">
+    <link rel="stylesheet" href="../CSS_login_screen/login.css">
     <style>
-  
         #error-msg {
             display: <?php echo $exibirErro ? 'block' : 'none'; ?>;
             color: red;
@@ -54,27 +62,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
     <nav class="navbar">
-        <a href="#">1. Login / Cadastro</a>
-        <a href="#">2. Cadastro Usuario</a>
-        <a href="#">3. Nova Ocorrência</a>
-        <a href="#">4. Pesquisa e Turmas</a>
-        <a href="#">5. Perfil do Aluno</a>
+        <a href="#">Login/ Cadastro</a>
+        <a href="cadastro.html">Cadastro Usuário</a> 
+        <a href="#">Nova Ocorrência</a>
+        <a href="#">Pesquise e Turmas</a>
+        <a href="#">Perfil do Aluno</a>
     </nav>
 
     <main class="container">
         <div class="login-card login-container">
             <h2>1. Acesso ao Sistema</h2>
             <hr class="divider">
-            
+           
             <h3 class="subtitle">Entrar</h3>
             <hr class="divider">
-
-            <?php if ($loginSucesso): ?>
-                <script>
-                    alert('Login efetuado com sucesso!');
-                    
-                </script>
-            <?php endif; ?>
 
             <form id="loginForm" method="POST" action="">
                 <div class="input-group">
@@ -96,7 +97,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="actions button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
-                    <button type="button" class="btn-cadastro">Solicitar Cadastro</button>
+                    <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
@@ -115,6 +116,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     </script>
-    //oi
 </body>
 </html>
+
