@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const btnEditar = document.getElementById('btn-editar');
     const btnUpload = document.getElementById('btn-upload');
-    const btnSalvar = document.getElementById('btn-salvar');
+    const btnCadastrar = document.getElementById('btn-cadastrar');
     const btnExcluir = document.getElementById('btn-excluir');
     const inputPesquisa = document.getElementById('input-pesquisa'); 
     const containerAlunos = document.getElementById('container-alunos');
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
+    let turmaDefinitivaObj = null; 
     let isModoCSV = false;
     let debounceTimeout; 
 
@@ -28,8 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const algumAlunoMarcado = document.querySelectorAll('.check-aluno:checked').length > 0;
         const turmaConfirmada = idTurmaDefinitiva !== null;
 
-        if (btnSalvar) {
-            btnSalvar.disabled = !(algumAlunoMarcado && turmaConfirmada);
+        if (btnCadastrar) {
+            btnCadastrar.disabled = !(algumAlunoMarcado && turmaConfirmada);
         }
 
         if (btnExcluir) {
@@ -47,20 +48,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // --- FUNÇÕES DA DIV VISUAL ---
-    function exibirInfoTurma(turma) {
-        const sem = turma.semestre_letivo ? `${turma.semestre_letivo}ºSem` : '-';
-        const tri = turma.trimestre_letivo ? `${turma.trimestre_letivo}ºTri` : '-';
+    // --- FUNÇÕES DA DIV VISUAL E DA TURMA ---
+    function atualizarTextoBadge() {
+        if (!turmaDefinitivaObj) return;
+
+        const sem = turmaDefinitivaObj.semestre_letivo ? `${turmaDefinitivaObj.semestre_letivo}ºSem` : '-';
+        const tri = turmaDefinitivaObj.trimestre_letivo ? `${turmaDefinitivaObj.trimestre_letivo}ºTri` : '-';
         
-        infoTurmaBadge.textContent = `Cadastro/Transferência: ${turma.desc_turma}\\${turma.ano_letivo}\\${sem}\\${tri}`;
+        const infoBase = `${turmaDefinitivaObj.desc_turma} \\ ${turmaDefinitivaObj.ano_letivo} \\ ${sem} \\ ${tri}`;
+        
+        if (isModoCSV) {
+            infoTurmaBadge.textContent = `Cadastrar para: ${infoBase}`;
+        } else {
+            infoTurmaBadge.textContent = infoBase;
+        }
+
         infoTurmaBadge.classList.add('visivel');
         atualizarEstadoBotoes();
     }
 
-    function ocultarInfoTurma() {
+    function limparEstadoTurma() {
+        idTurmaDefinitiva = null;
+        turmaDefinitivaObj = null;
         infoTurmaBadge.textContent = '';
         infoTurmaBadge.classList.remove('visivel');
         atualizarEstadoBotoes();
+    }
+
+    function resetarTurmaDropdown() {
+        selectTurmas.value = "";
+        limparEstadoTurma();
     }
 
     // --- CARREGAR E AGRUPAR TURMAS ---
@@ -94,10 +111,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- LÓGICA DO MODAL DE TURMAS ---
     selectTurmas.addEventListener('change', function(e) {
-        idTurmaDefinitiva = null; 
-        ocultarInfoTurma(); 
-
         const nomeSelecionado = e.target.value;
+        limparEstadoTurma(); 
+
         if (!nomeSelecionado) return;
 
         const versoesBrutas = todasTurmasDoBanco.filter(t => t.desc_turma === nomeSelecionado);
@@ -122,10 +138,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.textContent = `${v.ano_letivo} / ${semestreTexto} (${v.turno})`;
                 
                 btn.addEventListener('click', () => {
-                    idTurmaDefinitiva = v.id_turma; 
+                    idTurmaDefinitiva = v.id_turma;
+                    turmaDefinitivaObj = v; 
                     modalPeriodo.classList.add('hidden'); 
-                    exibirInfoTurma(v); 
+                    atualizarTextoBadge(); 
                     exibirMensagem(`✅ Turma confirmada.`);
+
+                    if (!isModoCSV) {
+                        buscarAlunosDaTurma(idTurmaDefinitiva);
+                    }
                 });
                 
                 containerOpcoesPeriodo.appendChild(btn);
@@ -134,54 +155,95 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } else if (versoes.length === 1) {
             idTurmaDefinitiva = versoes[0].id_turma;
-            exibirInfoTurma(versoes[0]); 
+            turmaDefinitivaObj = versoes[0];
+            atualizarTextoBadge(); 
             exibirMensagem(`✅ Turma confirmada.`);
+
+            if (!isModoCSV) {
+                buscarAlunosDaTurma(idTurmaDefinitiva);
+            }
         }
     });
 
     if (fecharModalBtn) {
         fecharModalBtn.addEventListener('click', () => {
             modalPeriodo.classList.add('hidden');
-            selectTurmas.value = ""; 
-            idTurmaDefinitiva = null;
-            ocultarInfoTurma();
+            resetarTurmaDropdown(); 
         });
+    }
+
+    // ==========================================
+    // NOVA FUNÇÃO: BUSCAR ALUNOS DA TURMA
+    // ==========================================
+    async function buscarAlunosDaTurma(id_turma) {
+        const formData = new FormData();
+        formData.append('acao', 'listar_alunos_por_turma');
+        formData.append('id_turma', id_turma);
+
+        try {
+            const response = await fetch('Backend.php', { method: 'POST', body: formData });
+            const result = await response.json();
+
+            if (result.sucesso) {
+                if (inputPesquisa) inputPesquisa.value = ''; 
+                if (result.dados.length > 0) {
+                    renderizarAlunos(result.dados, false); 
+                } else {
+                    const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
+                    itensAntigos.forEach(item => item.remove());
+                    
+                    if (checkboxTodos) checkboxTodos.checked = false;
+                    checkboxesAlunos = [];
+                    atualizarEstadoBotoes();
+
+                    exibirMensagem('Nenhum aluno cadastrado nesta turma.', true);
+                }
+            } else {
+                exibirMensagem('❌ ' + result.erro);
+            }
+        } catch (error) {
+            exibirMensagem('❌ Erro ao buscar os alunos da turma.');
+        }
     }
 
     // ==========================================
     // FUNÇÃO: LIMPAR TELA E CANCELAR OPERAÇÕES
     // ==========================================
-    function limparTelaECancelar() {
+    function limparTelaECancelar(forcarLimpezaTotal = false) {
         containerAlunos.classList.remove('modo-edicao');
         btnEditar.textContent = 'Editar';
         btnEditar.style.backgroundColor = '#ffffff'; 
         btnEditar.style.color = 'var(--color-primary)';
         
-        const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
-        itensAntigos.forEach(item => item.remove());
-        
         if (checkboxTodos) checkboxTodos.checked = false;
         checkboxesAlunos = document.querySelectorAll('.check-aluno'); 
+        checkboxesAlunos.forEach(cb => cb.checked = false); 
         
-        if (inputPesquisa) inputPesquisa.value = ''; 
-        isModoCSV = false; 
+        if (isModoCSV || forcarLimpezaTotal) {
+            const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
+            itensAntigos.forEach(item => item.remove());
+            
+            if (isModoCSV && inputPesquisa) inputPesquisa.value = ''; 
+            if (isModoCSV) resetarTurmaDropdown(); 
+            
+            isModoCSV = false; 
+        }
+        
         atualizarEstadoBotoes();
     }
 
     // ==========================================
-    // LÓGICA DO BOTÃO EDITAR / CANCELAR
+    // LÓGICA DO BOTÃO EDITAR / CANCELAR ("SALVAR")
     // ==========================================
     if (btnEditar) {
         btnEditar.addEventListener('click', () => {
             if (containerAlunos.classList.contains('modo-edicao')) {
-                // Se já está editando, o clique significa CANCELAR e LIMPAR TELA
-                limparTelaECancelar();
+                limparTelaECancelar(false); 
             } else {
-                // Se NÃO está editando, o clique ativa as CAIXINHAS para selecionar
                 const itensNaTela = containerAlunos.querySelectorAll('.aluno-item').length;
                 if (itensNaTela > 0) {
                     containerAlunos.classList.add('modo-edicao');
-                    btnEditar.textContent = 'Cancelar';
+                    btnEditar.textContent = 'Salvar'; 
                     btnEditar.style.backgroundColor = 'var(--color-danger)'; 
                     btnEditar.style.color = 'white';
                 }
@@ -190,16 +252,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // LÓGICA DE PESQUISA DINÂMICA (LIVE SEARCH)
+    // LÓGICA DE PESQUISA DINÂMICA (NOME + TURMA)
     // ==========================================
     if (inputPesquisa) {
         inputPesquisa.addEventListener('input', function(e) {
             const termo = e.target.value.trim();
-
             clearTimeout(debounceTimeout);
 
             if (termo.length === 0) {
-                limparTelaECancelar();
+                if (!isModoCSV && idTurmaDefinitiva !== null) {
+                    // UX Inteligente: Apagou o texto mas a turma continua selecionada? Traz a turma inteira de volta!
+                    buscarAlunosDaTurma(idTurmaDefinitiva);
+                } else {
+                    limparTelaECancelar(true);
+                    resetarTurmaDropdown(); 
+                }
                 return;
             }
 
@@ -207,6 +274,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const formData = new FormData();
                 formData.append('acao', 'pesquisar_alunos');
                 formData.append('termo', termo);
+
+                // Cruza o filtro de texto com o filtro de turma se houver alguma selecionada!
+                if (!isModoCSV && idTurmaDefinitiva !== null) {
+                    formData.append('id_turma', idTurmaDefinitiva);
+                }
 
                 try {
                     const response = await fetch('Backend.php', { method: 'POST', body: formData });
@@ -216,10 +288,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         isModoCSV = false; 
                         
                         if (result.dados.length > 0) {
-                            // false = Renderiza no modo Consulta (sem caixinhas abertas)
                             renderizarAlunos(result.dados, false); 
                         } else {
-                            limparTelaECancelar(); 
+                            // Limpa só as linhas da tela, mantém a tag da turma no topo!
+                            const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
+                            itensAntigos.forEach(item => item.remove());
+                            if (checkboxTodos) checkboxTodos.checked = false;
+                            atualizarEstadoBotoes();
+
                             exibirMensagem('Nenhum aluno encontrado.', true);
                         }
                     } else {
@@ -259,8 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (result.sucesso) {
                 isModoCSV = true; 
+                atualizarTextoBadge(); 
+                
                 if (inputPesquisa) inputPesquisa.value = ''; 
-                // true = Renderiza já forçando a edição (caixinhas abertas)
                 renderizarAlunos(result.dados, true); 
                 exibirMensagem('✅ Alunos extraídos do CSV. Selecione e guarde.');
             } else {
@@ -297,10 +374,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         checkboxesAlunos = document.querySelectorAll('.check-aluno');
         
-        // Define o visual com base na origem (Pesquisa vs CSV)
         if (forcarEdicao) {
             containerAlunos.classList.add('modo-edicao');
-            btnEditar.textContent = 'Cancelar';
+            btnEditar.textContent = 'Salvar'; 
             btnEditar.style.backgroundColor = 'var(--color-danger)'; 
             btnEditar.style.color = 'white';
         } else {
@@ -323,10 +399,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // LÓGICA DE SALVAMENTO COM ANIMAÇÃO VISUAL
+    // LÓGICA DE CADASTRO COM ANIMAÇÃO VISUAL
     // ==========================================
-    if (btnSalvar) {
-        btnSalvar.addEventListener('click', async function() {
+    if (btnCadastrar) {
+        btnCadastrar.addEventListener('click', async function() {
             if (!idTurmaDefinitiva) return;
 
             const alunosParaSalvar = [];
@@ -374,7 +450,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     setTimeout(() => {
                         if (todosForamSalvos) {
-                            limparTelaECancelar(); 
+                            limparTelaECancelar(true); 
                         } else {
                             checkboxesAlunos = document.querySelectorAll('.check-aluno');
                             if (checkboxTodos) checkboxTodos.checked = false;

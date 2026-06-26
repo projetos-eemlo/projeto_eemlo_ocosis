@@ -135,12 +135,12 @@ select.turmas:focus {
 }
 
 /* =========================================
-   Área de Alunos
+   Área de Alunos (TRAVADA COM ROLAGEM INTERNA)
    ========================================= */
 .alunos {
     width: 100%;
     max-width: 1200px;
-    min-height: 450px;
+    height: 560px; /* Aumentado em 80px (antes era 480px) */
     margin-bottom: 25px;
     background-color: #ffffff;
     border-radius: var(--border-radius-sm);
@@ -149,8 +149,9 @@ select.turmas:focus {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 20px; /* Aumentado o respiro entre os alunos (antes era 12px) */
     position: relative;
+    overflow-y: auto; 
 }
 
 /* ESCONDENDO CHECKBOXES POR PADRÃO */
@@ -167,7 +168,7 @@ select.turmas:focus {
 }
 
 /* =========================================
-   CABEÇALHO DOS ALUNOS (Lógica Flexbox)
+   CABEÇALHO DOS ALUNOS (FIXADO NO TOPO DO SCROLL)
    ========================================= */
 .aluno-header {
     display: flex;
@@ -180,12 +181,20 @@ select.turmas:focus {
     font-size: 14px;
     min-height: 35px;
     width: 100%;
+    
+    position: sticky;
+    top: -24px; 
+    background-color: #ffffff; 
+    z-index: 10; 
+    margin-top: -24px; 
+    padding-top: 24px; 
 }
 
 .header-left {
     display: flex;
     align-items: center;
     gap: 10px;
+    background-color: #ffffff;
 }
 
 /* LÓGICA DE ESPECIFICIDADE: Usando ID para a tag azul */
@@ -210,11 +219,11 @@ select.turmas:focus {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 12px;
+    padding: 18px 16px; /* Mais "gordura" interna para conforto visual (antes era 12px) */
     border-radius: var(--border-radius-sm);
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
-    overflow: hidden; /* Ajuda a esconder conteúdo ao aplicar a animação */
+    overflow: hidden; 
 }
 
 .aluno-item:hover {
@@ -222,15 +231,14 @@ select.turmas:focus {
 }
 
 /* =========================================
-   NOVA ANIMAÇÃO: ALUNO SALVO COM SUCESSO
+   ANIMAÇÃO: ALUNO SALVO COM SUCESSO
    ========================================= */
 .aluno-item.salvo-sucesso {
     background-color: var(--color-primary) !important;
     border-color: transparent !important;
     opacity: 0;
-    transform: scale(0.95) translateX(30px); /* Encolhe e desliza pra direita */
-    pointer-events: none; /* Bloqueia cliques no item desaparecendo */
-    /* Fica azul por 0.2s para o usuário ver, e depois gasta 0.5s sumindo */
+    transform: scale(0.95) translateX(30px); 
+    pointer-events: none; 
     transition: background-color 0.2s ease, opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s !important;
 }
 
@@ -340,7 +348,7 @@ select.turmas:focus {
     cursor: pointer;
     font-weight: 500;
     transition: var(--transition);
-    color: var(--color-text-dark);
+    color: var(--text-dark);
 }
 
 .btn-periodo:hover {
