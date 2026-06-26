@@ -1,35 +1,69 @@
-// Simulando as turmas que já existem no banco (Para testar o CA05 - Duplicidade)
-let turmasBanco = [
-    { desc_turma: "3° Reg 1", ano_letivo: "2026", turno: "Manhã" }
-];
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Lógica de Buscar Turma (Caixa Cinza) ---
+    
+    // --- Lógica de Buscar Turma (Caixa Cinza) Integrada com o Banco ---
     const btnBuscarTurmaFiltros = document.getElementById('btnBuscarTurmaFiltros');
+    const listaAlunos = document.getElementById('listaAlunos');
     
     btnBuscarTurmaFiltros.addEventListener('click', () => {
         const turma = document.getElementById('filtroSelectTurma').value;
-        // Aqui entrará a requisição AJAX/Fetch para o PHP buscar os dados da turma
-        alert(`Buscando dados para: ${turma}\n(Integração com backend pendente)`);
+        
+        // Coloca uma mensagem de carregamento enquanto o PHP busca
+        listaAlunos.innerHTML = '<li>Carregando alunos...</li>';
+
+        // Faz a requisição GET passando a turma na URL
+        fetch(`buscar_alunos.php?turma=${encodeURIComponent(turma)}`)
+        .then(response => response.json())
+        .then(data => {
+            listaAlunos.innerHTML = ''; // Limpa o "carregando"
+
+            if (data.sucesso) {
+                if (data.dados.length > 0) {
+                    // Percorre o array de alunos que veio do banco e cria os <li>
+                    data.dados.forEach(aluno => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a href="#" class="aluno_link">➔ ${aluno.nome_aluno}</a>`;
+                        listaAlunos.appendChild(li);
+                    });
+
+                    // Chama a função para garantir que os alunos novos fiquem clicáveis
+                    reatribuirCliquesAlunos();
+                } else {
+                    listaAlunos.innerHTML = '<li>Nenhum aluno encontrado nesta turma.</li>';
+                }
+            } else {
+                alert("Erro: " + data.mensagem);
+            }
+        })
+        .catch(error => {
+            console.error('Erro na requisição:', error);
+            listaAlunos.innerHTML = '<li>Erro ao comunicar com o servidor.</li>';
+        });
     });
 
     // --- Lógica de Selecionar Aluno na Lista ---
-    const alunos = document.querySelectorAll('.aluno_link');
-    alunos.forEach(aluno => {
-        aluno.addEventListener('click', (e) => {
-            e.preventDefault();
-            alunos.forEach(a => a.classList.remove('ativo'));
-            aluno.classList.add('ativo');
+    // Transformada em função para ser chamada após carregar os alunos do banco
+    function reatribuirCliquesAlunos() {
+        const alunosLista = document.querySelectorAll('.aluno_link');
+        alunosLista.forEach(aluno => {
+            aluno.addEventListener('click', (e) => {
+                e.preventDefault();
+                alunosLista.forEach(a => a.classList.remove('ativo'));
+                aluno.classList.add('ativo');
+            });
         });
-    });
+    }
+
+    // Chama a função uma vez no início para os alunos que já vierem no HTML
+    reatribuirCliquesAlunos();
 
     // --- Lógica de Pesquisa de Aluno (Acima da Lista) ---
     const inputPesquisaAluno = document.getElementById('inputPesquisaAluno');
     const btnBuscarAluno = document.getElementById('btnBuscarAluno');
-    const itensListaAlunos = document.querySelectorAll('#listaAlunos li');
 
     function filtrarAlunos() {
         const termoBusca = inputPesquisaAluno.value.toLowerCase();
+        // Precisa buscar os itens de lista atualizados caso tenham mudado
+        const itensListaAlunos = document.querySelectorAll('#listaAlunos li');
         
         itensListaAlunos.forEach(li => {
             const textoAluno = li.textContent.toLowerCase();
@@ -67,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Validar e Salvar Formulário
+    // Validar e Salvar Formulário com Integração ao Banco de Dados
     form.addEventListener('submit', (e) => {
         e.preventDefault(); 
 
@@ -100,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status: status
         };
 
-        // Faz a requisição para o PHP (agora na mesma pasta)
+        // Faz a requisição para o PHP
         fetch('cadastrar_turma.php', {
             method: 'POST',
             headers: {
