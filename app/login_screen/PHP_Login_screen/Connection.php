@@ -1,11 +1,11 @@
 <?php
  session_start();
 
+date_default_timezone_set('America/Sao_Paulo');
 
-
- $host = 'localhost';
- $user='root';
- $password=' ';
+$host = 'localhost';
+$user='root';
+$password='';
 $database='ocosis';
 $port=3306;
 

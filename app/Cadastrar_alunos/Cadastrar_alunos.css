@@ -172,7 +172,7 @@ select.turmas:focus {
 .aluno-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* LÓGICA: Empurra o grupo 1 pra esquerda e o grupo 2 pra direita */
+    justify-content: space-between; 
     padding-bottom: 12px;
     border-bottom: 2px solid var(--color-bg-light);
     color: var(--color-primary);
@@ -188,7 +188,7 @@ select.turmas:focus {
     gap: 10px;
 }
 
-/* LÓGICA DE ESPECIFICIDADE: Usando ID para ser impossível de ser subjugado */
+/* LÓGICA DE ESPECIFICIDADE: Usando ID para a tag azul */
 #turma-selecionada-info {
     background-color: var(--color-primary) !important;
     color: #ffffff !important;
@@ -214,10 +214,30 @@ select.turmas:focus {
     border-radius: var(--border-radius-sm);
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
+    overflow: hidden; /* Ajuda a esconder conteúdo ao aplicar a animação */
 }
 
 .aluno-item:hover {
     background-color: var(--color-blue-light);
+}
+
+/* =========================================
+   NOVA ANIMAÇÃO: ALUNO SALVO COM SUCESSO
+   ========================================= */
+.aluno-item.salvo-sucesso {
+    background-color: var(--color-primary) !important;
+    border-color: transparent !important;
+    opacity: 0;
+    transform: scale(0.95) translateX(30px); /* Encolhe e desliza pra direita */
+    pointer-events: none; /* Bloqueia cliques no item desaparecendo */
+    /* Fica azul por 0.2s para o usuário ver, e depois gasta 0.5s sumindo */
+    transition: background-color 0.2s ease, opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s !important;
+}
+
+.aluno-item.salvo-sucesso span,
+.aluno-item.salvo-sucesso strong {
+    color: #ffffff !important;
+    transition: color 0.2s ease;
 }
 
 /* =========================================
@@ -255,6 +275,11 @@ select.turmas:focus {
 
 .btn-danger { background-color: var(--color-danger); color: white; }
 .btn-danger:hover { background-color: #bd2130; }
+
+.botoes-inferiores button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 /* =========================================
    Modal de Seleção de Período
@@ -322,6 +347,15 @@ select.turmas:focus {
     background-color: var(--color-blue-light);
     border-color: var(--color-primary);
     color: var(--color-primary);
+}
+
+#fechar-modal {
+    width: 100%; 
+    padding: 15px; 
+    font-size: 15px; 
+    font-weight: bold;
+    margin-top: 10px;
+    letter-spacing: 0.5px;
 }
 
 /* =========================================
