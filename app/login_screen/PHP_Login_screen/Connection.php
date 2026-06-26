@@ -3,9 +3,9 @@
 
 
 
- $host = 'localhost';
- $user='root';
- $password=' ';
+$host = 'localhost';
+$user='root';
+$password='';
 $database='ocosis';
 $port=3306;
 
