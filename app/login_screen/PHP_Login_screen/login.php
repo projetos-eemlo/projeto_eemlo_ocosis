@@ -12,15 +12,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = $conexao->real_escape_string($_POST['usuario']);
         $senha_digitada = $_POST['senha']; 
 
+        
         $sql_code = "SELECT * FROM funcionarios WHERE email_funcionario = '$email'";
         $sql_query = $conexao->query($sql_code);
 
         if ($sql_query && $sql_query->num_rows == 1) {
             $funcionario = $sql_query->fetch_assoc();
             
+          
             if (password_verify($senha_digitada, $funcionario['senha_hash'])) {
                 $loginSucesso = true;
-     
+                
+             
             } else {
                 $exibirErro = true;
                 $mensagemErro = "E-mail ou senha incorretos.";
@@ -41,24 +44,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
+    <script src="js_login_screen/login.js" defer></script>
     <link rel="stylesheet" href="CSS_login_screen/login.css">
     <style>
-  
+      
         #error-msg {
             display: <?php echo $exibirErro ? 'block' : 'none'; ?>;
-            color: red;
+            color: red; 
             margin-top: 10px;
         }
     </style>
 </head>
 <body>
-
+    
     <nav class="navbar">
-        <a href="#">1. Login / Cadastro</a>
-        <a href="#">2. Cadastro Usuario</a>
-        <a href="#">3. Nova Ocorrência</a>
-        <a href="#">4. Pesquisa e Turmas</a>
-        <a href="#">5. Perfil do Aluno</a>
+        <a href="#">Login/ Cadastro</a>
+        <a href="cadastro.html">Cadastro Usuário</a> 
+        <a href="#">Nova Ocorrência</a>
+        <a href="#">Pesquise e Turmas</a>
+        <a href="#">Perfil do Aluno</a>
     </nav>
 
     <main class="container">
@@ -72,7 +76,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <?php if ($loginSucesso): ?>
                 <script>
                     alert('Login efetuado com sucesso!');
-                    
+                  
                 </script>
             <?php endif; ?>
 
@@ -96,13 +100,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="actions button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
-                    <button type="button" class="btn-cadastro">Solicitar Cadastro</button>
+                    <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
     </main>
 
     <script>
+       
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.btn-show-password');
@@ -115,6 +120,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         }
     </script>
-    //oi
 </body>
 </html>
