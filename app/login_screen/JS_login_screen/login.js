@@ -75,3 +75,41 @@ document.addEventListener('DOMContentLoaded', function() {
             errorMessage.textContent = '';
             alert('Login realizado com sucesso!');
         });
+
+       
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.querySelector('.btn-show-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = 'Ocultar';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = 'Mostrar';
+            }
+        }
+
+       
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            
+            event.preventDefault(); 
+
+           
+            const emailCorreto = "usuario@gmail.com";
+            const senhaCorreta = "123456";
+
+     
+            const emailDigitado = document.getElementById('email').value;
+            const senhaDigitada = document.getElementById('password').value;
+            const erroMensagem = document.getElementById('error-msg');
+
+            if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
+                alert('Login efetuado com sucesso!');
+                erroMensagem.style.display = 'none'; 
+               
+            } else {
+            
+                erroMensagem.style.display = 'block';
+            }
+        });
+        

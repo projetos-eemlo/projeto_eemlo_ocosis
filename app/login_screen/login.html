@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
+    <script src="js_login_screen/login.js" defer></script>
     <link rel="stylesheet" href="CSS_login_screen/login.css">
     <style>
-       
         #error-msg {
             display: none;
             color: red; 
@@ -15,13 +15,13 @@
     </style>
 </head>
 <body>
-
+    
     <nav class="navbar">
-        <a href="#">1. Login / Cadastro</a>
-        <a href="#">2. Cadastro Usuario</a>
-        <a href="#">3. Nova Ocorrência</a>
-        <a href="#">4. Pesquisa e Turmas</a>
-        <a href="#">5. Perfil do Aluno</a>
+        <a href="#">Login/ Cadastro</a>
+        <a href="cadastro.html">Cadastro Usuário</a> 
+        <a href="#">Nova Ocorrência</a>
+        <a href="#">Pesquise e Turmas</a>
+        <a href="#">Perfil do Aluno</a>
     </nav>
 
     <main class="container">
@@ -32,16 +32,16 @@
             <h3 class="subtitle">Entrar</h3>
             <hr class="divider">
 
-            <form id="loginForm">
+            <form id="loginForm" method="POST" action="logar.php">
                 <div class="input-group">
                     <label for="email">E-mail ou Matricula:</label>
-                    <input type="text" id="email" placeholder="Digite seu e-mail" required>
+                    <input type="text" id="email" name="email" placeholder="Digite seu e-mail" required>
                 </div>
 
                 <div class="input-group">
                     <label for="password">Senha:</label>
                     <div class="password-wrapper">
-                        <input type="password" id="password" placeholder="Digite sua senha" required>
+                        <input type="password" id="password" name="senha" placeholder="Digite sua senha" required>
                         <button type="button" class="btn-show-password" onclick="togglePassword()">Mostrar</button>
                     </div>
                 </div>
@@ -52,14 +52,13 @@
 
                 <div class="actions button-group">
                     <button type="submit" class="btn-entrar">Entrar</button>
-                    <button type="button" class="btn-cadastro">Solicitar Cadastro</button>
+                    <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
     </main>
 
     <script>
-       
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const toggleButton = document.querySelector('.btn-show-password');
@@ -72,30 +71,7 @@
             }
         }
 
-
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            
-            event.preventDefault(); 
-
-           
-            const emailCorreto = "usuario@gmail.com";
-            const senhaCorreta = "123456";
-
-     
-            const emailDigitado = document.getElementById('email').value;
-            const senhaDigitada = document.getElementById('password').value;
-            const erroMensagem = document.getElementById('error-msg');
-
-            // Validação
-            if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
-                alert('Login efetuado com sucesso!');
-                erroMensagem.style.display = 'none'; 
-               
-            } else {
-            
-                erroMensagem.style.display = 'block';
-            }
-        });
+        
     </script>
 </body>
 </html>
