@@ -140,7 +140,7 @@ select.turmas:focus {
 .alunos {
     width: 100%;
     max-width: 1200px;
-    height: 560px; /* Aumentado em 80px (antes era 480px) */
+    height: 560px;
     margin-bottom: 25px;
     background-color: #ffffff;
     border-radius: var(--border-radius-sm);
@@ -149,7 +149,7 @@ select.turmas:focus {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Aumentado o respiro entre os alunos (antes era 12px) */
+    gap: 20px; 
     position: relative;
     overflow-y: auto; 
 }
@@ -197,7 +197,6 @@ select.turmas:focus {
     background-color: #ffffff;
 }
 
-/* LÓGICA DE ESPECIFICIDADE: Usando ID para a tag azul */
 #turma-selecionada-info {
     background-color: var(--color-primary) !important;
     color: #ffffff !important;
@@ -219,7 +218,7 @@ select.turmas:focus {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 18px 16px; /* Mais "gordura" interna para conforto visual (antes era 12px) */
+    padding: 18px 16px; 
     border-radius: var(--border-radius-sm);
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
@@ -231,7 +230,7 @@ select.turmas:focus {
 }
 
 /* =========================================
-   ANIMAÇÃO: ALUNO SALVO COM SUCESSO
+   ANIMAÇÃO: ALUNO SALVO/TRANSFERIDO COM SUCESSO
    ========================================= */
 .aluno-item.salvo-sucesso {
     background-color: var(--color-primary) !important;
@@ -278,7 +277,7 @@ select.turmas:focus {
 .btn-secondary { background-color: #ffffff; color: var(--color-primary); border-color: var(--color-primary) !important; }
 .btn-secondary:hover { background-color: var(--color-blue-light); }
 
-.btn-info { background-color: var(--color-info); color: white; }
+.btn-info { background-color: var(--color-info); color: white; border-color: var(--color-info) !important;}
 .btn-info:hover { background-color: #79a6ba; }
 
 .btn-danger { background-color: var(--color-danger); color: white; }
@@ -290,7 +289,7 @@ select.turmas:focus {
 }
 
 /* =========================================
-   Modal de Seleção de Período
+   MODAIS E COMPONENTES
    ========================================= */
 .modal-overlay {
     position: fixed;
@@ -364,6 +363,22 @@ select.turmas:focus {
     font-weight: bold;
     margin-top: 10px;
     letter-spacing: 0.5px;
+}
+
+/* Efeito da Mini Div de Transferência */
+.mini-lista-alunos {
+    max-height: 150px;
+    overflow-y: auto;
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    padding: 15px;
+    border-radius: var(--border-radius-sm);
+    text-align: left;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-bottom: 15px;
 }
 
 /* =========================================

@@ -44,7 +44,7 @@
         <button id="btn-cadastrar" class="btn-primary" disabled>Cadastrar</button>
         <button id="btn-editar" class="btn-secondary">Editar</button>
         <button id="btn-excluir" class="btn-danger" disabled>Excluir</button>
-        <button class="btn-info">Trocar de Turma</button>
+        <button id="btn-trocar-turma" class="btn-info" disabled>Trocar de Turma</button>
     </div>
 
     <div id="modal-periodo" class="modal-overlay hidden">
@@ -54,6 +54,51 @@
             <div class="opcoes-periodo" id="opcoes-periodo">
                 </div>
             <button id="fechar-modal" class="btn-danger">Cancelar Seleção</button>
+        </div>
+    </div>
+    <div id="modal-transferencia-filtros" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Selecione a Nova Turma</h3>
+            <p>Filtre as opções abaixo para encontrar a turma de destino.</p>
+            
+            <div class="filtros-cascata">
+                <select id="filtro-ano" class="search" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">Selecione o Ano Letivo</option>
+                </select>
+                
+                <select id="filtro-semestre" class="search" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">Selecione o Semestre (Opcional)</option>
+                </select>
+                
+                <select id="filtro-trimestre" class="search" style="width: 100%; margin-bottom: 10px;">
+                    <option value="">Selecione o Trimestre (Opcional)</option>
+                </select>
+
+                <select id="filtro-turma-destino" class="search" style="width: 100%; border-color: var(--color-primary);">
+                    <option value="">Selecione a Turma de Destino</option>
+                </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="btn-cancelar-filtros" class="btn-secondary" style="flex: 1;">Cancelar</button>
+                <button id="btn-avancar-transferencia" class="btn-primary" style="flex: 1;" disabled>Avançar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-transferencia-confirmacao" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 500px;">
+            <h3>Confirmar Transferência</h3>
+            
+            <div id="lista-alunos-transferencia" class="mini-lista-alunos">
+                </div>
+            
+            <p id="texto-confirmacao-turma" style="margin-top: 15px; font-weight: bold; color: var(--color-text-dark);"></p>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button id="btn-cancelar-transferencia" class="btn-secondary" style="flex: 1;">Cancelar</button>
+                <button id="btn-confirmar-transferencia" class="btn-primary" style="flex: 1;">Confirmar</button>
+            </div>
         </div>
     </div>
     

@@ -21,9 +21,6 @@ $acao = isset($_POST['acao']) ? $_POST['acao'] : '';
 
 switch ($acao) {
     
-    // ==========================================
-    // BUSCAR TURMAS PARA O DROPDOWN
-    // ==========================================
     case 'listar_turmas':
         try {
             $sql = "SELECT id_turma, desc_turma, turno, ano_letivo, semestre_letivo, trimestre_letivo 
@@ -37,9 +34,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // BUSCAR ALUNOS POR TURMA (FILTRO)
-    // ==========================================
     case 'listar_alunos_por_turma':
         $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
         
@@ -65,9 +59,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // PESQUISA DINÂMICA (NOME + FILTRO DE TURMA OPICIONAL)
-    // ==========================================
     case 'pesquisar_alunos':
         $termo = isset($_POST['termo']) ? trim($_POST['termo']) : '';
         $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
@@ -78,7 +69,6 @@ switch ($acao) {
         }
 
         try {
-            // A base da consulta
             $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma 
                     FROM alunos a
                     LEFT JOIN turma t ON a.id_turma = t.id_turma
@@ -86,7 +76,6 @@ switch ($acao) {
             
             $params = ['termo' => '%' . $termo . '%'];
 
-            // Se o JS mandar uma turma, adicionamos a restrição na pesquisa!
             if ($id_turma > 0) {
                 $sql .= " AND a.id_turma = :id_turma";
                 $params['id_turma'] = $id_turma;
@@ -104,9 +93,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // UPLOAD E TRATAMENTO DO CSV
-    // ==========================================
     case 'upload_csv':
         if (isset($_FILES['arquivo_csv'])) {
             $file = $_FILES['arquivo_csv'];
@@ -159,9 +145,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // GUARDAR ALUNOS NA BASE DE DADOS
-    // ==========================================
     case 'salvar_alunos_csv':
         $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
         $alunos_json = isset($_POST['alunos']) ? $_POST['alunos'] : '[]';
@@ -205,6 +188,36 @@ switch ($acao) {
             echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos guardado(s). Problemas encontrados: " . implode(", ", $erros_detalhados)]);
         } else {
             echo json_encode(['sucesso' => false, 'erro' => "Falha na gravação. Motivo: " . implode(", ", $erros_detalhados)]);
+        }
+        break;
+
+    // ==========================================
+    // NOVA AÇÃO: TRANSFERIR ALUNOS ENTRE TURMAS
+    // ==========================================
+    case 'transferir_alunos':
+        $id_turma_destino = isset($_POST['id_turma_destino']) ? (int)$_POST['id_turma_destino'] : 0;
+        $alunos_simade_json = isset($_POST['alunos_simade']) ? $_POST['alunos_simade'] : '[]';
+        $alunos_simade = json_decode($alunos_simade_json, true);
+
+        if ($id_turma_destino === 0 || empty($alunos_simade)) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Turma de destino inválida ou alunos não selecionados.']);
+            exit;
+        }
+
+        try {
+            // Cria os "?" dinamicamente de acordo com a quantidade de alunos selecionados
+            $placeholders = implode(',', array_fill(0, count($alunos_simade), '?'));
+            $sql = "UPDATE alunos SET id_turma = ? WHERE num_simade IN ($placeholders)";
+            
+            $stmt = $pdo->prepare($sql);
+            
+            // Junta o ID da turma com a array de SIMADEs para passar para o banco
+            $params = array_merge([$id_turma_destino], $alunos_simade);
+            $stmt->execute($params);
+
+            echo json_encode(['sucesso' => true, 'mensagem' => count($alunos_simade) . ' aluno(s) transferido(s) com sucesso!']);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao realizar transferência: ' . $e->getMessage()]);
         }
         break;
 

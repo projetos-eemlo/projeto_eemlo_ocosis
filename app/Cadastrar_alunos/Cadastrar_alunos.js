@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnUpload = document.getElementById('btn-upload');
     const btnCadastrar = document.getElementById('btn-cadastrar');
     const btnExcluir = document.getElementById('btn-excluir');
+    const btnTrocarTurma = document.getElementById('btn-trocar-turma'); // Novo Botão
+    
     const inputPesquisa = document.getElementById('input-pesquisa'); 
     const containerAlunos = document.getElementById('container-alunos');
     const checkboxTodos = document.getElementById('aluno-todos');
@@ -15,6 +17,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const fecharModalBtn = document.getElementById('fechar-modal');
     
     const infoTurmaBadge = document.getElementById('turma-selecionada-info');
+
+    // Elementos do Modal de Transferência
+    const modalTransferenciaFiltros = document.getElementById('modal-transferencia-filtros');
+    const modalTransferenciaConfirmacao = document.getElementById('modal-transferencia-confirmacao');
+    
+    const filtroAno = document.getElementById('filtro-ano');
+    const filtroSemestre = document.getElementById('filtro-semestre');
+    const filtroTrimestre = document.getElementById('filtro-trimestre');
+    const filtroTurmaDestino = document.getElementById('filtro-turma-destino');
+    
+    const btnCancelarFiltros = document.getElementById('btn-cancelar-filtros');
+    const btnAvancarTransferencia = document.getElementById('btn-avancar-transferencia');
+    const btnCancelarTransferencia = document.getElementById('btn-cancelar-transferencia');
+    const btnConfirmarTransferencia = document.getElementById('btn-confirmar-transferencia');
+    
+    const listaAlunosTransferencia = document.getElementById('lista-alunos-transferencia');
+    const textoConfirmacaoTurma = document.getElementById('texto-confirmacao-turma');
 
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
@@ -33,13 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
             btnCadastrar.disabled = !(algumAlunoMarcado && turmaConfirmada);
         }
 
-        if (btnExcluir) {
-            if (isModoCSV) {
-                btnExcluir.disabled = true;
-            } else {
-                btnExcluir.disabled = !algumAlunoMarcado;
-            }
-        }
+        // Excluir e Trocar de Turma só funcionam se tiver aluno marcado E NÃO for do CSV
+        if (btnExcluir) btnExcluir.disabled = isModoCSV ? true : !algumAlunoMarcado;
+        if (btnTrocarTurma) btnTrocarTurma.disabled = isModoCSV ? true : !algumAlunoMarcado;
     }
 
     containerAlunos.addEventListener('change', function(e) {
@@ -80,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
         limparEstadoTurma();
     }
 
-    // --- CARREGAR E AGRUPAR TURMAS ---
+    // --- CARREGAR E AGRUPAR TURMAS GERAIS ---
     async function carregarTurmas() {
         const formData = new FormData();
         formData.append('acao', 'listar_turmas');
@@ -109,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     carregarTurmas();
 
-    // --- LÓGICA DO MODAL DE TURMAS ---
     selectTurmas.addEventListener('change', function(e) {
         const nomeSelecionado = e.target.value;
         limparEstadoTurma(); 
@@ -130,7 +144,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (versoes.length > 1) {
             containerOpcoesPeriodo.innerHTML = ''; 
-
             versoes.forEach(v => {
                 const btn = document.createElement('button');
                 btn.className = 'btn-periodo';
@@ -143,12 +156,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     modalPeriodo.classList.add('hidden'); 
                     atualizarTextoBadge(); 
                     exibirMensagem(`✅ Turma confirmada.`);
-
-                    if (!isModoCSV) {
-                        buscarAlunosDaTurma(idTurmaDefinitiva);
-                    }
+                    if (!isModoCSV) buscarAlunosDaTurma(idTurmaDefinitiva);
                 });
-                
                 containerOpcoesPeriodo.appendChild(btn);
             });
             modalPeriodo.classList.remove('hidden');
@@ -158,10 +167,7 @@ document.addEventListener('DOMContentLoaded', function() {
             turmaDefinitivaObj = versoes[0];
             atualizarTextoBadge(); 
             exibirMensagem(`✅ Turma confirmada.`);
-
-            if (!isModoCSV) {
-                buscarAlunosDaTurma(idTurmaDefinitiva);
-            }
+            if (!isModoCSV) buscarAlunosDaTurma(idTurmaDefinitiva);
         }
     });
 
@@ -171,6 +177,160 @@ document.addEventListener('DOMContentLoaded', function() {
             resetarTurmaDropdown(); 
         });
     }
+
+    // ==========================================
+    // LÓGICA DE TRANSFERÊNCIA DE TURMAS (CASCATA & MODAIS)
+    // ==========================================
+    
+    // 1. Abrir Modal de Filtros e preparar Cascata
+    if (btnTrocarTurma) {
+        btnTrocarTurma.addEventListener('click', () => {
+            // Preenche o ano letivo de forma única
+            const anosUnicos = [...new Set(todasTurmasDoBanco.map(t => t.ano_letivo))].sort((a, b) => b - a);
+            filtroAno.innerHTML = '<option value="">Selecione o Ano Letivo</option>';
+            anosUnicos.forEach(ano => {
+                filtroAno.innerHTML += `<option value="${ano}">${ano}</option>`;
+            });
+            
+            // Reseta os outros
+            filtroSemestre.innerHTML = '<option value="">Selecione o Semestre (Opcional)</option>';
+            filtroTrimestre.innerHTML = '<option value="">Selecione o Trimestre (Opcional)</option>';
+            filtroTurmaDestino.innerHTML = '<option value="">Selecione a Turma de Destino</option>';
+            btnAvancarTransferencia.disabled = true;
+
+            modalTransferenciaFiltros.classList.remove('hidden');
+        });
+    }
+
+    // 2. Atualizar selects em cascata
+    function atualizarCascata() {
+        const ano = filtroAno.value;
+        const sem = filtroSemestre.value;
+        const tri = filtroTrimestre.value;
+
+        // Turmas filtradas pelo que foi selecionado
+        let turmasFiltradas = todasTurmasDoBanco;
+        
+        if (ano) turmasFiltradas = turmasFiltradas.filter(t => t.ano_letivo == ano);
+        if (sem) turmasFiltradas = turmasFiltradas.filter(t => t.semestre_letivo == sem);
+        if (tri) turmasFiltradas = turmasFiltradas.filter(t => t.trimestre_letivo == tri);
+
+        // Preencher Semestre (Apenas se o Ano estiver selecionado)
+        if (e.target.id === 'filtro-ano') {
+            const semsUnicos = [...new Set(turmasFiltradas.map(t => t.semestre_letivo).filter(v => v))].sort();
+            filtroSemestre.innerHTML = '<option value="">Selecione o Semestre (Opcional)</option>';
+            semsUnicos.forEach(s => filtroSemestre.innerHTML += `<option value="${s}">${s}º Semestre</option>`);
+            
+            const trisUnicos = [...new Set(turmasFiltradas.map(t => t.trimestre_letivo).filter(v => v))].sort();
+            filtroTrimestre.innerHTML = '<option value="">Selecione o Trimestre (Opcional)</option>';
+            trisUnicos.forEach(t => filtroTrimestre.innerHTML += `<option value="${t}">${t}º Trimestre</option>`);
+        }
+
+        // Preencher Turma de Destino
+        filtroTurmaDestino.innerHTML = '<option value="">Selecione a Turma de Destino</option>';
+        turmasFiltradas.forEach(t => {
+            filtroTurmaDestino.innerHTML += `<option value="${t.id_turma}">${t.desc_turma} - ${t.turno}</option>`;
+        });
+
+        verificarAvanço();
+    }
+
+    function verificarAvanço() {
+        btnAvancarTransferencia.disabled = filtroTurmaDestino.value === "";
+    }
+
+    [filtroAno, filtroSemestre, filtroTrimestre].forEach(el => {
+        el.addEventListener('change', (e) => atualizarCascata(e));
+    });
+
+    filtroTurmaDestino.addEventListener('change', verificarAvanço);
+
+    // Cancelar Filtros
+    btnCancelarFiltros.addEventListener('click', () => {
+        modalTransferenciaFiltros.classList.add('hidden');
+    });
+
+    // 3. Avançar para Confirmação
+    btnAvancarTransferencia.addEventListener('click', () => {
+        modalTransferenciaFiltros.classList.add('hidden');
+        
+        // Pega os alunos marcados na tela
+        listaAlunosTransferencia.innerHTML = '';
+        checkboxesAlunos.forEach(cb => {
+            if (cb.checked) {
+                const nome = cb.getAttribute('data-nome');
+                const simade = cb.value;
+                listaAlunosTransferencia.innerHTML += `<div>• ${nome} <small>(SIMADE: ${simade})</small></div>`;
+            }
+        });
+
+        // Pega o nome da turma selecionada no select
+        const turmaTexto = filtroTurmaDestino.options[filtroTurmaDestino.selectedIndex].text;
+        textoConfirmacaoTurma.textContent = `Os alunos acima serão transferidos para a turma: ${turmaTexto}`;
+
+        modalTransferenciaConfirmacao.classList.remove('hidden');
+    });
+
+    // Cancelar Confirmação
+    btnCancelarTransferencia.addEventListener('click', () => {
+        modalTransferenciaConfirmacao.classList.add('hidden');
+    });
+
+    // 4. Efetivar Transferência no Banco de Dados
+    btnConfirmarTransferencia.addEventListener('click', async () => {
+        const idTurmaNova = filtroTurmaDestino.value;
+        const alunosSimadeArray = [];
+
+        checkboxesAlunos.forEach(cb => {
+            if (cb.checked) alunosSimadeArray.push(cb.value);
+        });
+
+        modalTransferenciaConfirmacao.classList.add('hidden');
+        exibirMensagem('A transferir alunos...', false);
+
+        const formData = new FormData();
+        formData.append('acao', 'transferir_alunos');
+        formData.append('id_turma_destino', idTurmaNova);
+        formData.append('alunos_simade', JSON.stringify(alunosSimadeArray));
+
+        try {
+            const response = await fetch('Backend.php', { method: 'POST', body: formData });
+            const result = await response.json();
+
+            if (result.sucesso) {
+                exibirMensagem('✅ ' + result.mensagem, false);
+                
+                // Mágica Visual: Some com os alunos transferidos
+                let quantidadeSalva = 0;
+                checkboxesAlunos.forEach(cb => {
+                    if (cb.checked) {
+                        quantidadeSalva++;
+                        const itemDoAluno = cb.parentElement;
+                        itemDoAluno.classList.add('salvo-sucesso'); 
+                        
+                        setTimeout(() => itemDoAluno.remove(), 700);
+                    }
+                });
+
+                const todosForamSalvos = (quantidadeSalva === checkboxesAlunos.length);
+                setTimeout(() => {
+                    if (todosForamSalvos) {
+                        limparTelaECancelar(true); 
+                    } else {
+                        checkboxesAlunos = document.querySelectorAll('.check-aluno');
+                        if (checkboxTodos) checkboxTodos.checked = false;
+                        atualizarEstadoBotoes(); 
+                    }
+                }, 750);
+
+            } else {
+                exibirMensagem('❌ ' + result.erro);
+            }
+        } catch (error) {
+            exibirMensagem('❌ Erro de comunicação ao transferir.');
+        }
+    });
+
 
     // ==========================================
     // NOVA FUNÇÃO: BUSCAR ALUNOS DA TURMA
@@ -261,7 +421,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (termo.length === 0) {
                 if (!isModoCSV && idTurmaDefinitiva !== null) {
-                    // UX Inteligente: Apagou o texto mas a turma continua selecionada? Traz a turma inteira de volta!
                     buscarAlunosDaTurma(idTurmaDefinitiva);
                 } else {
                     limparTelaECancelar(true);
@@ -275,7 +434,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 formData.append('acao', 'pesquisar_alunos');
                 formData.append('termo', termo);
 
-                // Cruza o filtro de texto com o filtro de turma se houver alguma selecionada!
                 if (!isModoCSV && idTurmaDefinitiva !== null) {
                     formData.append('id_turma', idTurmaDefinitiva);
                 }
@@ -290,7 +448,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (result.dados.length > 0) {
                             renderizarAlunos(result.dados, false); 
                         } else {
-                            // Limpa só as linhas da tela, mantém a tag da turma no topo!
                             const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
                             itensAntigos.forEach(item => item.remove());
                             if (checkboxTodos) checkboxTodos.checked = false;
