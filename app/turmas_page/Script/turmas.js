@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- 4. MODAL 1: CADASTRAR TURMA ---
+   // --- 4. MODAL 1: CADASTRAR TURMA (COM TRAVA ANTI-DUPLICIDADE E VALIDAÇÕES) ---
     const modalTurma = document.getElementById("modalTurma");
     const btnNovaTurma = document.getElementById("btnNovaTurma");
     const fecharModalTurma = modalTurma.querySelector(".fechar_modal");
@@ -196,6 +196,80 @@ document.addEventListener('DOMContentLoaded', () => {
     btnNovaTurma.addEventListener('click', () => modalTurma.style.display = "block");
     fecharModalTurma.addEventListener('click', () => modalTurma.style.display = "none");
 
+    const formCadastroTurma = document.getElementById("formCadastroTurma");
+    let enviandoFormulario = false; // Bloqueador de cliques simultâneos
+
+    if (formCadastroTurma) {
+        formCadastroTurma.addEventListener('submit', (e) => {
+            e.preventDefault(); // Impede a página de atualizar
+
+            // Captura e limpa os valores digitados nos inputs
+            const descTurmaValue = document.getElementById("descTurma").value.trim();
+            const anoLetivoValue = document.getElementById("anoLetivo").value.trim();
+            const semestreLetivoValue = document.getElementById("semestreLetivo").value;
+            const turnoValue = document.getElementById("turno").value;
+
+            // ⚠️ Validações trazidas da antiga seção 7
+            if (!descTurmaValue) {
+                alert("Campo [Nome / Descrição] Preenchido incorretamente, confira as informações devidamente.");
+                return; 
+            }
+            if (!anoLetivoValue || anoLetivoValue < 2024) {
+                alert("Campo [Ano Letivo] Preenchido incorretamente, confira as informações devidamente.");
+                return;
+            }
+
+            // Se o formulário já estiver sendo processado, ignora novos cliques
+            if (enviandoFormulario) return;
+            enviandoFormulario = true;
+
+            // Desativa o botão salvar para dar feedback visual ao usuário
+            const btnSalvar = formCadastroTurma.querySelector("button[type='submit']");
+            if (btnSalvar) {
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = "Salvando...";
+            }
+
+            // Envia os dados reais para o seu PHP
+            fetch('cadastrar_turma.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    descTurma: descTurmaValue,
+                    anoLetivo: anoLetivoValue,
+                    semestreLetivo: semestreLetivoValue,
+                    turno: turnoValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert(data.mensagem); // "Turma registrada com sucesso!"
+                    modalTurma.style.display = "none"; // Fecha o modal
+                    formCadastroTurma.reset();         // Limpa os campos
+                    
+                    // Atualiza o select de turmas da tela principal
+                    if (typeof carregarTurmasParaFiltro === "function") {
+                        carregarTurmasParaFiltro();
+                    }
+                } else {
+                    alert("Atenção: " + data.mensagem); // Mensagem de erro do PHP
+                }
+            })
+            .catch(error => {
+                console.error('Erro de conexão:', error);
+                alert('Erro ao tentar comunicar com o servidor.');
+            })
+            .finally(() => {
+                // Libera a trava e reativa o botão quando o processo terminar
+                enviandoFormulario = false;
+                if (btnSalvar) {
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = "Salvar Turma";
+                }
+            });
+        });
+    }
 
     // --- 5. MODAL 2: EDITAR OCORRÊNCIA ---
     const modalEditar = document.getElementById("modalEditar");
@@ -220,62 +294,3 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
 });
-
-// --- 7. SALVAR NOVA TURMA (Integração com PHP) ---
-    const formCadastroTurma = document.getElementById('formCadastroTurma');
-
-    formCadastroTurma.addEventListener('submit', (e) => {
-        e.preventDefault(); // Evita que a página recarregue ao clicar em Salvar
-
-        // Pega os valores que o usuário digitou nos campos
-        const descTurma = document.getElementById('descTurma').value.trim();
-        const anoLetivo = document.getElementById('anoLetivo').value.trim();
-        const semestreLetivo = document.getElementById('semestreLetivo').value;
-        const turno = document.getElementById('turno').value;
-
-        // [CA03 e RN05] Validação de campos
-        if (!descTurma) {
-            alert("Campo [Nome / Descrição] Preenchido incorretamente, confira as informações devidamente.");
-            return; // Para a execução e não envia pro banco
-        }
-        if (!anoLetivo || anoLetivo < 2024) {
-            alert("Campo [Ano Letivo] Preenchido incorretamente, confira as informações devidamente.");
-            return;
-        }
-
-        // Prepara o "pacote" de dados para enviar pro seu PHP
-        const dados = {
-            descTurma: descTurma,
-            anoLetivo: anoLetivo,
-            semestreLetivo: semestreLetivo,
-            turno: turno
-        };
-
-        // Chama o arquivo cadastrar_turma.php e envia os dados
-        fetch('cadastrar_turma.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dados)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.sucesso) {
-                // [CA04] Cadastro com sucesso
-                alert(data.mensagem); 
-                formCadastroTurma.reset(); // Limpa os campos do formulário
-                modalTurma.style.display = "none"; // Fecha o modal
-                
-                // Atualiza o filtro de turmas para a nova turma já aparecer lá!
-                carregarTurmasParaFiltro(); 
-            } else {
-                // [CA05] Prevenção de Duplicidade (Mensagem vinda do PHP)
-                alert(data.mensagem); 
-            }
-        })
-        .catch(error => {
-            console.error("Erro ao cadastrar turma:", error);
-            alert("Erro de comunicação com o servidor.");
-        });
-    });
