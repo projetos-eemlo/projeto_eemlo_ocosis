@@ -3,7 +3,7 @@ session_start();
 
 // É importante que o Connection.php tenha o mysqli configurado para lançar exceções:
 // mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-require 'Connection.php';
+require 'Connect.php';
 
 /*
 // BLOCO CORRIGIDO PARA O FUTURO:
@@ -32,16 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             // Criptografa a senha antes de enviar para o banco
             $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
-            $stmt = $conn->prepare("INSERT INTO funcionarios (nome_funcionario, email_funcionario, senha_hash, id_tipo_func, cargo_funcionario) VALUES (?, ?, ?, ?, ?)");
+            $sql = $pdo->prepare("INSERT INTO funcionarios (nome_funcionario, email_funcionario, senha_hash, id_tipo_func, cargo_funcionario) VALUES (?, ?, ?, ?, ?)");
             
             // Dica: Se $id_tipo_func for um número inteiro no banco, os tipos deveriam ser "sssis" em vez de "sssss". 
             // "s" = string, "i" = integer.
-            $stmt->bind_param("sssss", $nome, $email, $hashSenha, $id_tipo_func, $nome_cargo);
-            $stmt->execute();
+            $sql->execute([$nome, $email, $hashSenha, $id_tipo_func, $nome_cargo]);
             
             $sucesso = "Cadastro realizado com sucesso!";
             
-        } catch (mysqli_sql_exception $e) {
+        } catch (PDOException $e) {
             // 1062 é o código de erro padrão do MySQL para 'Duplicate entry' (Entrada duplicada)
             if ($e->getCode() == 1062) { 
                 $erro = "Este funcionário/e-mail já está cadastrado no sistema.";
