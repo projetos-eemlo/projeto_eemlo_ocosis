@@ -220,3 +220,62 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
 });
+
+// --- 7. SALVAR NOVA TURMA (Integração com PHP) ---
+    const formCadastroTurma = document.getElementById('formCadastroTurma');
+
+    formCadastroTurma.addEventListener('submit', (e) => {
+        e.preventDefault(); // Evita que a página recarregue ao clicar em Salvar
+
+        // Pega os valores que o usuário digitou nos campos
+        const descTurma = document.getElementById('descTurma').value.trim();
+        const anoLetivo = document.getElementById('anoLetivo').value.trim();
+        const semestreLetivo = document.getElementById('semestreLetivo').value;
+        const turno = document.getElementById('turno').value;
+
+        // [CA03 e RN05] Validação de campos
+        if (!descTurma) {
+            alert("Campo [Nome / Descrição] Preenchido incorretamente, confira as informações devidamente.");
+            return; // Para a execução e não envia pro banco
+        }
+        if (!anoLetivo || anoLetivo < 2024) {
+            alert("Campo [Ano Letivo] Preenchido incorretamente, confira as informações devidamente.");
+            return;
+        }
+
+        // Prepara o "pacote" de dados para enviar pro seu PHP
+        const dados = {
+            descTurma: descTurma,
+            anoLetivo: anoLetivo,
+            semestreLetivo: semestreLetivo,
+            turno: turno
+        };
+
+        // Chama o arquivo cadastrar_turma.php e envia os dados
+        fetch('cadastrar_turma.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dados)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.sucesso) {
+                // [CA04] Cadastro com sucesso
+                alert(data.mensagem); 
+                formCadastroTurma.reset(); // Limpa os campos do formulário
+                modalTurma.style.display = "none"; // Fecha o modal
+                
+                // Atualiza o filtro de turmas para a nova turma já aparecer lá!
+                carregarTurmasParaFiltro(); 
+            } else {
+                // [CA05] Prevenção de Duplicidade (Mensagem vinda do PHP)
+                alert(data.mensagem); 
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao cadastrar turma:", error);
+            alert("Erro de comunicação com o servidor.");
+        });
+    });
