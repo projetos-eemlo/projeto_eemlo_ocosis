@@ -1,4 +1,4 @@
-cument.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
     injetarEstilosDinamicos();
     initFiltroTurma();
     initBuscaRapida();

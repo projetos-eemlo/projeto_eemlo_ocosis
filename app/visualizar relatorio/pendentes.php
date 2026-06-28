@@ -1,12 +1,3 @@
-Aqui está o código atualizado do **`pendentes.php`**.
-
-Fiz uma limpeza completa no modal dessa tela: removi todos os campos de edição (disciplina, professor, infrações, descrição) e deixei o foco exclusivamente no **Status da Ocorrência**. Além disso, atualizei o sistema de cores e os helpers em PHP para acomodar as três opções solicitadas: **Pendente**, **Entregue** e **Fora do prazo**.
-
-Cole o código do seu `perfil.php` na próxima mensagem para eu transferir todas as funções de edição pesada para lá.
-
-### Código Atualizado: `pendentes.php`
-
-```php
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -730,5 +721,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
-```
