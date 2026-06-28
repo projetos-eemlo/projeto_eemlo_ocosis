@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnUpload = document.getElementById('btn-upload');
     const btnCadastrar = document.getElementById('btn-cadastrar');
     const btnExcluir = document.getElementById('btn-excluir');
-    const btnTrocarTurma = document.getElementById('btn-trocar-turma'); // Novo Botão
+    const btnTrocarTurma = document.getElementById('btn-trocar-turma'); 
     
     const inputPesquisa = document.getElementById('input-pesquisa'); 
     const containerAlunos = document.getElementById('container-alunos');
@@ -18,28 +18,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const infoTurmaBadge = document.getElementById('turma-selecionada-info');
 
-    // Elementos do Modal de Transferência
+    // Elementos de Transferência
     const modalTransferenciaFiltros = document.getElementById('modal-transferencia-filtros');
     const modalTransferenciaConfirmacao = document.getElementById('modal-transferencia-confirmacao');
-    
     const filtroAno = document.getElementById('filtro-ano');
     const filtroSemestre = document.getElementById('filtro-semestre');
     const filtroTrimestre = document.getElementById('filtro-trimestre');
     const filtroTurmaDestino = document.getElementById('filtro-turma-destino');
-    
     const btnCancelarFiltros = document.getElementById('btn-cancelar-filtros');
     const btnAvancarTransferencia = document.getElementById('btn-avancar-transferencia');
     const btnCancelarTransferencia = document.getElementById('btn-cancelar-transferencia');
     const btnConfirmarTransferencia = document.getElementById('btn-confirmar-transferencia');
-    
     const listaAlunosTransferencia = document.getElementById('lista-alunos-transferencia');
     const textoConfirmacaoTurma = document.getElementById('texto-confirmacao-turma');
+    const containerNaoTransferidos = document.getElementById('container-nao-transferidos');
+    const listaAlunosNaoTransferidos = document.getElementById('lista-alunos-nao-transferidos');
+
+    // Elementos do Modal de Exclusão
+    const modalExcluirConfirmacao = document.getElementById('modal-excluir-confirmacao');
+    const btnCancelarExcluir = document.getElementById('btn-cancelar-excluir');
+    const btnConfirmarExcluir = document.getElementById('btn-confirmar-excluir');
+    const textoExcluirConfirmacao = document.getElementById('texto-excluir-confirmacao');
 
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
     let turmaDefinitivaObj = null; 
     let isModoCSV = false;
     let debounceTimeout; 
+    let countdownExcluir; 
 
     // ==========================================
     // LÓGICA DE ESTADO DOS BOTÕES
@@ -49,11 +55,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const turmaConfirmada = idTurmaDefinitiva !== null;
 
         if (btnCadastrar) {
-            btnCadastrar.disabled = !(algumAlunoMarcado && turmaConfirmada);
+            // CORREÇÃO DEFINITIVA: O botão Cadastrar agora SÓ ativa se os alunos vierem do CSV (isModoCSV === true)
+            btnCadastrar.disabled = !(algumAlunoMarcado && turmaConfirmada && isModoCSV);
         }
 
-        // Excluir e Trocar de Turma só funcionam se tiver aluno marcado E NÃO for do CSV
-        if (btnExcluir) btnExcluir.disabled = isModoCSV ? true : !algumAlunoMarcado;
+        if (btnExcluir) btnExcluir.disabled = !algumAlunoMarcado;
         if (btnTrocarTurma) btnTrocarTurma.disabled = isModoCSV ? true : !algumAlunoMarcado;
     }
 
@@ -116,7 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     selectTurmas.appendChild(option);
                 });
             } else {
-                exibirMensagem('❌ Erro ao carregar turmas: ' + result.erro);
+                exibirMensagem('❌ Erro ao carregar turmas: ' + result.erro); 
             }
         } catch (error) {
             console.error(error);
@@ -179,57 +185,51 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================
-    // LÓGICA DE TRANSFERÊNCIA DE TURMAS (CASCATA & MODAIS)
+    // LÓGICA DE TRANSFERÊNCIA DE TURMAS 
     // ==========================================
-    
-    // 1. Abrir Modal de Filtros e preparar Cascata
     if (btnTrocarTurma) {
         btnTrocarTurma.addEventListener('click', () => {
-            // Preenche o ano letivo de forma única
-            const anosUnicos = [...new Set(todasTurmasDoBanco.map(t => t.ano_letivo))].sort((a, b) => b - a);
+            const anosUnicos = [...new Set(todasTurmasDoBanco.map(t => t.ano_letivo).filter(a => a))].sort((a, b) => b - a);
             filtroAno.innerHTML = '<option value="">Selecione o Ano Letivo</option>';
             anosUnicos.forEach(ano => {
                 filtroAno.innerHTML += `<option value="${ano}">${ano}</option>`;
             });
             
-            // Reseta os outros
-            filtroSemestre.innerHTML = '<option value="">Selecione o Semestre (Opcional)</option>';
-            filtroTrimestre.innerHTML = '<option value="">Selecione o Trimestre (Opcional)</option>';
-            filtroTurmaDestino.innerHTML = '<option value="">Selecione a Turma de Destino</option>';
-            btnAvancarTransferencia.disabled = true;
+            filtroSemestre.innerHTML = `
+                <option value="">Selecione o Semestre (Opcional)</option>
+                <option value="1">1º Semestre</option>
+                <option value="2">2º Semestre</option>
+            `;
+            
+            filtroTrimestre.innerHTML = `
+                <option value="">Selecione o Trimestre (Opcional)</option>
+                <option value="1">1º Trimestre</option>
+                <option value="2">2º Trimestre</option>
+                <option value="3">3º Trimestre</option>
+            `;
 
+            atualizarCascata(); 
+            btnAvancarTransferencia.disabled = true;
             modalTransferenciaFiltros.classList.remove('hidden');
         });
     }
 
-    // 2. Atualizar selects em cascata
     function atualizarCascata() {
         const ano = filtroAno.value;
         const sem = filtroSemestre.value;
         const tri = filtroTrimestre.value;
 
-        // Turmas filtradas pelo que foi selecionado
         let turmasFiltradas = todasTurmasDoBanco;
         
-        if (ano) turmasFiltradas = turmasFiltradas.filter(t => t.ano_letivo == ano);
-        if (sem) turmasFiltradas = turmasFiltradas.filter(t => t.semestre_letivo == sem);
-        if (tri) turmasFiltradas = turmasFiltradas.filter(t => t.trimestre_letivo == tri);
+        if (ano) turmasFiltradas = turmasFiltradas.filter(t => String(t.ano_letivo) === ano);
+        if (sem) turmasFiltradas = turmasFiltradas.filter(t => String(t.semestre_letivo) === sem);
+        if (tri) turmasFiltradas = turmasFiltradas.filter(t => String(t.trimestre_letivo) === tri);
 
-        // Preencher Semestre (Apenas se o Ano estiver selecionado)
-        if (e.target.id === 'filtro-ano') {
-            const semsUnicos = [...new Set(turmasFiltradas.map(t => t.semestre_letivo).filter(v => v))].sort();
-            filtroSemestre.innerHTML = '<option value="">Selecione o Semestre (Opcional)</option>';
-            semsUnicos.forEach(s => filtroSemestre.innerHTML += `<option value="${s}">${s}º Semestre</option>`);
-            
-            const trisUnicos = [...new Set(turmasFiltradas.map(t => t.trimestre_letivo).filter(v => v))].sort();
-            filtroTrimestre.innerHTML = '<option value="">Selecione o Trimestre (Opcional)</option>';
-            trisUnicos.forEach(t => filtroTrimestre.innerHTML += `<option value="${t}">${t}º Trimestre</option>`);
-        }
-
-        // Preencher Turma de Destino
         filtroTurmaDestino.innerHTML = '<option value="">Selecione a Turma de Destino</option>';
         turmasFiltradas.forEach(t => {
-            filtroTurmaDestino.innerHTML += `<option value="${t.id_turma}">${t.desc_turma} - ${t.turno}</option>`;
+            const descSem = t.semestre_letivo ? ` | ${t.semestre_letivo}º Sem` : '';
+            const descTri = t.trimestre_letivo ? ` | ${t.trimestre_letivo}º Tri` : '';
+            filtroTurmaDestino.innerHTML += `<option value="${t.id_turma}">${t.desc_turma} (${t.turno})${descSem}${descTri}</option>`;
         });
 
         verificarAvanço();
@@ -240,49 +240,67 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     [filtroAno, filtroSemestre, filtroTrimestre].forEach(el => {
-        el.addEventListener('change', (e) => atualizarCascata(e));
+        el.addEventListener('change', atualizarCascata);
     });
 
     filtroTurmaDestino.addEventListener('change', verificarAvanço);
 
-    // Cancelar Filtros
     btnCancelarFiltros.addEventListener('click', () => {
         modalTransferenciaFiltros.classList.add('hidden');
     });
 
-    // 3. Avançar para Confirmação
     btnAvancarTransferencia.addEventListener('click', () => {
         modalTransferenciaFiltros.classList.add('hidden');
-        
-        // Pega os alunos marcados na tela
         listaAlunosTransferencia.innerHTML = '';
+        listaAlunosNaoTransferidos.innerHTML = '';
+        const idTurmaNova = filtroTurmaDestino.value;
+        let qtdTransferir = 0;
+        let qtdNaoTransferir = 0;
+
         checkboxesAlunos.forEach(cb => {
             if (cb.checked) {
                 const nome = cb.getAttribute('data-nome');
                 const simade = cb.value;
-                listaAlunosTransferencia.innerHTML += `<div>• ${nome} <small>(SIMADE: ${simade})</small></div>`;
+                const idTurmaAtual = cb.getAttribute('data-id-turma');
+
+                if (idTurmaAtual === idTurmaNova) {
+                    listaAlunosNaoTransferidos.innerHTML += `<div style="color: var(--color-danger);">• <strong>${nome}</strong> <br><small>SIMADE: ${simade}</small></div>`;
+                    qtdNaoTransferir++;
+                } else {
+                    listaAlunosTransferencia.innerHTML += `<div><strong>${nome}</strong> <br><small style="color: #666;">SIMADE: ${simade}</small></div>`;
+                    qtdTransferir++;
+                }
             }
         });
 
-        // Pega o nome da turma selecionada no select
-        const turmaTexto = filtroTurmaDestino.options[filtroTurmaDestino.selectedIndex].text;
-        textoConfirmacaoTurma.textContent = `Os alunos acima serão transferidos para a turma: ${turmaTexto}`;
+        if (qtdNaoTransferir > 0) containerNaoTransferidos.classList.remove('hidden');
+        else containerNaoTransferidos.classList.add('hidden');
 
+        if (qtdTransferir === 0) {
+            listaAlunosTransferencia.innerHTML = '<div style="color: #666; font-style: italic;">Nenhum aluno elegível para transferência.</div>';
+            btnConfirmarTransferencia.disabled = true;
+        } else {
+            btnConfirmarTransferencia.disabled = false;
+        }
+
+        const turmaTexto = filtroTurmaDestino.options[filtroTurmaDestino.selectedIndex].text;
+        textoConfirmacaoTurma.textContent = `A transferir para: ${turmaTexto}`;
         modalTransferenciaConfirmacao.classList.remove('hidden');
     });
 
-    // Cancelar Confirmação
     btnCancelarTransferencia.addEventListener('click', () => {
         modalTransferenciaConfirmacao.classList.add('hidden');
     });
 
-    // 4. Efetivar Transferência no Banco de Dados
     btnConfirmarTransferencia.addEventListener('click', async () => {
         const idTurmaNova = filtroTurmaDestino.value;
+        const turmaTextoLimpo = filtroTurmaDestino.options[filtroTurmaDestino.selectedIndex].text.split('(')[0].trim(); 
         const alunosSimadeArray = [];
 
         checkboxesAlunos.forEach(cb => {
-            if (cb.checked) alunosSimadeArray.push(cb.value);
+            if (cb.checked && cb.getAttribute('data-id-turma') !== idTurmaNova) {
+                alunosSimadeArray.push(cb.value);
+            }
         });
 
         modalTransferenciaConfirmacao.classList.add('hidden');
@@ -298,42 +316,154 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
 
             if (result.sucesso) {
-                exibirMensagem('✅ ' + result.mensagem, false);
+                exibirMensagem('✅ ' + result.mensagem); 
                 
-                // Mágica Visual: Some com os alunos transferidos
-                let quantidadeSalva = 0;
                 checkboxesAlunos.forEach(cb => {
-                    if (cb.checked) {
-                        quantidadeSalva++;
+                    if (cb.checked && cb.getAttribute('data-id-turma') !== idTurmaNova) {
                         const itemDoAluno = cb.parentElement;
-                        itemDoAluno.classList.add('salvo-sucesso'); 
+                        itemDoAluno.classList.add('transferido-sucesso');
+                        cb.setAttribute('data-id-turma', idTurmaNova);
+                        const span = itemDoAluno.querySelector('span');
+                        const nome = cb.getAttribute('data-nome');
+                        const simade = cb.value;
+                        const nascimento = cb.getAttribute('data-nascimento');
                         
-                        setTimeout(() => itemDoAluno.remove(), 700);
+                        span.innerHTML = `<strong>${nome}</strong> — SIMADE: ${simade} | Nasc: ${nascimento} | Atual: ${turmaTextoLimpo}`;
+
+                        setTimeout(() => itemDoAluno.remove(), 1500); 
                     }
                 });
 
-                const todosForamSalvos = (quantidadeSalva === checkboxesAlunos.length);
                 setTimeout(() => {
-                    if (todosForamSalvos) {
-                        limparTelaECancelar(true); 
-                    } else {
-                        checkboxesAlunos = document.querySelectorAll('.check-aluno');
-                        if (checkboxTodos) checkboxTodos.checked = false;
-                        atualizarEstadoBotoes(); 
-                    }
-                }, 750);
+                    limparTelaECancelar(false); 
+                }, 1500);
 
             } else {
-                exibirMensagem('❌ ' + result.erro);
+                exibirMensagem('❌ ' + result.erro); 
             }
         } catch (error) {
-            exibirMensagem('❌ Erro de comunicação ao transferir.');
+            exibirMensagem('❌ Erro de comunicação ao transferir.'); 
         }
     });
 
+    // ==========================================
+    // FUNCIONALIDADE DE EXCLUSÃO (CORRIGIDA)
+    // ==========================================
+    if (btnExcluir) {
+        btnExcluir.addEventListener('click', function() {
+            const marcados = document.querySelectorAll('.check-aluno:checked');
+            if (marcados.length === 0) return;
+
+            if (isModoCSV) {
+                marcados.forEach(cb => {
+                    const itemDoAluno = cb.parentElement;
+                    itemDoAluno.remove();
+                });
+                
+                checkboxesAlunos = document.querySelectorAll('.check-aluno');
+                if (checkboxTodos) checkboxTodos.checked = false;
+                atualizarEstadoBotoes();
+                
+                if (checkboxesAlunos.length === 0) {
+                    limparTelaECancelar(true);
+                }
+                
+                exibirMensagem('✅ Registro(s) removido(s) da lista com sucesso.');
+            } else {
+                let tempoRestante = 5;
+                
+                btnConfirmarExcluir.disabled = true;
+                btnConfirmarExcluir.textContent = `Confirmar (${tempoRestante}s)`;
+                
+                if (marcados.length > 1) {
+                    textoExcluirConfirmacao.textContent = `Você tem certeza que deseja excluir esses ${marcados.length} alunos? Eles serão apagados do banco e se precisar deles de volta terá que fazer o cadastro com as informações necessárias.`;
+                } else {
+                    textoExcluirConfirmacao.textContent = "Você tem certeza que deseja excluir esse aluno? Ele será apagado do banco e se precisar dele de volta terá que fazer o cadastro com as informações necessárias.";
+                }
+
+                modalExcluirConfirmacao.classList.remove('hidden');
+
+                countdownExcluir = setInterval(() => {
+                    tempoRestante--;
+                    if (tempoRestante > 0) {
+                        btnConfirmarExcluir.textContent = `Confirmar (${tempoRestante}s)`;
+                    } else {
+                        clearInterval(countdownExcluir);
+                        btnConfirmarExcluir.textContent = "Confirmar";
+                        btnConfirmarExcluir.disabled = false;
+                    }
+                }, 1000);
+            }
+        });
+    }
+
+    if (btnCancelarExcluir) {
+        btnCancelarExcluir.addEventListener('click', () => {
+            clearInterval(countdownExcluir); 
+            modalExcluirConfirmacao.classList.add('hidden');
+        });
+    }
+
+    if (btnConfirmarExcluir) {
+        btnConfirmarExcluir.addEventListener('click', async () => {
+            const marcados = document.querySelectorAll('.check-aluno:checked');
+            const alunosSimadeArray = [];
+
+            marcados.forEach(cb => alunosSimadeArray.push(cb.value));
+
+            modalExcluirConfirmacao.classList.add('hidden');
+            exibirMensagem('A apagar do banco de dados...', false);
+
+            const formData = new FormData();
+            formData.append('acao', 'excluir_alunos');
+            formData.append('alunos_simade', JSON.stringify(alunosSimadeArray));
+
+            try {
+                const response = await fetch('Backend.php', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.sucesso) {
+                    exibirMensagem('✅ ' + result.mensagem);
+                    
+                    // Remove cirurgicamente apenas os alunos selecionados via animação
+                    marcados.forEach(cb => {
+                        const itemDoAluno = cb.parentElement;
+                        itemDoAluno.style.backgroundColor = 'var(--color-danger)';
+                        itemDoAluno.style.transition = 'all 0.5s ease';
+                        itemDoAluno.style.opacity = '0';
+                        itemDoAluno.style.transform = 'scale(0.9) translateX(-30px)';
+                        
+                        setTimeout(() => itemDoAluno.remove(), 500);
+                    });
+
+                    // CORREÇÃO: Fecha o modo de edição e mantém quem sobrou na tela de forma limpa!
+                    setTimeout(() => {
+                        containerAlunos.classList.remove('modo-edicao');
+                        btnEditar.textContent = 'Editar';
+                        btnEditar.style.backgroundColor = '#ffffff'; 
+                        btnEditar.style.color = 'var(--color-primary)';
+                        if (checkboxTodos) checkboxTodos.checked = false;
+
+                        checkboxesAlunos = document.querySelectorAll('.check-aluno');
+                        atualizarEstadoBotoes();
+
+                        // Só dá o reset total caso a tela tenha ficado 100% vazia de fato
+                        if (checkboxesAlunos.length === 0) {
+                            limparTelaECancelar(true);
+                        }
+                    }, 550);
+
+                } else {
+                    exibirMensagem('❌ ' + result.erro);
+                }
+            } catch (error) {
+                exibirMensagem('❌ Erro de comunicação ao excluir.');
+            }
+        });
+    }
 
     // ==========================================
-    // NOVA FUNÇÃO: BUSCAR ALUNOS DA TURMA
+    // BUSCAR ALUNOS DA TURMA
     // ==========================================
     async function buscarAlunosDaTurma(id_turma) {
         const formData = new FormData();
@@ -351,11 +481,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
                     itensAntigos.forEach(item => item.remove());
-                    
                     if (checkboxTodos) checkboxTodos.checked = false;
                     checkboxesAlunos = [];
                     atualizarEstadoBotoes();
-
                     exibirMensagem('Nenhum aluno cadastrado nesta turma.', true);
                 }
             } else {
@@ -382,19 +510,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isModoCSV || forcarLimpezaTotal) {
             const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
             itensAntigos.forEach(item => item.remove());
-            
             if (isModoCSV && inputPesquisa) inputPesquisa.value = ''; 
             if (isModoCSV) resetarTurmaDropdown(); 
-            
             isModoCSV = false; 
         }
-        
         atualizarEstadoBotoes();
     }
 
-    // ==========================================
-    // LÓGICA DO BOTÃO EDITAR / CANCELAR ("SALVAR")
-    // ==========================================
     if (btnEditar) {
         btnEditar.addEventListener('click', () => {
             if (containerAlunos.classList.contains('modo-edicao')) {
@@ -411,9 +533,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ==========================================
-    // LÓGICA DE PESQUISA DINÂMICA (NOME + TURMA)
-    // ==========================================
     if (inputPesquisa) {
         inputPesquisa.addEventListener('input', function(e) {
             const termo = e.target.value.trim();
@@ -444,7 +563,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     if (result.sucesso) {
                         isModoCSV = false; 
-                        
                         if (result.dados.length > 0) {
                             renderizarAlunos(result.dados, false); 
                         } else {
@@ -452,7 +570,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             itensAntigos.forEach(item => item.remove());
                             if (checkboxTodos) checkboxTodos.checked = false;
                             atualizarEstadoBotoes();
-
                             exibirMensagem('Nenhum aluno encontrado.', true);
                         }
                     } else {
@@ -465,9 +582,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ==========================================
-    // UPLOAD CSV
-    // ==========================================
     const inputFile = document.createElement('input');
     inputFile.type = 'file';
     inputFile.accept = '.csv';
@@ -493,7 +607,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.sucesso) {
                 isModoCSV = true; 
                 atualizarTextoBadge(); 
-                
                 if (inputPesquisa) inputPesquisa.value = ''; 
                 renderizarAlunos(result.dados, true); 
                 exibirMensagem('✅ Alunos extraídos do CSV. Selecione e guarde.');
@@ -506,9 +619,6 @@ document.addEventListener('DOMContentLoaded', function() {
         this.value = ''; 
     });
 
-    // ==========================================
-    // RENDERIZAÇÃO INTELIGENTE DE ALUNOS NA TELA
-    // ==========================================
     function renderizarAlunos(alunos, forcarEdicao) {
         const itensAntigos = containerAlunos.querySelectorAll('.aluno-item');
         itensAntigos.forEach(item => item.remove());
@@ -516,14 +626,14 @@ document.addEventListener('DOMContentLoaded', function() {
         alunos.forEach(aluno => {
             const div = document.createElement('div');
             div.className = 'aluno-item';
-            
             const infoTurmaContexto = aluno.desc_turma ? ` | Atual: ${aluno.desc_turma}` : '';
-
+            
             div.innerHTML = `
                 <input type="checkbox" name="aluno" class="check-aluno" 
                        value="${aluno.simade}" 
                        data-nome="${aluno.nome}" 
-                       data-nascimento="${aluno.nascimento}">
+                       data-nascimento="${aluno.nascimento}"
+                       data-id-turma="${aluno.id_turma || ''}">
                 <span><strong>${aluno.nome}</strong> — SIMADE: ${aluno.simade} | Nasc: ${aluno.nascimento}${infoTurmaContexto}</span>
             `;
             containerAlunos.appendChild(div);
@@ -543,7 +653,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btnEditar.style.color = 'var(--color-primary)';
             if (checkboxTodos) checkboxTodos.checked = false;
         }
-
         atualizarEstadoBotoes();
     }
 
@@ -552,75 +661,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const isChecked = e.target.checked;
             checkboxesAlunos.forEach(cb => cb.checked = isChecked);
             atualizarEstadoBotoes();
-        });
-    }
-
-    // ==========================================
-    // LÓGICA DE CADASTRO COM ANIMAÇÃO VISUAL
-    // ==========================================
-    if (btnCadastrar) {
-        btnCadastrar.addEventListener('click', async function() {
-            if (!idTurmaDefinitiva) return;
-
-            const alunosParaSalvar = [];
-            checkboxesAlunos.forEach(cb => {
-                if (cb.checked) {
-                    alunosParaSalvar.push({
-                        simade: cb.value,
-                        nome: cb.getAttribute('data-nome'),
-                        nascimento: cb.getAttribute('data-nascimento')
-                    });
-                }
-            });
-
-            if (alunosParaSalvar.length === 0) return; 
-
-            exibirMensagem('A guardar na base de dados...', false);
-            
-            const formData = new FormData();
-            formData.append('acao', 'salvar_alunos_csv');
-            formData.append('id_turma', idTurmaDefinitiva); 
-            formData.append('alunos', JSON.stringify(alunosParaSalvar)); 
-
-            try {
-                const response = await fetch('Backend.php', { method: 'POST', body: formData });
-                const result = await response.json();
-
-                if (result.sucesso) {
-                    exibirMensagem('✅ ' + result.mensagem, false); 
-                    
-                    let quantidadeSalva = 0;
-
-                    checkboxesAlunos.forEach(cb => {
-                        if (cb.checked) {
-                            quantidadeSalva++;
-                            const itemDoAluno = cb.parentElement;
-                            itemDoAluno.classList.add('salvo-sucesso'); 
-                            
-                            setTimeout(() => {
-                                itemDoAluno.remove();
-                            }, 700);
-                        }
-                    });
-
-                    const todosForamSalvos = (quantidadeSalva === checkboxesAlunos.length);
-
-                    setTimeout(() => {
-                        if (todosForamSalvos) {
-                            limparTelaECancelar(true); 
-                        } else {
-                            checkboxesAlunos = document.querySelectorAll('.check-aluno');
-                            if (checkboxTodos) checkboxTodos.checked = false;
-                            atualizarEstadoBotoes(); 
-                        }
-                    }, 750);
-
-                } else {
-                    exibirMensagem('❌ ' + result.erro, false);
-                }
-            } catch (error) {
-                exibirMensagem('❌ Erro de comunicação ao guardar.');
-            }
         });
     }
 

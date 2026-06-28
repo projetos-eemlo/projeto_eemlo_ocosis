@@ -43,7 +43,7 @@ switch ($acao) {
         }
 
         try {
-            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma 
+            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma, a.id_turma 
                     FROM alunos a
                     LEFT JOIN turma t ON a.id_turma = t.id_turma
                     WHERE a.id_turma = :id_turma
@@ -69,7 +69,7 @@ switch ($acao) {
         }
 
         try {
-            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma 
+            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma, a.id_turma 
                     FROM alunos a
                     LEFT JOIN turma t ON a.id_turma = t.id_turma
                     WHERE a.nome_aluno LIKE :termo";
@@ -191,9 +191,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // NOVA AÇÃO: TRANSFERIR ALUNOS ENTRE TURMAS
-    // ==========================================
     case 'transferir_alunos':
         $id_turma_destino = isset($_POST['id_turma_destino']) ? (int)$_POST['id_turma_destino'] : 0;
         $alunos_simade_json = isset($_POST['alunos_simade']) ? $_POST['alunos_simade'] : '[]';
@@ -205,19 +202,41 @@ switch ($acao) {
         }
 
         try {
-            // Cria os "?" dinamicamente de acordo com a quantidade de alunos selecionados
             $placeholders = implode(',', array_fill(0, count($alunos_simade), '?'));
             $sql = "UPDATE alunos SET id_turma = ? WHERE num_simade IN ($placeholders)";
             
             $stmt = $pdo->prepare($sql);
-            
-            // Junta o ID da turma com a array de SIMADEs para passar para o banco
             $params = array_merge([$id_turma_destino], $alunos_simade);
             $stmt->execute($params);
 
             echo json_encode(['sucesso' => true, 'mensagem' => count($alunos_simade) . ' aluno(s) transferido(s) com sucesso!']);
         } catch (PDOException $e) {
             echo json_encode(['sucesso' => false, 'erro' => 'Erro ao realizar transferência: ' . $e->getMessage()]);
+        }
+        break;
+
+    // ==========================================
+    // NOVA AÇÃO: EXCLUIR ALUNOS DEFINITIVAMENTE
+    // ==========================================
+    case 'excluir_alunos':
+        $alunos_simade_json = isset($_POST['alunos_simade']) ? $_POST['alunos_simade'] : '[]';
+        $alunos_simade = json_decode($alunos_simade_json, true);
+
+        if (empty($alunos_simade)) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Nenhum aluno selecionado para exclusão.']);
+            exit;
+        }
+
+        try {
+            $placeholders = implode(',', array_fill(0, count($alunos_simade), '?'));
+            $sql = "DELETE FROM alunos WHERE num_simade IN ($placeholders)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($alunos_simade);
+
+            echo json_encode(['sucesso' => true, 'mensagem' => count($alunos_simade) . ' aluno(s) removido(s) do sistema permanentemente!']);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao excluir alunos: ' . $e->getMessage()]);
         }
         break;
 

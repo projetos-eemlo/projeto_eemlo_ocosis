@@ -90,14 +90,35 @@
         <div class="modal-content" style="max-width: 500px;">
             <h3>Confirmar Transferência</h3>
             
+            <p id="texto-confirmacao-turma" style="margin-bottom: 10px; font-weight: bold; color: var(--color-primary);"></p>
+            
             <div id="lista-alunos-transferencia" class="mini-lista-alunos">
                 </div>
             
-            <p id="texto-confirmacao-turma" style="margin-top: 15px; font-weight: bold; color: var(--color-text-dark);"></p>
+            <div id="container-nao-transferidos" class="hidden" style="margin-top: 15px; text-align: left;">
+                <p style="color: var(--color-danger); font-weight: 600; margin-bottom: 8px; font-size: 13px;">
+                    Os alunos abaixo NÃO serão transferidos (Já pertencem a esta turma):
+                </p>
+                <div id="lista-alunos-nao-transferidos" class="mini-lista-alunos" style="background-color: #fff0f0; border-color: #ffcaca; max-height: 120px;">
+                    </div>
+            </div>
             
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
                 <button id="btn-cancelar-transferencia" class="btn-secondary" style="flex: 1;">Cancelar</button>
                 <button id="btn-confirmar-transferencia" class="btn-primary" style="flex: 1;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+    <div id="modal-excluir-confirmacao" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 480px;">
+            <h3 style="color: var(--color-danger);">Confirmar Exclusão</h3>
+            <p id="texto-excluir-confirmacao" style="margin-top: 15px; margin-bottom: 25px; text-align: justify; font-size: 15px; color: #444; line-height: 1.6;">
+                Você tem certeza que deseja excluir esse aluno? Ele será apagado do banco e se precisar dele de volta terá que fazer o cadastro com as informações necessárias.
+            </p>
+            
+            <div style="display: flex; gap: 12px;">
+                <button id="btn-cancelar-excluir" class="btn-secondary" style="flex: 1; padding: 14px;">Cancelar</button>
+                <button id="btn-confirmar-excluir" class="btn-danger" style="flex: 1; padding: 14px;" disabled>Confirmar (5s)</button>
             </div>
         </div>
     </div>
