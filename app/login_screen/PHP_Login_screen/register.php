@@ -1,7 +1,7 @@
 <?php
-session_start();
+//session_start();
 
-require ('Connection.php');
+//require ('Connection.php');
 
 
 /*if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['cargo_funcionario'] !== 'Direcao'){}
@@ -9,7 +9,7 @@ header("Location: login.php");
   exit;
 */
 
-
+/*
 $erro ='';
 $sucesso='';
 

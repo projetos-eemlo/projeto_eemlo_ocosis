@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cadastro Usuarios</title>
-
-
     <link rel="stylesheet" href="CSS_login_screen/style.css">
-
 </head>
 <body>
 
@@ -17,41 +14,35 @@
         <a>Nova Ocorrência</a>
         <a>Pesquise e Turmas</a>
         <a>Perfil do Aluno</a>
-        </nav>
-     <main>
-
+    </nav>
+    
+    <main>
         <div class="login-container">
             <h2>2. Cadastro de Usuário</h2>
             <h3> Cadastrar Funcionario </h3>
-            <form id="FormCadastro" action="/app/login_screen/PHP_Login_screen/register.php" method="POST">
+            
+            <form id="FormCadastro" action="PHP_Login_screen/register2.php" method="POST">
+                
                 <label for="nome">Nome do funcionário</label>
                 <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
 
-
-
-
                 <label for="email">Email </label>
                 <input type="email" id="email" name="email" placeholder="Digite seu email" required>
-                   
-
+                    
                 <label for="cargo">Cargo / Permissão </label>
-                <select type="text" id="cargo" name="cargo" required>
-                    <option value="">Selecione o cargo</option>
-                    <option value="Direção">Direção</option>
-                    
-                    
-                </select>
+                <input type="text" id="cargo" name="cargo" value="Direção" readonly style="background: #e9ecef; color: #555; cursor: not-allowed; border: 1px solid #ccc;">
+
                 <label for="senha">Senha </label>
-                 <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
+                <div class="password-field" style="position: relative; width: 100%; max-width: 420px;">
                     <input type="password" id="senha" name="senha" placeholder="Digite sua senha" required style="width: 100%; padding: 10px 100px 10px 10px; font-size: 1rem; box-sizing: border-box;">
                     <button type="button" class="toggle-password" style="position: absolute; right: 4px; top: 20%; transform: translateY(-20%); height: calc(10% - 8px); padding: 0 12px; font-size: 0.9rem; border: none; background: #ddd; cursor: pointer;">Mostrar</button>
                 </div>
+                
                 <button type="submit" class="btn-cadastrar">Cadastrar</button>
             </form>
         </div>
     </main>    
 
     <script src="JS_login_screen/cadastro.js"></script>
-   
 </body>
 </html>
