@@ -1,5 +1,6 @@
 <?php
-session_start();
+
+//session_start();
 
 // É importante que o Connection.php tenha o mysqli configurado para lançar exceções:
 // mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
@@ -12,7 +13,7 @@ if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['cargo_funcionario'] !=
     exit;
 }
 */
-
+/*
 $erro = '';
 $sucesso = '';
 

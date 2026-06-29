@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 // CONEXÃO COM A BASE DE DADOS (PDO)
 // ==========================================
 $host = 'localhost';
-$dbname = 'ocosis'; // Base de dados corrigida para a oficial
+$dbname = 'ocosis'; 
 $user = 'root'; 
 $pass = '';     
 
@@ -21,9 +21,6 @@ $acao = isset($_POST['acao']) ? $_POST['acao'] : '';
 
 switch ($acao) {
     
-    // ==========================================
-    // BUSCAR TURMAS
-    // ==========================================
     case 'listar_turmas':
         try {
             $sql = "SELECT id_turma, desc_turma, turno, ano_letivo, semestre_letivo, trimestre_letivo 
@@ -37,11 +34,34 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // PESQUISA DINÂMICA DE ALUNOS (LIVE SEARCH)
-    // ==========================================
+    case 'listar_alunos_por_turma':
+        $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
+        
+        if ($id_turma === 0) {
+            echo json_encode(['sucesso' => false, 'erro' => 'ID de turma inválido.']);
+            exit;
+        }
+
+        try {
+            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma, a.id_turma 
+                    FROM alunos a
+                    LEFT JOIN turma t ON a.id_turma = t.id_turma
+                    WHERE a.id_turma = :id_turma
+                    ORDER BY a.nome_aluno ASC";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(['id_turma' => $id_turma]);
+            $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            echo json_encode(['sucesso' => true, 'dados' => $alunos]);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao filtrar turma: ' . $e->getMessage()]);
+        }
+        break;
+
     case 'pesquisar_alunos':
         $termo = isset($_POST['termo']) ? trim($_POST['termo']) : '';
+        $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
 
         if (strlen($termo) === 0) {
             echo json_encode(['sucesso' => true, 'dados' => []]);
@@ -49,17 +69,22 @@ switch ($acao) {
         }
 
         try {
-            // Busca o aluno pelo nome e faz um JOIN para descobrir o nome da turma dele
-            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma 
+            $sql = "SELECT a.nome_aluno AS nome, a.num_simade AS simade, a.dt_nascimento AS nascimento, t.desc_turma, a.id_turma 
                     FROM alunos a
                     LEFT JOIN turma t ON a.id_turma = t.id_turma
-                    WHERE a.nome_aluno LIKE :termo
-                    ORDER BY a.nome_aluno ASC 
-                    LIMIT 50"; // Limite de segurança para não travar o navegador
+                    WHERE a.nome_aluno LIKE :termo";
+            
+            $params = ['termo' => '%' . $termo . '%'];
+
+            if ($id_turma > 0) {
+                $sql .= " AND a.id_turma = :id_turma";
+                $params['id_turma'] = $id_turma;
+            }
+
+            $sql .= " ORDER BY a.nome_aluno ASC LIMIT 50";
             
             $stmt = $pdo->prepare($sql);
-            // O operador % permite buscar em qualquer parte do nome (ex: "jo" acha "joeldson")
-            $stmt->execute(['termo' => '%' . $termo . '%']);
+            $stmt->execute($params);
             $alunos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             echo json_encode(['sucesso' => true, 'dados' => $alunos]);
@@ -68,9 +93,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // UPLOAD E TRATAMENTO DO CSV
-    // ==========================================
     case 'upload_csv':
         if (isset($_FILES['arquivo_csv'])) {
             $file = $_FILES['arquivo_csv'];
@@ -94,7 +116,6 @@ switch ($acao) {
                         $dataCrua = trim($data[2]);
                         $dataSQL = $dataCrua; 
 
-                        // TRADUTOR DE DATAS
                         if (strpos($dataCrua, '/') !== false) {
                             $partes = explode('/', $dataCrua);
                             if (strlen($partes[0]) == 4) {
@@ -124,9 +145,6 @@ switch ($acao) {
         }
         break;
 
-    // ==========================================
-    // GUARDAR ALUNOS NA BASE DE DADOS
-    // ==========================================
     case 'salvar_alunos_csv':
         $id_turma = isset($_POST['id_turma']) ? (int)$_POST['id_turma'] : 0;
         $alunos_json = isset($_POST['alunos']) ? $_POST['alunos'] : '[]';
@@ -154,9 +172,9 @@ switch ($acao) {
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) {
                     if (strpos($e->getMessage(), 'foreign key') !== false || strpos($e->getMessage(), 'Constraint') !== false) {
-                        $erros_detalhados[] = "A turma com ID $id_turma não foi encontrada no banco de dados.";
+                        $erros_detalhados[] = "A turma com ID $id_turma não foi encontrada.";
                     } else {
-                        $erros_detalhados[] = $nomeAluno . " (O número de SIMADE $numSimade já pertence a outro registo ativo).";
+                        $erros_detalhados[] = $nomeAluno . " (SIMADE $numSimade já pertence a outro registo ativo).";
                     }
                 } else {
                     $erros_detalhados[] = "Falha crítica no banco: " . $e->getMessage();
@@ -170,6 +188,55 @@ switch ($acao) {
             echo json_encode(['sucesso' => true, 'mensagem' => "$sucessos guardado(s). Problemas encontrados: " . implode(", ", $erros_detalhados)]);
         } else {
             echo json_encode(['sucesso' => false, 'erro' => "Falha na gravação. Motivo: " . implode(", ", $erros_detalhados)]);
+        }
+        break;
+
+    case 'transferir_alunos':
+        $id_turma_destino = isset($_POST['id_turma_destino']) ? (int)$_POST['id_turma_destino'] : 0;
+        $alunos_simade_json = isset($_POST['alunos_simade']) ? $_POST['alunos_simade'] : '[]';
+        $alunos_simade = json_decode($alunos_simade_json, true);
+
+        if ($id_turma_destino === 0 || empty($alunos_simade)) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Turma de destino inválida ou alunos não selecionados.']);
+            exit;
+        }
+
+        try {
+            $placeholders = implode(',', array_fill(0, count($alunos_simade), '?'));
+            $sql = "UPDATE alunos SET id_turma = ? WHERE num_simade IN ($placeholders)";
+            
+            $stmt = $pdo->prepare($sql);
+            $params = array_merge([$id_turma_destino], $alunos_simade);
+            $stmt->execute($params);
+
+            echo json_encode(['sucesso' => true, 'mensagem' => count($alunos_simade) . ' aluno(s) transferido(s) com sucesso!']);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao realizar transferência: ' . $e->getMessage()]);
+        }
+        break;
+
+    // ==========================================
+    // NOVA AÇÃO: EXCLUIR ALUNOS DEFINITIVAMENTE
+    // ==========================================
+    case 'excluir_alunos':
+        $alunos_simade_json = isset($_POST['alunos_simade']) ? $_POST['alunos_simade'] : '[]';
+        $alunos_simade = json_decode($alunos_simade_json, true);
+
+        if (empty($alunos_simade)) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Nenhum aluno selecionado para exclusão.']);
+            exit;
+        }
+
+        try {
+            $placeholders = implode(',', array_fill(0, count($alunos_simade), '?'));
+            $sql = "DELETE FROM alunos WHERE num_simade IN ($placeholders)";
+            
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($alunos_simade);
+
+            echo json_encode(['sucesso' => true, 'mensagem' => count($alunos_simade) . ' aluno(s) removido(s) do sistema permanentemente!']);
+        } catch (PDOException $e) {
+            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao excluir alunos: ' . $e->getMessage()]);
         }
         break;
 
