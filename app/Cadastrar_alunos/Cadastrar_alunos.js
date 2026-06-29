@@ -40,6 +40,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnConfirmarExcluir = document.getElementById('btn-confirmar-excluir');
     const textoExcluirConfirmacao = document.getElementById('texto-excluir-confirmacao');
 
+    // Elementos do Modal de Confirmação de Cadastro
+    const modalCadastrarConfirmacao = document.getElementById('modal-cadastrar-confirmacao');
+    const btnCancelarCadastro = document.getElementById('btn-cancelar-cadastro');
+    const btnConfirmarCadastro = document.getElementById('btn-confirmar-cadastro');
+    const listaAlunosCadastro = document.getElementById('lista-alunos-cadastro');
+    const textoConfirmacaoCadastro = document.getElementById('texto-confirmacao-cadastro');
+
     let todasTurmasDoBanco = [];
     let idTurmaDefinitiva = null; 
     let turmaDefinitivaObj = null; 
@@ -55,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const turmaConfirmada = idTurmaDefinitiva !== null;
 
         if (btnCadastrar) {
-            // CORREÇÃO DEFINITIVA: O botão Cadastrar agora SÓ ativa se os alunos vierem do CSV (isModoCSV === true)
             btnCadastrar.disabled = !(algumAlunoMarcado && turmaConfirmada && isModoCSV);
         }
 
@@ -225,6 +231,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (sem) turmasFiltradas = turmasFiltradas.filter(t => String(t.semestre_letivo) === sem);
         if (tri) turmasFiltradas = turmasFiltradas.filter(t => String(t.trimestre_letivo) === tri);
 
+        if (!isModoCSV && idTurmaDefinitiva !== null) {
+            turmasFiltradas = turmasFiltradas.filter(t => t.id_turma !== idTurmaDefinitiva);
+        }
+
         filtroTurmaDestino.innerHTML = '<option value="">Selecione a Turma de Destino</option>';
         turmasFiltradas.forEach(t => {
             const descSem = t.semestre_letivo ? ` | ${t.semestre_letivo}º Sem` : '';
@@ -304,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         modalTransferenciaConfirmacao.classList.add('hidden');
-        exibirMensagem('A transferir alunos...', false);
+        exibirMensagem('A transferir alunos...', false); 
 
         const formData = new FormData();
         formData.append('acao', 'transferir_alunos');
@@ -347,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ==========================================
-    // FUNCIONALIDADE DE EXCLUSÃO (CORRIGIDA)
+    // FUNCIONALIDADE DE EXCLUSÃO
     // ==========================================
     if (btnExcluir) {
         btnExcluir.addEventListener('click', function() {
@@ -425,7 +435,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.sucesso) {
                     exibirMensagem('✅ ' + result.mensagem);
                     
-                    // Remove cirurgicamente apenas os alunos selecionados via animação
                     marcados.forEach(cb => {
                         const itemDoAluno = cb.parentElement;
                         itemDoAluno.style.backgroundColor = 'var(--color-danger)';
@@ -436,7 +445,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => itemDoAluno.remove(), 500);
                     });
 
-                    // CORREÇÃO: Fecha o modo de edição e mantém quem sobrou na tela de forma limpa!
                     setTimeout(() => {
                         containerAlunos.classList.remove('modo-edicao');
                         btnEditar.textContent = 'Editar';
@@ -447,7 +455,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         checkboxesAlunos = document.querySelectorAll('.check-aluno');
                         atualizarEstadoBotoes();
 
-                        // Só dá o reset total caso a tela tenha ficado 100% vazia de fato
                         if (checkboxesAlunos.length === 0) {
                             limparTelaECancelar(true);
                         }
@@ -458,6 +465,110 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             } catch (error) {
                 exibirMensagem('❌ Erro de comunicação ao excluir.');
+            }
+        });
+    }
+
+    // ==========================================
+    // LÓGICA DE CADASTRO (COM NOVO MODAL DE CONFIRMAÇÃO)
+    // ==========================================
+    
+    // 1. Abrir modal ao invés de salvar direto
+    if (btnCadastrar) {
+        btnCadastrar.addEventListener('click', function() {
+            if (!idTurmaDefinitiva) return;
+
+            listaAlunosCadastro.innerHTML = '';
+            let algumMarcado = false;
+
+            checkboxesAlunos.forEach(cb => {
+                if (cb.checked) {
+                    algumMarcado = true;
+                    const nome = cb.getAttribute('data-nome');
+                    const simade = cb.value;
+                    listaAlunosCadastro.innerHTML += `<div><strong>${nome}</strong> <br><small style="color: #666;">SIMADE: ${simade}</small></div>`;
+                }
+            });
+
+            if (!algumMarcado) return; 
+
+            const sem = turmaDefinitivaObj.semestre_letivo ? `${turmaDefinitivaObj.semestre_letivo}ºSem` : '-';
+            const tri = turmaDefinitivaObj.trimestre_letivo ? `${turmaDefinitivaObj.trimestre_letivo}ºTri` : '-';
+            const infoBase = `${turmaDefinitivaObj.desc_turma} \\ ${turmaDefinitivaObj.ano_letivo} \\ ${sem} \\ ${tri}`;
+
+            textoConfirmacaoCadastro.textContent = `Os alunos acima serão cadastrados na turma: ${infoBase}`;
+            modalCadastrarConfirmacao.classList.remove('hidden');
+        });
+    }
+
+    // 2. Cancelar no modal
+    if (btnCancelarCadastro) {
+        btnCancelarCadastro.addEventListener('click', () => {
+            modalCadastrarConfirmacao.classList.add('hidden');
+        });
+    }
+
+    // 3. Confirmar e enviar para o PHP
+    if (btnConfirmarCadastro) {
+        btnConfirmarCadastro.addEventListener('click', async function() {
+            const alunosParaSalvar = [];
+            
+            checkboxesAlunos.forEach(cb => {
+                if (cb.checked) {
+                    alunosParaSalvar.push({
+                        simade: cb.value,
+                        nome: cb.getAttribute('data-nome'),
+                        nascimento: cb.getAttribute('data-nascimento')
+                    });
+                }
+            });
+
+            modalCadastrarConfirmacao.classList.add('hidden');
+            exibirMensagem('A guardar na base de dados...', false); // Fica fixo até o banco responder
+            
+            const formData = new FormData();
+            formData.append('acao', 'salvar_alunos_csv');
+            formData.append('id_turma', idTurmaDefinitiva); 
+            formData.append('alunos', JSON.stringify(alunosParaSalvar)); 
+
+            try {
+                const response = await fetch('Backend.php', { method: 'POST', body: formData });
+                const result = await response.json();
+
+                if (result.sucesso) {
+                    exibirMensagem('✅ ' + result.mensagem); 
+                    
+                    let quantidadeSalva = 0;
+
+                    checkboxesAlunos.forEach(cb => {
+                        if (cb.checked) {
+                            quantidadeSalva++;
+                            const itemDoAluno = cb.parentElement;
+                            itemDoAluno.classList.add('salvo-sucesso'); 
+                            
+                            setTimeout(() => {
+                                itemDoAluno.remove();
+                            }, 700);
+                        }
+                    });
+
+                    const todosForamSalvos = (quantidadeSalva === checkboxesAlunos.length);
+
+                    setTimeout(() => {
+                        if (todosForamSalvos) {
+                            limparTelaECancelar(true); 
+                        } else {
+                            checkboxesAlunos = document.querySelectorAll('.check-aluno');
+                            if (checkboxTodos) checkboxTodos.checked = false;
+                            atualizarEstadoBotoes(); 
+                        }
+                    }, 750);
+
+                } else {
+                    exibirMensagem('❌ ' + result.erro); 
+                }
+            } catch (error) {
+                exibirMensagem('❌ Erro de comunicação ao guardar.'); 
             }
         });
     }
