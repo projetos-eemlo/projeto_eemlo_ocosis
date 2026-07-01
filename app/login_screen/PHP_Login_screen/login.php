@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acesso ao Sistema</title>
-    <link rel="stylesheet" href="CSS_login_screen/login.css">
+    <link rel="stylesheet" href="../CSS_login_screen/login.css">
     <style>
         #error-msg {
             display: <?php echo $exibirErro ? 'block' : 'none'; ?>;
