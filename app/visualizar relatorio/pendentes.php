@@ -9,14 +9,13 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
  
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-                         'Helvetica Neue', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f0f2f5;
             color: #2d3748;
             min-height: 100vh;
         }
  
-        /* ── NAVBAR (igual às outras páginas do sistema) ─────── */
+        /* ── NAVBAR ────────────────────────────────────────── */
         .navbar {
             background: #1a56db;
             height: 56px;
@@ -66,10 +65,7 @@
  
         .navbar-nav li a:hover { color: #fff; }
  
-        .navbar-nav li a.active {
-            color: #fff;
-            font-weight: 700;
-        }
+        .navbar-nav li a.active { color: #fff; font-weight: 700; }
  
         .navbar-nav li a.active::after {
             content: '';
@@ -111,10 +107,7 @@
             font-family: inherit;
         }
  
-        .btn-sair:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: #fff;
-        }
+        .btn-sair:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
  
         /* ── LAYOUT ─────────────────────────────────────────── */
         .main {
@@ -123,9 +116,7 @@
             padding: 2.25rem 1.5rem 3rem;
         }
  
-        .page-header {
-            margin-bottom: 1.5rem;
-        }
+        .page-header { margin-bottom: 1.5rem; }
  
         .page-title {
             font-size: 1.65rem;
@@ -147,7 +138,7 @@
             border-radius: 999px;
         }
  
-        /* ── AVISO: ALUNOS COM OCORRÊNCIAS PENDENTES ─────────── */
+        /* ── AVISO PENDENTES ────────────────────────────────── */
         .alert-pendentes {
             background: #fff5f5;
             border: 1.5px solid #feb2b2;
@@ -188,22 +179,11 @@
         .chip-aluno:hover { background: #fff5f5; }
         .chip-aluno:active { transform: scale(0.97); }
  
-        .chip-aluno.chip-ativo {
-            background: #fed7d7;
-            border-color: #e53e3e;
-        }
- 
-        /* ── DOT (reaproveitado das outras telas) ────────────── */
-        .dot {
-            width: 9px;
-            height: 9px;
-            border-radius: 50%;
-            flex-shrink: 0;
-        }
- 
+        /* ── DOTS ───────────────────────────────────────────── */
+        .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
         .dot-red { background: #e53e3e; box-shadow: 0 0 0 2px rgba(229,62,62,.18); }
  
-        /* ── TABLE CARD (reaproveitado) ───────────────────────── */
+        /* ── TABLE CARD ─────────────────────────────────────── */
         .table-card {
             background: #fff;
             border-radius: 12px;
@@ -228,17 +208,10 @@
             color: #718096;
         }
  
-        .ocorrencias-table tbody tr {
-            border-bottom: 1px solid #f1f5f9;
-            transition: background 0.4s;
-        }
- 
+        .ocorrencias-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.4s; }
         .ocorrencias-table tbody tr:last-child { border-bottom: none; }
         .ocorrencias-table tbody tr:hover { background: #f8fafd; }
- 
-        .ocorrencias-table tbody tr.linha-destacada {
-            background: #fff5f5;
-        }
+        .ocorrencias-table tbody tr.linha-destacada { background: #fff5f5; }
  
         .ocorrencias-table td {
             padding: 0.85rem 1.1rem;
@@ -278,8 +251,10 @@
             white-space: nowrap;
         }
  
+        /* NOVAS CORES DE STATUS */
         .status-pendente { background: #fde2e2; color: #c53030; }
-        .status-resolvida { background: #d4edda; color: #276749; }
+        .status-entregue { background: #d4edda; color: #276749; }
+        .status-foraprazo { background: #feebc8; color: #c05621; }
  
         .resp-convocado {
             display: block;
@@ -289,11 +264,7 @@
             font-weight: 600;
         }
  
-        .td-acoes {
-            display: flex;
-            gap: 0.5rem;
-            white-space: nowrap;
-        }
+        .td-acoes { display: flex; gap: 0.5rem; white-space: nowrap; }
  
         .btn-perfil {
             display: inline-block;
@@ -308,9 +279,7 @@
             text-decoration: none;
             font-family: inherit;
             transition: background 0.15s, transform 0.1s;
-            white-space: nowrap;
         }
- 
         .btn-perfil:hover  { background: #22543d; }
         .btn-perfil:active { transform: scale(0.97); }
  
@@ -326,15 +295,11 @@
             cursor: pointer;
             font-family: inherit;
             transition: background 0.15s, transform 0.1s;
-            white-space: nowrap;
         }
- 
         .btn-editar:hover  { background: #fff5f5; }
         .btn-editar:active { transform: scale(0.97); }
  
-        /* ════════════════════════════════════════════════════
-           MODAL — EDITAR OCORRÊNCIA
-           ════════════════════════════════════════════════════ */
+        /* ── MODAL DE STATUS (ENXUGADO) ─────────────────────── */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -352,7 +317,7 @@
             background: #fff;
             border-radius: 14px;
             width: 100%;
-            max-width: 460px;
+            max-width: 480px; /* Levemente maior para acomodar 3 botões lado a lado */
             max-height: 90vh;
             overflow-y: auto;
             padding: 1.5rem;
@@ -366,11 +331,7 @@
             margin-bottom: 0.35rem;
         }
  
-        .modal-header h2 {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1a202c;
-        }
+        .modal-header h2 { font-size: 1.15rem; font-weight: 700; color: #1a202c; }
  
         .modal-fechar {
             background: none;
@@ -381,7 +342,6 @@
             cursor: pointer;
             padding: 0.2rem;
         }
- 
         .modal-fechar:hover { color: #4a5568; }
  
         .modal-subtitulo {
@@ -391,7 +351,6 @@
         }
  
         .campo-grupo { margin-bottom: 1.1rem; }
- 
         .campo-label {
             display: block;
             font-size: 0.85rem;
@@ -400,50 +359,25 @@
             margin-bottom: 0.5rem;
         }
  
-        .campo-linha {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.85rem;
-        }
- 
-        .filter-select {
-            width: 100%;
-            padding: 0.5rem 2.2rem 0.5rem 0.8rem;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #2d3748;
-            background: #fff;
-            cursor: pointer;
-            font-family: inherit;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath fill='%23718096' d='M5 7L0 2h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.7rem center;
-        }
- 
-        .filter-select:focus {
-            outline: none;
-            border-color: #1a56db;
-            box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-        }
- 
-        /* status: pendente / resolvida (cartões selecionáveis) */
+        /* STATUS COM 3 OPÇÕES */
         .status-toggle {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.75rem;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
         }
  
         .status-opcao {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            text-align: center;
+            gap: 0.4rem;
             border: 1.5px solid #e2e8f0;
             border-radius: 9px;
-            padding: 0.6rem 0.8rem;
+            padding: 0.8rem 0.5rem;
             cursor: pointer;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #4a5568;
             transition: border-color 0.15s, background 0.15s;
@@ -456,97 +390,23 @@
             margin: 0;
         }
  
-        .status-opcao:has(input:checked) {
-            border-width: 2px;
-        }
+        .status-opcao:has(input:checked) { border-width: 2px; }
  
         .status-opcao.status-opcao-pendente:has(input:checked) {
-            border-color: #e53e3e;
-            background: #fff5f5;
-            color: #c53030;
+            border-color: #e53e3e; background: #fff5f5; color: #c53030;
         }
- 
-        .status-opcao.status-opcao-resolvida:has(input:checked) {
-            border-color: #38a169;
-            background: #f0fff4;
-            color: #276749;
+        .status-opcao.status-opcao-entregue:has(input:checked) {
+            border-color: #38a169; background: #f0fff4; color: #276749;
         }
- 
-        .lista-infracoes {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            max-height: 175px;
-            overflow-y: auto;
-        }
- 
-        .item-infracao {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.55rem;
-            padding: 0.55rem 0.75rem;
-            font-size: 0.85rem;
-            color: #2d3748;
-            cursor: pointer;
-            transition: background 0.12s;
-        }
- 
-        .item-infracao:hover { background: #f8fafd; }
-        .item-infracao:nth-child(even) { background: #fafbfd; }
-        .item-infracao:nth-child(even):hover { background: #f1f5f9; }
- 
-        .item-infracao input {
-            margin-top: 0.15rem;
-            accent-color: #1a56db;
-            flex-shrink: 0;
-        }
- 
-        .campo-textarea {
-            width: 100%;
-            padding: 0.6rem 0.8rem;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 0.88rem;
-            font-family: inherit;
-            color: #2d3748;
-            resize: vertical;
-        }
- 
-        .campo-textarea:focus {
-            outline: none;
-            border-color: #1a56db;
-            box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-        }
- 
-        .item-notificar {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.6rem;
-            background: #f7fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.75rem 0.9rem;
-            margin-bottom: 1.25rem;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: #2d3748;
-        }
- 
-        .item-notificar input {
-            margin-top: 0.2rem;
-            accent-color: #1a56db;
-        }
- 
-        .item-notificar small {
-            display: block;
-            color: #a0aec0;
-            font-weight: 400;
-            margin-top: 0.15rem;
+        .status-opcao.status-opcao-foraprazo:has(input:checked) {
+            border-color: #dd6b20; background: #fffaf0; color: #c05621;
         }
  
         .modal-footer {
             display: flex;
             justify-content: flex-end;
             gap: 0.7rem;
+            margin-top: 1.5rem;
         }
  
         .btn-cancelar {
@@ -559,13 +419,9 @@
             font-weight: 600;
             cursor: pointer;
             font-family: inherit;
-            transition: background 0.15s;
         }
- 
-        .btn-cancelar:hover { background: #f7fafc; }
- 
         .btn-salvar {
-            background: #276749;
+            background: #1a56db;
             color: #fff;
             border: none;
             padding: 0.5rem 1.3rem;
@@ -574,13 +430,9 @@
             font-weight: 700;
             cursor: pointer;
             font-family: inherit;
-            transition: background 0.15s, transform 0.1s;
         }
  
-        .btn-salvar:hover  { background: #22543d; }
-        .btn-salvar:active { transform: scale(0.97); }
- 
-        /* ── TOAST (feedback de "salvo com sucesso") ─────────── */
+        /* ── TOAST ──────────────────────────────────────────── */
         .toast {
             position: fixed;
             bottom: 1.5rem;
@@ -598,19 +450,11 @@
             z-index: 300;
             pointer-events: none;
         }
+        .toast.toast-visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
  
-        .toast.toast-visivel {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
- 
-        /* ── RESPONSIVO ─────────────────────────────────────── */
         @media (max-width: 768px) {
-            .navbar { padding: 0 1rem; }
-            .navbar-brand { margin-right: 1rem; }
-            .main { padding: 1.5rem 1rem 2.5rem; }
-            .page-title { font-size: 1.3rem; }
-            .campo-linha { grid-template-columns: 1fr; }
+            .status-toggle { grid-template-columns: 1fr; }
+            .status-opcao { flex-direction: row; justify-content: flex-start; padding: 0.6rem 1rem;}
         }
     </style>
 </head>
@@ -618,15 +462,7 @@
 <?php
 /* ════════════════════════════════════════════════════════════
     DADOS TEMPORÁRIOS (MOCK)
-    Isso substitui, por enquanto, a consulta ao banco de dados.
-    Quando formos para a Parte 2 (backend), isso vira uma query real.
-    ════════════════════════════════════════════════════════════ */
- 
-$disciplinas = ['Português', 'Matemática', 'Inglês', 'Química', 'Física', 'História', 'Geografia', 'Educação Física', 'Artes'];
- 
-$professores = ['Prof. William', 'Profª Sandra', 'Prof. Eduardo', 'Prof. Marcos', 'Prof. Carlos'];
- 
-// Lista de tipos de infração.
+   ════════════════════════════════════════════════════════════ */
 $tiposInfracao = [
     1 => 'Indisciplina durante a aula de',
     2 => 'Desrespeitou o(a) professor(a)',
@@ -650,53 +486,34 @@ $ocorrenciasPendentes = [
         'data' => '2026-05-10', 'hora' => '09:15', 'disciplina' => 'Português', 'professor' => 'Profª Sandra',
         'infracoes' => [8, 2], 'descricao' => '',
         'notificar_responsavel' => false, 'resp_convocado' => true, 'status' => 'pendente',
-    ],
-    [
-        'id' => 3, 'aluno_id' => 103, 'aluno' => 'Ricardo Souza', 'turma' => '1º Ano A',
-        'data' => '2026-04-28', 'hora' => '11:40', 'disciplina' => 'Química', 'professor' => 'Prof. Eduardo',
-        'infracoes' => [3], 'descricao' => '',
-        'notificar_responsavel' => false, 'resp_convocado' => true, 'status' => 'pendente',
-    ],
-    [
-        'id' => 4, 'aluno_id' => 104, 'aluno' => 'Alessandra Vieira', 'turma' => '1º Ano A',
-        'data' => '2026-04-20', 'hora' => '08:30', 'disciplina' => 'Matemática', 'professor' => 'Prof. Marcos',
-        'infracoes' => [2], 'descricao' => '',
-        'notificar_responsavel' => false, 'resp_convocado' => true, 'status' => 'pendente',
-    ],
-    [
-        'id' => 5, 'aluno_id' => 105, 'aluno' => 'João Silva Sauro', 'turma' => '1º Ano A',
-        'data' => '2026-04-15', 'hora' => '13:50', 'disciplina' => 'Física', 'professor' => 'Prof. Carlos',
-        'infracoes' => [8], 'descricao' => '',
-        'notificar_responsavel' => false, 'resp_convocado' => true, 'status' => 'pendente',
-    ],
+    ]
 ];
  
 /* ── FUNÇÕES AUXILIARES ─────────────────────────────────────── */
 function classeStatus(string $status): string {
-    return $status === 'resolvida' ? 'status-resolvida' : 'status-pendente';
+    if ($status === 'entregue') return 'status-entregue';
+    if ($status === 'fora_do_prazo') return 'status-foraprazo';
+    return 'status-pendente';
 }
  
 function textoStatus(string $status): string {
-    return $status === 'resolvida' ? 'Resolvida' : 'Pendente';
+    if ($status === 'entregue') return 'Entregue';
+    if ($status === 'fora_do_prazo') return 'Fora do prazo';
+    return 'Pendente';
 }
  
-function formatarData(string $dataIso): string {
-    return date('d/m/Y', strtotime($dataIso));
-}
+function formatarData(string $dataIso): string { return date('d/m/Y', strtotime($dataIso)); }
  
 function textoInfracoes(array $idsInfracao, array $tiposInfracao): string {
     $textos = [];
     foreach ($idsInfracao as $id) {
-        if (isset($tiposInfracao[$id])) {
-            $textos[] = $tiposInfracao[$id];
-        }
+        if (isset($tiposInfracao[$id])) $textos[] = $tiposInfracao[$id];
     }
     return implode('; ', $textos);
 }
  
 $totalPendentes = count(array_filter($ocorrenciasPendentes, fn($o) => $o['status'] === 'pendente'));
  
-// Lista única de alunos com pendência
 $alunosPendentesUnicos = [];
 $idsVistos = [];
 foreach ($ocorrenciasPendentes as $oc) {
@@ -709,7 +526,6 @@ foreach ($ocorrenciasPendentes as $oc) {
  
 <nav class="navbar">
     <a href="index.php" class="navbar-brand">🏠 Ocorrências</a>
- 
     <ul class="navbar-nav">
         <li><a href="nova_ocorrencia.php">Nova Ocorrência</a></li>
         <li><a href="pesquisa_turmas.php">Pesquisa e Turmas</a></li>
@@ -722,7 +538,6 @@ foreach ($ocorrenciasPendentes as $oc) {
             </a>
         </li>
     </ul>
- 
     <div class="navbar-actions">
         <form method="POST" action="logout.php">
             <button type="submit" class="btn-sair">Sair</button>
@@ -731,7 +546,6 @@ foreach ($ocorrenciasPendentes as $oc) {
 </nav>
  
 <main class="main">
- 
     <div class="page-header">
         <h1 class="page-title">
             Ocorrências Pendentes
@@ -798,14 +612,9 @@ foreach ($ocorrenciasPendentes as $oc) {
                                         'turma' => $oc['turma'],
                                         'data' => formatarData($oc['data']),
                                         'hora' => $oc['hora'],
-                                        'disciplina' => $oc['disciplina'],
-                                        'professor' => $oc['professor'],
-                                        'infracoes' => $oc['infracoes'],
-                                        'descricao' => $oc['descricao'],
-                                        'notificarResponsavel' => $oc['notificar_responsavel'],
                                         'status' => $oc['status'],
                                     ]), ENT_QUOTES, 'UTF-8') ?>'
-                                >Editar</button>
+                                >Atualizar Status</button>
  
                                 <a href="perfil.php?id=<?= $oc['aluno_id'] ?>" class="btn-perfil">Ver Perfil</a>
                             </div>
@@ -815,13 +624,12 @@ foreach ($ocorrenciasPendentes as $oc) {
             </tbody>
         </table>
     </div>
- 
 </main>
  
 <div class="modal-overlay" id="modal-overlay" hidden>
     <div class="modal-editar" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
         <div class="modal-header">
-            <h2 id="modal-titulo">Editar Ocorrência</h2>
+            <h2 id="modal-titulo">Atualizar Status</h2>
             <button type="button" class="modal-fechar" id="modal-fechar" aria-label="Fechar">&times;</button>
         </div>
         <p class="modal-subtitulo" id="modal-subtitulo"></p>
@@ -830,72 +638,32 @@ foreach ($ocorrenciasPendentes as $oc) {
             <input type="hidden" id="modal-occ-id" name="id">
  
             <div class="campo-grupo">
-                <label class="campo-label">Status</label>
+                <label class="campo-label">Status da Ocorrência</label>
                 <div class="status-toggle">
                     <label class="status-opcao status-opcao-pendente">
                         <input type="radio" name="status" value="pendente">
-                        <span class="dot dot-red"></span> Pendente
+                        Pendente
                     </label>
-                    <label class="status-opcao status-opcao-resolvida">
-                        <input type="radio" name="status" value="resolvida">
-                        ✅ Resolvida
+                    <label class="status-opcao status-opcao-entregue">
+                        <input type="radio" name="status" value="entregue">
+                        Entregue
+                    </label>
+                    <label class="status-opcao status-opcao-foraprazo">
+                        <input type="radio" name="status" value="fora_do_prazo">
+                        Fora do prazo
                     </label>
                 </div>
             </div>
- 
-            <div class="campo-linha">
-                <div class="campo-grupo">
-                    <label class="campo-label" for="modal-disciplina">Disciplina</label>
-                    <select id="modal-disciplina" name="disciplina" class="filter-select">
-                        <?php foreach ($disciplinas as $d): ?>
-                            <option value="<?= htmlspecialchars($d) ?>"><?= htmlspecialchars($d) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div class="campo-grupo">
-                    <label class="campo-label" for="modal-professor">Professor(a)</label>
-                    <select id="modal-professor" name="professor" class="filter-select">
-                        <?php foreach ($professores as $p): ?>
-                            <option value="<?= htmlspecialchars($p) ?>"><?= htmlspecialchars($p) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-            </div>
- 
-            <div class="campo-grupo">
-                <label class="campo-label">Tipo(s) de Infração</label>
-                <div class="lista-infracoes" id="lista-infracoes">
-                    <?php foreach ($tiposInfracao as $idInfracao => $texto): ?>
-                        <label class="item-infracao">
-                            <input type="checkbox" name="infracoes[]" value="<?= $idInfracao ?>">
-                            <span><?= $idInfracao ?>. <?= htmlspecialchars($texto) ?></span>
-                        </label>
-                    <?php endforeach; ?>
-                </div>
-            </div>
- 
-            <div class="campo-grupo">
-                <label class="campo-label" for="modal-descricao">Descrição / Observações</label>
-                <textarea id="modal-descricao" name="descricao" class="campo-textarea" rows="3"></textarea>
-            </div>
- 
-            <label class="item-notificar">
-                <input type="checkbox" name="notificar_responsavel" id="modal-notificar">
-                <span>
-                    <strong>16. Notificar responsável</strong>
-                    <small>Aparecerá na impressão da folha</small>
-                </span>
-            </label>
  
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" id="modal-cancelar">Cancelar</button>
-                <button type="submit" class="btn-salvar">Salvar Alterações</button>
+                <button type="submit" class="btn-salvar">Salvar Status</button>
             </div>
         </form>
     </div>
 </div>
-
-<div id="toast" class="toast">Alterações salvas com sucesso!</div>
+ 
+<div id="toast" class="toast">Status atualizado com sucesso!</div>
  
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -904,99 +672,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnFechar = document.getElementById('modal-fechar');
     const btnCancelar = document.getElementById('modal-cancelar');
     const toast = document.getElementById('toast');
-
-    // Elementos internos do modal
+ 
     const modalSubtitulo = document.getElementById('modal-subtitulo');
     const modalOccId = document.getElementById('modal-occ-id');
-    const modalDisciplina = document.getElementById('modal-disciplina');
-    const modalProfessor = document.getElementById('modal-professor');
-    const modalDescricao = document.getElementById('modal-descricao');
-    const modalNotificar = document.getElementById('modal-notificar');
-
-    // 1. ABRIR E PREENCHER O MODAL COM OS DADOS DA LINHA CLICADA
+ 
+    // Abrir o modal
     document.querySelectorAll('.btn-editar').forEach(botao => {
         botao.addEventListener('click', () => {
-            // Captura o JSON que está guardado no atributo data-occ do botão
             const dadosOcorrencia = JSON.parse(botao.getAttribute('data-occ'));
-
-            // Preenche o cabeçalho idêntico ao protótipo: Aluno · Data · Hora · Turma
+ 
             modalSubtitulo.innerHTML = `<strong>${dadosOcorrencia.aluno}</strong> · ${dadosOcorrencia.data} · ${dadosOcorrencia.hora} · ${dadosOcorrencia.turma}`;
-            
-            // Preenche os campos normais
             modalOccId.value = dadosOcorrencia.id;
-            modalDisciplina.value = dadosOcorrencia.disciplina;
-            modalProfessor.value = dadosOcorrencia.professor;
-            modalDescricao.value = dadosOcorrencia.descricao;
-            modalNotificar.checked = dadosOcorrencia.notificarResponsavel;
-
-            // Ativa o rádio button do status correto (Pendente ou Resolvida)
+ 
             const radioStatus = formEditar.querySelector(`input[name="status"][value="${dadosOcorrencia.status}"]`);
-            if (radioStatus) radioStatus.checked = true;
-
-            // Limpa todos os checkboxes de infração antes de marcar os novos
-            formEditar.querySelectorAll('input[name="infracoes[]"]').forEach(chk => chk.checked = false);
-
-            // Marca as caixas das infrações que vieram no array
-            dadosOcorrencia.infracoes.forEach(idInfracao => {
-                const chk = formEditar.querySelector(`input[name="infracoes[]"][value="${idInfracao}"]`);
-                if (chk) chk.checked = true;
-            });
-
-            // Torna o modal visível removendo o atributo hidden
+            if (radioStatus) {
+                radioStatus.checked = true;
+            }
+ 
             modalOverlay.removeAttribute('hidden');
         });
     });
-
-    // 2. FUNÇÕES PARA FECHAR O MODAL
+ 
+    // Fechar o modal
     const fecharModal = () => {
-        modalOverlay.setAttribute('hidden', '');
+        modalOverlay.setAttribute('hidden', 'true');
         formEditar.reset();
     };
-
+ 
     btnFechar.addEventListener('click', fecharModal);
     btnCancelar.addEventListener('click', fecharModal);
-    
-    // Fecha se clicar na área escura (fora da caixa branca)
     modalOverlay.addEventListener('click', (e) => {
         if (e.target === modalOverlay) fecharModal();
     });
-
-    // 3. EVENTO DE SUBMIT (Simulação visual de salvamento no Frontend)
+ 
+    // Salvar (Simulação)
     formEditar.addEventListener('submit', (e) => {
-        e.preventDefault(); // Impede o recarregamento da página
-
-        const id = modalOccId.value;
-        const statusSelecionado = formEditar.querySelector('input[name="status"]:checked').value;
-        const linhaTabela = document.querySelector(`tr[data-occ-id="${id}"]`);
-
-        if (linhaTabela) {
-            const statusTd = linhaTabela.querySelector('.td-status');
-            const statusPill = statusTd.querySelector('.status-pill');
-
-            // Atualiza as classes e o texto do Pill de Status na tabela
-            if (statusSelecionado === 'resolvida') {
-                statusPill.className = 'status-pill status-resolvida';
-                statusPill.textContent = 'Resolvida';
-                linhaTabela.classList.remove('linha-destacada'); // tira o fundo vermelho
-            } else {
-                statusPill.className = 'status-pill status-pendente';
-                statusPill.textContent = 'Pendente';
-                linhaTabela.classList.add('linha-destacada');
-            }
-        }
-
-        // Fecha o modal e exibe o balão de sucesso
+        e.preventDefault();
+        
         fecharModal();
-        mostrarToast();
-    });
-
-    // Auxiliar para animar o Toast de sucesso
-    const mostrarToast = () => {
+        
+        // Exibe o toast
         toast.classList.add('toast-visivel');
         setTimeout(() => {
             toast.classList.remove('toast-visivel');
         }, 3000);
-    };
+    });
 });
 </script>
 </body>

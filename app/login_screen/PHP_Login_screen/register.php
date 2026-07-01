@@ -1,62 +1,63 @@
 <?php
-session_start();
 
-require ('Connection.php');
+//session_start();
 
+// É importante que o Connection.php tenha o mysqli configurado para lançar exceções:
+// mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+require 'Connection.php';
 
-/*if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['cargo_funcionario'] !== 'Direcao'){}
-header("Location: login.php");
-  exit;
+/*
+// BLOCO CORRIGIDO PARA O FUTURO:
+if (!isset($_SESSION['usuario']) || $_SESSION['usuario']['cargo_funcionario'] !== 'Direcao') {
+    header("Location: login.php");
+    exit;
+}
 */
-
-
-$erro ='';
-$sucesso='';
-
-
+/*
+$erro = '';
+$sucesso = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
-     $nome = $_POST['nome'] ?? '';
-     $senha = $_POST['senha'] ?? '';
-     $email = $_POST['email'] ?? '';
-     $id_tipo_func = 1;
-     $nome_cargo = 'Direção';
+    $nome = $_POST['nome'] ?? '';
+    $senha = $_POST['senha'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $id_tipo_func = 1;
+    $nome_cargo = 'Direção';
 
-     if (empty($nome) || empty($senha) || empty($email)){
-
-        $erro="Preencha todos os campos";
-     } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
-        $erro = "O email está invalido";
-     } else {
-      
-try {
-$hashSenha = password_hash($senha, PASSWORD_DEFAULT);
-
-
-    $stmt = $conn->prepare("INSERT INTO funcionarios (email_funcionario, id_tipo_func, nome_funcionario, senha_hash ) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("sssis", $nome, $email, $hashSenha, $id_tipo_func, $nome_cargo);
-    $stmt->execute();
-    
-    // Redireciona para evitar duplicidade caso o usuário aperte F5 (Refresh)
-    $sucesso = "Cadastro realizado com sucesso!";
-    $_POST = []; // Esse comando limpa os campos do formulário
-    
-} catch (mysqli_sql_exception $e) {
-    if ($e->getCode() == 23000) { // Código de violação de chave única/estrangeira
-        echo "Este e-mail já está cadastrado no sistema.";
+    if (empty($nome) || empty($senha) || empty($email)){
+        $erro = "Preencha todos os campos";
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $erro = "O e-mail está inválido";
     } else {
-        echo "Erro ao cadastrar: " . $e->getMessage();
+        try {
+            // Criptografa a senha antes de enviar para o banco
+            $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
+
+            $stmt = $conn->prepare("INSERT INTO funcionarios (nome_funcionario, email_funcionario, senha_hash, id_tipo_func, cargo_funcionario) VALUES (?, ?, ?, ?, ?)");
+            
+            // Dica: Se $id_tipo_func for um número inteiro no banco, os tipos deveriam ser "sssis" em vez de "sssss". 
+            // "s" = string, "i" = integer.
+            $stmt->bind_param("sssss", $nome, $email, $hashSenha, $id_tipo_func, $nome_cargo);
+            $stmt->execute();
+            
+            $sucesso = "Cadastro realizado com sucesso!";
+            
+        } catch (mysqli_sql_exception $e) {
+            // 1062 é o código de erro padrão do MySQL para 'Duplicate entry' (Entrada duplicada)
+            if ($e->getCode() == 1062) { 
+                $erro = "Este funcionário/e-mail já está cadastrado no sistema.";
+            } else {
+                $erro = "Erro ao cadastrar: " . $e->getMessage();
+            }
+        }
     }
 }
-     }
-}
 
-
-
+// Em vez de dar echo no meio do catch, passamos para as variáveis e disparamos aqui embaixo:
 if (!empty($erro)) {
-  echo "<script>alert('$erro'); window.history.back();</script>";
+    echo "<script>alert('$erro'); window.history.back();</script>";
 }
 if (!empty($sucesso)) {
-  echo "<script>alert('$sucesso'); window.location.href = 'cadastro.html';</script>";
+    echo "<script>alert('$sucesso'); window.location.href = 'cadastro.html';</script>";
 }
 ?>

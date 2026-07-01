@@ -21,11 +21,14 @@
     --color-upload-hover: #6ee600;
     --color-secondary: #f1f3f5;
     --color-danger: #dc3545;
+    --color-danger-light: #fff0f0;
+    --color-danger-border: #ffcaca;
     
     --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-modal: 0 15px 35px rgba(0, 0, 0, 0.25);
     --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.08) inset;
     --border-radius-sm: 4px;
-    --border-radius-md: 8px;
+    --border-radius-md: 12px; /* Cantos arredondados mais modernos para os modais */
     --transition: all 0.2s ease-in-out;
 }
 
@@ -135,12 +138,12 @@ select.turmas:focus {
 }
 
 /* =========================================
-   Área de Alunos
+   Área de Alunos (TRAVADA COM ROLAGEM INTERNA)
    ========================================= */
 .alunos {
     width: 100%;
     max-width: 1200px;
-    min-height: 450px;
+    height: 560px; /* Mantido os 80px a mais que pediu */
     margin-bottom: 25px;
     background-color: #ffffff;
     border-radius: var(--border-radius-sm);
@@ -149,26 +152,23 @@ select.turmas:focus {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 20px; /* Respiro confortável entre linhas */
     position: relative;
+    overflow-y: auto; 
 }
 
-/* ESCONDENDO CHECKBOXES POR PADRÃO */
 .alunos input[type="checkbox"], 
 .alunos label#label-todos {
     display: none;
 }
 
-/* MOSTRANDO CHECKBOXES QUANDO NO MODO DE EDIÇÃO */
 .alunos.modo-edicao input[type="checkbox"], 
 .alunos.modo-edicao label#label-todos {
     display: inline-block;
     cursor: pointer;
 }
 
-/* =========================================
-   CABEÇALHO DOS ALUNOS (Lógica Flexbox)
-   ========================================= */
+/* Cabeçalho Fixo do Scroll */
 .aluno-header {
     display: flex;
     align-items: center;
@@ -180,15 +180,21 @@ select.turmas:focus {
     font-size: 14px;
     min-height: 35px;
     width: 100%;
+    position: sticky;
+    top: -24px; 
+    background-color: #ffffff; 
+    z-index: 10; 
+    margin-top: -24px; 
+    padding-top: 24px; 
 }
 
 .header-left {
     display: flex;
     align-items: center;
     gap: 10px;
+    background-color: #ffffff;
 }
 
-/* LÓGICA DE ESPECIFICIDADE: Usando ID para a tag azul */
 #turma-selecionada-info {
     background-color: var(--color-primary) !important;
     color: #ffffff !important;
@@ -210,11 +216,11 @@ select.turmas:focus {
     display: flex;
     align-items: center;
     gap: 15px;
-    padding: 12px;
+    padding: 18px 16px; 
     border-radius: var(--border-radius-sm);
     border-bottom: 1px solid var(--color-bg-light);
     transition: var(--transition);
-    overflow: hidden; /* Ajuda a esconder conteúdo ao aplicar a animação */
+    overflow: hidden; 
 }
 
 .aluno-item:hover {
@@ -222,15 +228,15 @@ select.turmas:focus {
 }
 
 /* =========================================
-   NOVA ANIMAÇÃO: ALUNO SALVO COM SUCESSO
+   ANIMAÇÕES DE SUCESSO DO SISTEMA
    ========================================= */
+/* Cadastro CSV: Desliza e some */
 .aluno-item.salvo-sucesso {
     background-color: var(--color-primary) !important;
     border-color: transparent !important;
     opacity: 0;
-    transform: scale(0.95) translateX(30px); /* Encolhe e desliza pra direita */
-    pointer-events: none; /* Bloqueia cliques no item desaparecendo */
-    /* Fica azul por 0.2s para o usuário ver, e depois gasta 0.5s sumindo */
+    transform: scale(0.95) translateX(30px); 
+    pointer-events: none; 
     transition: background-color 0.2s ease, opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s !important;
 }
 
@@ -238,6 +244,13 @@ select.turmas:focus {
 .aluno-item.salvo-sucesso strong {
     color: #ffffff !important;
     transition: color 0.2s ease;
+}
+
+/* Transferência: Pisca em verde suave e fica na tela */
+.aluno-item.transferido-sucesso {
+    background-color: #d4edda !important; 
+    border-color: #c3e6cb !important;
+    transition: background-color 0.5s ease !important;
 }
 
 /* =========================================
@@ -270,7 +283,7 @@ select.turmas:focus {
 .btn-secondary { background-color: #ffffff; color: var(--color-primary); border-color: var(--color-primary) !important; }
 .btn-secondary:hover { background-color: var(--color-blue-light); }
 
-.btn-info { background-color: var(--color-info); color: white; }
+.btn-info { background-color: var(--color-info); color: white; border-color: var(--color-info) !important;}
 .btn-info:hover { background-color: #79a6ba; }
 
 .btn-danger { background-color: var(--color-danger); color: white; }
@@ -282,7 +295,7 @@ select.turmas:focus {
 }
 
 /* =========================================
-   Modal de Seleção de Período
+   INTERFACES DE MODAIS (REPROJETADOS)
    ========================================= */
 .modal-overlay {
     position: fixed;
@@ -306,41 +319,83 @@ select.turmas:focus {
 
 .modal-content {
     background-color: #ffffff;
-    padding: 30px;
+    padding: 40px; 
     border-radius: var(--border-radius-md);
     width: 90%;
-    max-width: 450px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    max-width: 550px; /* Expandido para dar mais espaço */
+    box-shadow: var(--shadow-modal);
     text-align: center;
 }
 
 .modal-content h3 {
     color: var(--color-primary);
-    margin-bottom: 10px;
+    margin-bottom: 15px;
+    font-size: 22px;
+    letter-spacing: -0.3px;
 }
 
 .modal-content p {
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 14px;
+    color: #555;
+    margin-bottom: 25px;
+    font-size: 15px;
+    line-height: 1.5;
 }
 
+/* Botões robustos internos dos modais */
+.modal-content button {
+    padding: 14px 22px;
+    font-size: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-content button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Formatação dos Selects em Cascata */
+.filtros-cascata select {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    font-size: 15px;
+    background-color: #f8f9fa;
+    color: var(--color-text-dark);
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: auto; /* Garante a setinha nativa do browser */
+}
+
+.filtros-cascata select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
+    outline: none;
+    background-color: #ffffff;
+}
+
+/* Modal de Período antigo (Estrutura de botões verticais) */
 .opcoes-periodo {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 25px;
 }
 
 .btn-periodo {
     background-color: var(--color-secondary);
     border: 1px solid var(--color-border);
-    padding: 12px;
-    border-radius: var(--border-radius-sm);
+    padding: 15px;
+    border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
     transition: var(--transition);
     color: var(--color-text-dark);
+    font-size: 15px;
 }
 
 .btn-periodo:hover {
@@ -351,15 +406,48 @@ select.turmas:focus {
 
 #fechar-modal {
     width: 100%; 
-    padding: 15px; 
-    font-size: 15px; 
-    font-weight: bold;
     margin-top: 10px;
-    letter-spacing: 0.5px;
 }
 
 /* =========================================
-   Mensagens de Notificação
+   AS MINI-DIVS DE COMPARAÇÃO (SCROLL DE NOMES)
+   ========================================= */
+/* Padrão para a lista de aprovados (Elegíveis) */
+.mini-lista-alunos {
+    max-height: 180px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 2px solid var(--color-border);
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--color-text-dark);
+    box-shadow: var(--shadow-input);
+}
+
+.mini-lista-alunos div {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+    line-height: 1.4;
+}
+
+.mini-lista-alunos div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Classe utilitária para esconder blocos (Ex: Container de Não Transferidos) */
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+   Mensagens de Notificação Flutuante
    ========================================= */
 .confirm-message {
     position: fixed;

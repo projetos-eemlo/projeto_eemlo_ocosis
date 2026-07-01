@@ -43,10 +43,33 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.innerHTML = '<tr><td colspan="5">Erro ao carregar dados do servidor.</td></tr>';
         });
     }
-
+    // --- 1.5 BUSCAR TURMAS PARA O FILTRO ---
+    function carregarTurmasParaFiltro() {
+        fetch('listar_turmas.php')
+        .then(response => response.json())
+        .then(data => {
+            const filtroTurma = document.getElementById('filtroTurma');
+            
+            // Mantém apenas a primeira opção (Todas as Turmas)
+            filtroTurma.innerHTML = '<option value="todas">Todas as Turmas</option>';
+            
+            if (data.sucesso && data.dados.length > 0) {
+                data.dados.forEach(turma => {
+                    const option = document.createElement('option');
+                    // Usamos a descrição tanto pro valor quanto pro texto, 
+                    // para a lógica do seu filtro continuar funcionando certinho!
+                    option.value = turma.desc_turma; 
+                    option.textContent = turma.desc_turma;
+                    filtroTurma.appendChild(option);
+                });
+            }
+        })
+        .catch(error => console.error('Erro ao carregar lista de turmas:', error));
+    }
     // Carrega os alunos assim que a tela abre
     carregarAlunos();
-
+    carregarTurmasParaFiltro();
+    
 
     // --- 2. LÓGICA DO FILTRO DE TURMAS ---
     const filtroTurma = document.getElementById('filtroTurma');
@@ -69,31 +92,92 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- 3. NAVEGAÇÃO: TELA PRINCIPAL <-> PERFIL DO ALUNO ---
+    // --- 3. NAVEGAÇÃO E DADOS REAIS DO PERFIL DO ALUNO ---
     const telaPesquisa = document.getElementById('telaPesquisa');
     const telaPerfil = document.getElementById('telaPerfil');
     const btnVoltar = document.getElementById('btnVoltar');
+    const tbodyHistorico = document.getElementById('tabelaHistoricoOcorrencias');
 
     function atribuirEventosPerfil() {
         const botoesPerfil = document.querySelectorAll('.btn-ver-perfil');
         
         botoesPerfil.forEach(btn => {
             btn.addEventListener('click', (e) => {
-                // Pega os dados do aluno clicado através dos atributos data-*
-                const nome = e.target.getAttribute('data-nome');
                 const simade = e.target.getAttribute('data-simade');
-                const turma = e.target.getAttribute('data-turma');
-                const ocorrencias = e.target.getAttribute('data-ocorrencias');
-
-                // Preenche a tela de perfil
-                document.getElementById('nomeAlunoPerfil').textContent = nome;
-                document.getElementById('simadePerfil').textContent = simade;
-                document.getElementById('turmaPerfil').textContent = turma;
-                document.getElementById('totalOcorrenciasPerfil').textContent = ocorrencias;
-
+                
+                // Mostrar "Carregando" na tabela de histórico
+                tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center;">Carregando dados do banco...</td></tr>';
+                
                 // Esconde a tabela e mostra o perfil
                 telaPesquisa.style.display = 'none';
                 telaPerfil.style.display = 'block';
+
+                // Busca os dados REAIS no banco de dados
+                fetch(`buscar_perfil_aluno.php?simade=${simade}`)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.sucesso) {
+                        const aluno = data.aluno;
+                        const ocorrencias = data.ocorrencias;
+
+                        // 1. Preenche os dados do aluno nos cards
+                        document.getElementById('nomeAlunoPerfil').textContent = aluno.nome_aluno;
+                        document.getElementById('simadePerfil').textContent = aluno.num_simade;
+                        document.getElementById('nascPerfil').textContent = aluno.dt_nascimento || '--/--/----';
+                        document.getElementById('turmaPerfil').textContent = aluno.desc_turma || 'Sem Turma';
+                        
+                        document.getElementById('totalOcorrenciasPerfil').textContent = ocorrencias.length;
+                        document.getElementById('pendentesPerfil').textContent = ocorrencias.length; // Simulado
+                        
+                        // 2. Preenche a tabela de Histórico
+                        tbodyHistorico.innerHTML = '';
+                        
+                        if(ocorrencias.length > 0) {
+                            // Pega a primeira ocorrência como 'mais reincidente' só como exemplo visual
+                            document.getElementById('reincidentePerfil').textContent = ocorrencias[0].tipo_infracao;
+
+                            ocorrencias.forEach(oc => {
+                                const tr = document.createElement('tr');
+                                const materiaProf = (oc.desc_disciplina && oc.nome_funcionario) 
+                                    ? `${oc.desc_disciplina} / ${oc.nome_funcionario}` 
+                                    : 'Não informado';
+                                
+                                tr.innerHTML = `
+                                    <td>${oc.data_formatada}</td>
+                                    <td>${oc.horario || '--:--'}</td>
+                                    <td>${materiaProf}</td>
+                                    <td>
+                                        <span class="text-blue font-bold">Registro</span><br>
+                                        <span class="text-small">${oc.tipo_infracao || 'Sem descrição específica'}</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-dot red"></span> Pendente<br>
+                                        <span class="text-small text-orange">Notif. responsável</span>
+                                    </td>
+                                    <td class="action-buttons">
+                                        <!-- Ao clicar em editar, passa os dados pro modal -->
+                                        <button class="btn-edit btnAbrirModalEditar" 
+                                            data-nome="${aluno.nome_aluno}" 
+                                            data-data="${oc.data_formatada}"
+                                            data-turma="${aluno.desc_turma}">Editar</button>
+                                        <button class="btn-icon">🖨️</button>
+                                    </td>
+                                `;
+                                tbodyHistorico.appendChild(tr);
+                            });
+                        } else {
+                            document.getElementById('reincidentePerfil').textContent = '-';
+                            tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Nenhuma ocorrência registrada para este aluno.</td></tr>';
+                        }
+                    } else {
+                        alert("Erro ao buscar dados: " + data.mensagem);
+                        btnVoltar.click();
+                    }
+                })
+                .catch(error => {
+                    console.error("Erro no fetch:", error);
+                    tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Erro de conexão com o banco de dados.</td></tr>';
+                });
             });
         });
     }
@@ -104,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    // --- 4. MODAL 1: CADASTRAR TURMA ---
+   // --- 4. MODAL 1: CADASTRAR TURMA (COM TRAVA ANTI-DUPLICIDADE E VALIDAÇÕES) ---
     const modalTurma = document.getElementById("modalTurma");
     const btnNovaTurma = document.getElementById("btnNovaTurma");
     const fecharModalTurma = modalTurma.querySelector(".fechar_modal");
@@ -112,6 +196,80 @@ document.addEventListener('DOMContentLoaded', () => {
     btnNovaTurma.addEventListener('click', () => modalTurma.style.display = "block");
     fecharModalTurma.addEventListener('click', () => modalTurma.style.display = "none");
 
+    const formCadastroTurma = document.getElementById("formCadastroTurma");
+    let enviandoFormulario = false; // Bloqueador de cliques simultâneos
+
+    if (formCadastroTurma) {
+        formCadastroTurma.addEventListener('submit', (e) => {
+            e.preventDefault(); // Impede a página de atualizar
+
+            // Captura e limpa os valores digitados nos inputs
+            const descTurmaValue = document.getElementById("descTurma").value.trim();
+            const anoLetivoValue = document.getElementById("anoLetivo").value.trim();
+            const semestreLetivoValue = document.getElementById("semestreLetivo").value;
+            const turnoValue = document.getElementById("turno").value;
+
+            // ⚠️ Validações trazidas da antiga seção 7
+            if (!descTurmaValue) {
+                alert("Campo [Nome / Descrição] Preenchido incorretamente, confira as informações devidamente.");
+                return; 
+            }
+            if (!anoLetivoValue || anoLetivoValue < 2024) {
+                alert("Campo [Ano Letivo] Preenchido incorretamente, confira as informações devidamente.");
+                return;
+            }
+
+            // Se o formulário já estiver sendo processado, ignora novos cliques
+            if (enviandoFormulario) return;
+            enviandoFormulario = true;
+
+            // Desativa o botão salvar para dar feedback visual ao usuário
+            const btnSalvar = formCadastroTurma.querySelector("button[type='submit']");
+            if (btnSalvar) {
+                btnSalvar.disabled = true;
+                btnSalvar.textContent = "Salvando...";
+            }
+
+            // Envia os dados reais para o seu PHP
+            fetch('cadastrar_turma.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    descTurma: descTurmaValue,
+                    anoLetivo: anoLetivoValue,
+                    semestreLetivo: semestreLetivoValue,
+                    turno: turnoValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.sucesso) {
+                    alert(data.mensagem); // "Turma registrada com sucesso!"
+                    modalTurma.style.display = "none"; // Fecha o modal
+                    formCadastroTurma.reset();         // Limpa os campos
+                    
+                    // Atualiza o select de turmas da tela principal
+                    if (typeof carregarTurmasParaFiltro === "function") {
+                        carregarTurmasParaFiltro();
+                    }
+                } else {
+                    alert("Atenção: " + data.mensagem); // Mensagem de erro do PHP
+                }
+            })
+            .catch(error => {
+                console.error('Erro de conexão:', error);
+                alert('Erro ao tentar comunicar com o servidor.');
+            })
+            .finally(() => {
+                // Libera a trava e reativa o botão quando o processo terminar
+                enviandoFormulario = false;
+                if (btnSalvar) {
+                    btnSalvar.disabled = false;
+                    btnSalvar.textContent = "Salvar Turma";
+                }
+            });
+        });
+    }
 
     // --- 5. MODAL 2: EDITAR OCORRÊNCIA ---
     const modalEditar = document.getElementById("modalEditar");
@@ -134,5 +292,5 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modalTurma) modalTurma.style.display = "none";
         if (e.target === modalEditar) modalEditar.style.display = "none";
     });
-
+    
 });
