@@ -4,7 +4,7 @@
 
 // É importante que o Connection.php tenha o mysqli configurado para lançar exceções:
 // mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-require 'Connection.php';
+//require 'Connection.php';
 
 /*
 // BLOCO CORRIGIDO PARA O FUTURO:
