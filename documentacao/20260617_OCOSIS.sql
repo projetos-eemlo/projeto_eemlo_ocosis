@@ -1,7 +1,7 @@
 -- PROJETO OCOSIS - 2026
-DROP DATABASE IF EXISTS sistema_ocorrencia;
-CREATE DATABASE sistema_ocorrencia;
-USE sistema_ocorrencia;
+DROP DATABASE IF EXISTS ocosis;
+CREATE DATABASE ocosis;
+USE ocosis;
 
 -- 1. Turma
 CREATE TABLE turma (
