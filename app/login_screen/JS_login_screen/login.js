@@ -1,115 +1,58 @@
-
-const USUARIO_CORRETO = "admin@teste.com";
-const SENHA_CORRETA = "1234";
-
-
 document.addEventListener('DOMContentLoaded', function() {
-    
     const form = document.getElementById('loginForm');
-    const emailInput = document.getElementById('email');
-    const senhaInput = document.getElementById('senha');
-    const mensagemErro = document.getElementById('mensagem-erro');
+    const maspInput = document.getElementById('masp');
+    const passwordInput = document.getElementById('password'); 
+    const errorMessage = document.getElementById('error-msg');
 
-   
-    if (!form || !emailInput || !senhaInput || !mensagemErro) {
-        console.error("Erro: Um ou mais elementos do HTML não foram encontrados pelos IDs.");
-        return;
+    // ==========================================
+    // MOSTRAR/OCULTAR SENHA
+    // ==========================================
+    const toggleButton = document.querySelector('.btn-show-password');
+    if (toggleButton && passwordInput) {
+        toggleButton.addEventListener('click', () => {
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = 'Ocultar';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = 'Mostrar';
+            }
+        });
     }
 
-    
-    form.addEventListener('submit', function(event) {
-        event.preventDefault(); 
+    // ==========================================
+    // MÁSCARA DO MASP (9999999-9)
+    // ==========================================
+    if (maspInput) {
+        maspInput.addEventListener("input", function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 7) {
+                value = value.replace(/^(\d{7})(\d)/, '$1-$2');
+            }
+            e.target.value = value;
+        });
+    }
 
-        const usuarioDigitado = emailInput.value.trim();
-        const senhaDigitada = senhaInput.value;
-
-        
-        if (usuarioDigitado === USUARIO_CORRETO && senhaDigitada === SENHA_CORRETA) {
-            mensagemErro.style.display = 'none';
-            alert('Login efetuado com sucesso!');
-           
-        } else {
-           
-            mensagemErro.textContent = "Usuário ou senha incorretos";
-            mensagemErro.style.display = 'block';
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('erro')) {
+        if (errorMessage) {
+            errorMessage.style.display = 'block';
+            errorMessage.textContent = 'MASP ou senha incorretos.';
         }
-    });
+    }
+
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            const maspDigitado = maspInput ? maspInput.value.trim() : '';
+            const senhaDigitada = passwordInput ? passwordInput.value : '';
+
+            if (maspDigitado === "" || senhaDigitada === "") {
+                event.preventDefault(); 
+                if (errorMessage) {
+                    errorMessage.textContent = "Preencha todos os campos.";
+                    errorMessage.style.display = 'block';
+                }
+            }
+        });
+    }
 });
-        const togglePasswordBtn = document.querySelector('.toggle-password');
-        const passwordInput = document.querySelector('#password');
-        if (togglePasswordBtn && passwordInput) {
-            togglePasswordBtn.addEventListener('click', () => {
-                const isPasswordVisible = passwordInput.type === 'text';
-                passwordInput.type = isPasswordVisible ? 'password' : 'text';
-                togglePasswordBtn.textContent = isPasswordVisible ? 'Mostrar' : 'Ocultar';
-            });
-        }
-    
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleButton = document.querySelector('.btn-show-password');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleButton.textContent = 'Ocultar';
-            } else {
-                passwordInput.type = 'password';
-                toggleButton.textContent = 'Mostrar';
-            }
-        }
-
-        document.getElementById('login-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('login-error');
-
-            const validEmail = 'usuario@exemplo.com';
-            const validPassword = 'senha123';
-
-            if (email !== validEmail || password !== validPassword) {
-                errorMessage.textContent = 'Gmail ou senha incorreta';
-                return;
-            }
-
-            errorMessage.textContent = '';
-            alert('Login realizado com sucesso!');
-        });
-
-       
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleButton = document.querySelector('.btn-show-password');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleButton.textContent = 'Ocultar';
-            } else {
-                passwordInput.type = 'password';
-                toggleButton.textContent = 'Mostrar';
-            }
-        }
-
-       
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            
-            event.preventDefault(); 
-
-           
-            const emailCorreto = "usuario@gmail.com";
-            const senhaCorreta = "123456";
-
-     
-            const emailDigitado = document.getElementById('email').value;
-            const senhaDigitada = document.getElementById('password').value;
-            const erroMensagem = document.getElementById('error-msg');
-
-            if (emailDigitado === emailCorreto && senhaDigitada === senhaCorreta) {
-                alert('Login efetuado com sucesso!');
-                erroMensagem.style.display = 'none'; 
-               
-            } else {
-            
-                erroMensagem.style.display = 'block';
-            }
-        });
-        
