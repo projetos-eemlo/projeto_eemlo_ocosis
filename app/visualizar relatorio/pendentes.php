@@ -246,6 +246,7 @@
             gap: 0.35rem;
             font-size: 0.8rem;
             font-weight: 700;
+            padding: 0.22rem 0.7 Base/rem;
             padding: 0.22rem 0.7rem;
             border-radius: 999px;
             white-space: nowrap;
@@ -264,7 +265,7 @@
             font-weight: 600;
         }
  
-        .td-acoes { display: flex; gap: 0.5rem; white-space: nowrap; }
+        .td-acoes { display: flex; gap: 0.5rem; white-space: nowrap; align-items: center; }
  
         .btn-perfil {
             display: inline-block;
@@ -298,6 +299,22 @@
         }
         .btn-editar:hover  { background: #fff5f5; }
         .btn-editar:active { transform: scale(0.97); }
+
+        .btn-imprimir {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #4a5568;
+            color: #fff;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-imprimir:hover { background: #2d3748; }
+        .btn-imprimir svg { width: 16px; height: 16px; fill: currentColor; }
  
         /* ── MODAL DE STATUS (ENXUGADO) ─────────────────────── */
         .modal-overlay {
@@ -317,7 +334,7 @@
             background: #fff;
             border-radius: 14px;
             width: 100%;
-            max-width: 480px; /* Levemente maior para acomodar 3 botões lado a lado */
+            max-width: 480px;
             max-height: 90vh;
             overflow-y: auto;
             padding: 1.5rem;
@@ -456,6 +473,56 @@
             .status-toggle { grid-template-columns: 1fr; }
             .status-opcao { flex-direction: row; justify-content: flex-start; padding: 0.6rem 1rem;}
         }
+
+        /* ── SEÇÃO DE IMPRESSÃO BLOQUEADA NA TELA ─────────────── */
+        #folha-impressao-container { display: none; }
+
+        @media print {
+            body * { display: none !important; }
+            #folha-impressao-container, #folha-impressao-container * { display: block !important; }
+            #folha-impressao-container {
+                display: block !important;
+                position: absolute;
+                left: 0; top: 0; width: 100%;
+                font-family: Arial, sans-serif;
+                color: #000;
+                padding: 10px;
+            }
+            .print-header {
+                display: flex !important;
+                align-items: center;
+                border-bottom: 2px solid #000;
+                padding-bottom: 8px;
+                margin-bottom: 15px;
+            }
+            .print-logo-box {
+                border: 2px solid #000;
+                padding: 10px;
+                font-weight: bold;
+                font-size: 14px;
+                text-align: center;
+                margin-right: 15px;
+                line-height: 1.2;
+            }
+            .print-header-text h2 { font-size: 16px; font-weight: bold; color: #0b2373 !important; }
+            .print-header-text p { font-size: 11px; margin-top: 2px; }
+            .print-cidade-data { text-align: right; font-size: 13px; margin-bottom: 15px; font-weight: 500; }
+            .print-linha-aluno { display: flex !important; font-size: 14px; margin-bottom: 15px; width: 100%; }
+            .print-input-fill { flex: 1; border-bottom: 1px solid #000; margin-left: 5px; padding-left: 5px; font-weight: bold; }
+            .print-comunicado { font-size: 13px; margin-bottom: 12px; }
+            .print-lista-infracoes { list-style: none; margin-bottom: 15px; }
+            .print-lista-infracoes li { display: flex !important; align-items: flex-start; font-size: 12px; margin-bottom: 5px; line-height: 1.3; }
+            .print-checkbox {
+                width: 16px; height: 16px; border: 1.5px solid #000; 
+                margin-right: 8px; flex-shrink: 0; display: inline-flex !important;
+                align-items: center; justify-content: center; font-weight: bold; font-size: 11px;
+            }
+            .print-obs { font-size: 13px; margin-bottom: 30px; border-bottom: 1px dashed #777; padding-bottom: 5px; }
+            .print-assinaturas-row { display: flex !important; justify-content: space-between; margin-bottom: 25px; margin-top: 40px; }
+            .print-col-assinatura { width: 45%; text-align: center; font-size: 12px; border-top: 1px solid #000; padding-top: 5px; }
+            .print-divisor-recibo { border-top: 2px dashed #000; margin: 25px 0; padding-top: 20px; text-align: center; position: relative; }
+            .print-recibo-titulo { font-size: 13px; font-weight: bold; letter-spacing: 1px; margin-bottom: 15px; }
+        }
     </style>
 </head>
 <body>
@@ -484,7 +551,7 @@ $ocorrenciasPendentes = [
     [
         'id' => 2, 'aluno_id' => 102, 'aluno' => 'Maria Eduarda', 'turma' => '1º Ano A',
         'data' => '2026-05-10', 'hora' => '09:15', 'disciplina' => 'Português', 'professor' => 'Profª Sandra',
-        'infracoes' => [8, 2], 'descricao' => '',
+        'infracoes' => [8, 2], 'descricao' => 'Fez uso indevido do smartphone e respondeu aos questionamentos.',
         'notificar_responsavel' => false, 'resp_convocado' => true, 'status' => 'pendente',
     ]
 ];
@@ -617,6 +684,19 @@ foreach ($ocorrenciasPendentes as $oc) {
                                 >Atualizar Status</button>
  
                                 <a href="perfil.php?id=<?= $oc['aluno_id'] ?>" class="btn-perfil">Ver Perfil</a>
+
+                                <button type="button" class="btn-imprimir" title="Imprimir Ocorrência" 
+                                    data-print-aluno="<?= htmlspecialchars($oc['aluno']) ?>"
+                                    data-print-turma="<?= htmlspecialchars($oc['turma']) ?>"
+                                    data-print-data="<?= formatarData($oc['data']) ?>"
+                                    data-print-horario="<?= htmlspecialchars($oc['hora']) ?> · <?= htmlspecialchars($oc['disciplina']) ?>"
+                                    data-print-infracoes="<?= implode(',', $oc['infracoes']) ?>"
+                                    data-print-obs="<?= htmlspecialchars($oc['descricao']) ?>"
+                                >
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -663,7 +743,71 @@ foreach ($ocorrenciasPendentes as $oc) {
     </div>
 </div>
  
-<div id="toast" class="toast">Status atualizado com sucesso!</div>
+<div id="toast" class="toast">Status updated seamlessly!</div>
+
+<div id="folha-impressao-container">
+    <div class="print-header">
+        <div class="print-logo-box">E.E.<br>M.L.O.</div>
+        <div class="print-header-text">
+            <h2>ESCOLA ESTADUAL MARIA DE LOURDES DE OLIVEIRA</h2>
+            <p>Rua José Diório de Miranda, 549 – B. Mara Corneto – Tel.: 3382-2770</p>
+        </div>
+    </div>
+
+    <div class="print-cidade-data">Belo Horizonte, <span id="print-f1-data"></span></div>
+
+    <div class="print-linha-aluno">
+        <span>Aluno(a):</span><div class="print-input-fill" id="print-f1-aluno"></div>
+        <span style="margin-left: 20px;">Turma:</span><div class="print-input-fill" id="print-f1-turma" style="flex: 0 0 150px;"></div>
+    </div>
+
+    <p class="print-comunicado">Comunicamos que o (a) aluno (a) recebeu uma <strong>ocorrência disciplinar</strong> quanto a:</p>
+
+    <ul class="print-lista-infracoes">
+        <?php foreach($tiposInfracao as $id => $texto): ?>
+            <li>
+                <div class="print-checkbox" id="chk-f1-<?= $id ?>"></div>
+                ( ) <?= $id ?>. <?= htmlspecialchars($texto) ?><?= $id === 1 ? ' __________________________________' : '' ?>;
+            </li>
+        <?php endforeach; ?>
+        <li><div class="print-checkbox" id="chk-f1-9"></div>( ) 9. Praticou bullying;</li>
+        <li><div class="print-checkbox" id="chk-f1-10"></div>( ) 10. Atrapalha o bom andamento das aulas com brincadeiras inadequadas/comportamento inconveniente;</li>
+        <li><div class="print-checkbox" id="chk-f1-11"></div>( ) 11. Fez uso do celular ou outro aparelho eletrônico durante as aulas;</li>
+        <li><div class="print-checkbox" id="chk-f1-12"></div>( ) 12. Não estava usando uniforme;</li>
+        <li><div class="print-checkbox" id="chk-f1-13"></div>( ) 13. Estava usando roupas inadequadas para o ambiente escolar;</li>
+        <li><div class="print-checkbox" id="chk-f1-14"></div>( ) 14. Estava "matando aula" do(a) professor(a);</li>
+        <li><div class="print-checkbox" id="chk-f1-15"></div>( ) 15. Se envolveu em boatos e fofocas, causando transtornos na convivência escolar;</li>
+        <li><div class="print-checkbox" id="chk-f1-16"></div>( ) 16. É preciso que o(a) responsável compareça à escola e procure ______________________ na data ___/___/___, horário _______.</li>
+        <li><div class="print-checkbox" id="chk-f1-17"></div>( ) 17. Outros (especificado abaixo);</li>
+    </ul>
+
+    <div class="print-obs">
+        <strong>Obs.:</strong> <span id="print-f1-obs"></span>
+    </div>
+
+    <div class="print-assinaturas-row">
+        <div class="print-col-assinatura">Assinatura do professor ou supervisor pedagógico</div>
+        <div class="print-col-assinatura">Assinatura do responsável</div>
+    </div>
+
+    <div class="print-divisor-recibo">
+        <div class="print-recibo-titulo">ESCOLA ESTADUAL MARIA DE LOURDES DE OLIVEIRA<br><small>RECIBO DE RECEBIMENTO DA OCORRÊNCIA</small></div>
+    </div>
+
+    <div class="print-linha-aluno">
+        <span>Aluno(a):</span><div class="print-input-fill" id="print-f2-aluno"></div>
+        <span style="margin-left: 20px;">Turma:</span><div class="print-input-fill" id="print-f2-turma" style="flex: 0 0 150px;"></div>
+    </div>
+
+    <div class="print-linha-aluno" style="margin-top: 10px;">
+        <span>Motivo ( <span id="print-f2-motivos"></span> ) — Horário:</span><div class="print-input-fill" id="print-f2-horario"></div>
+    </div>
+
+    <div class="print-assinaturas-row" style="margin-top: 50px; margin-bottom: 5px;">
+        <div class="print-col-assinatura">Assinatura do vice-diretor ou supervisor</div>
+        <div class="print-col-assinatura">Assinatura do responsável</div>
+    </div>
+</div>
  
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -708,14 +852,47 @@ document.addEventListener('DOMContentLoaded', () => {
     // Salvar (Simulação)
     formEditar.addEventListener('submit', (e) => {
         e.preventDefault();
-        
         fecharModal();
-        
-        // Exibe o toast
         toast.classList.add('toast-visivel');
-        setTimeout(() => {
-            toast.classList.remove('toast-visivel');
-        }, 3000);
+        setTimeout(() => { toast.classList.remove('toast-visivel'); }, 3000);
+    });
+
+    // Lógica Inteligente de Impressão Dinâmica
+    document.querySelectorAll('.btn-imprimir').forEach(botao => {
+        botao.addEventListener('click', () => {
+            // Captura os atributos de dados injetados na linha da tabela
+            const aluno = botao.getAttribute('data-print-aluno');
+            const turma = botao.getAttribute('data-print-turma');
+            const data = botao.getAttribute('data-print-data');
+            const horario = botao.getAttribute('data-print-horario');
+            const infracoesIds = botao.getAttribute('data-print-infracoes').split(',');
+            const obs = botao.getAttribute('data-print-obs');
+
+            // Insere nos campos correspondentes do modelo impresso
+            document.getElementById('print-f1-aluno').textContent = aluno;
+            document.getElementById('print-f1-turma').textContent = turma;
+            document.getElementById('print-f1-data').textContent = data;
+            document.getElementById('print-f1-obs').textContent = obs || 'Nenhuma.';
+
+            document.getElementById('print-f2-aluno').textContent = aluno;
+            document.getElementById('print-f2-turma').textContent = turma;
+            document.getElementById('print-f2-horario').textContent = horario;
+            document.getElementById('print-f2-motivos').textContent = infracoesIds.join(', ');
+
+            // Limpa marcações anteriores de impressão
+            document.querySelectorAll('.print-checkbox').forEach(cb => cb.textContent = '');
+
+            // Marca com "✓" os checkboxes das infrações cometidas
+            infracoesIds.forEach(id => {
+                const targetCheckbox = document.getElementById(`chk-f1-${id.trim()}`);
+                if (targetCheckbox) {
+                    targetCheckbox.textContent = '✓';
+                }
+            });
+
+            // Dispara a janela nativa do sistema operacional para impressão/salvamento em PDF
+            window.print();
+        });
     });
 });
 </script>
