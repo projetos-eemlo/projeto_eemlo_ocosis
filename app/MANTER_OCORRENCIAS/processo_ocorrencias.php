@@ -3,7 +3,7 @@
 $host     = "localhost";
 $usuario  = "root";      
 $senha    = "";          
-$banco    = "sistema_escolar";
+$banco    = "ocosis";
 
 
 try {

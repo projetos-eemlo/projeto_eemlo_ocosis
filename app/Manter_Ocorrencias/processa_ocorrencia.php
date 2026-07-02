@@ -3,7 +3,7 @@
 $host     = "localhost";
 $usuario  = "root";      // Padrão do XAMPP
 $senha    = "";          // Padrão do XAMPP (vazio)
-$banco    = "projeto_eemlo_ocosis";
+$banco    = "ocosis";
 
 // 1. Cria a conexão usando PDO (mais seguro e moderno)
 try {
