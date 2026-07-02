@@ -18,8 +18,11 @@ body {
 
 nav {
 
+    background-color: #3b82f6;
+
     width: 100%;
-    background-color: #3b82f6; 
+
+    box-sizing: border-box;
 
     padding: 1.5rem;
 
