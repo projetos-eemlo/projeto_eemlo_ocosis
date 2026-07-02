@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
         try {
     $hashSenha = password_hash($senha, PASSWORD_DEFAULT);
 
-    // O SQL espera: nome, email, senha, cargo
+    
     $sql = "INSERT INTO funcionarios (nome_funcionario, email_funcionario, senha_hash, cargo_funcionario) VALUES (?, ?, ?, ?)";
     $stmt = $pdo->prepare($sql);
     
