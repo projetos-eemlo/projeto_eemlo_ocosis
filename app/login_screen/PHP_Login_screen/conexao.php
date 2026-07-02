@@ -1,10 +1,5 @@
 <?php
-$host = "localhost";
-$usuario = "root";
-$senha = "";
-$banco = "ocosis";
-
-$conexao = new mysqli($host, $usuario, $senha, $banco);
+$conexao = new mysqli("localhost", "root", "", "ocosis");
 
 if ($conexao->connect_error) {
     die("Falha na conexão: " . $conexao->connect_error);

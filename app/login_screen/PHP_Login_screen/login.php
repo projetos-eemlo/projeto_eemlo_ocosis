@@ -1,6 +1,6 @@
 
 <?php
-// Inicia a sessão antes de qualquer output HTML
+
 session_start();
 include("conexao.php");
 
@@ -23,11 +23,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (password_verify($senha_digitada, $funcionario['senha_hash'])) {
                 $loginSucesso = true;
                 
-                // SALVA OS DADOS NA SESSÃO
-                $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; // Ajuste o nome da coluna id se necessário
-                $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario']; // Ajuste o nome da coluna nome se necessário
                 
-                // REDIRECIONA PARA A PÁGINA INTERNA (substitua pelo nome do seu arquivo)
+                $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; 
+                $_SESSION['funcionario_nome'] = $funcionario['nome_funcionario']; 
+                
+             
                 header("Location: painel.php");
                 exit;
      
