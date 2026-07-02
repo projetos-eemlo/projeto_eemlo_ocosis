@@ -1,34 +1,13 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const form = document.querySelector("form");
-    const nomeInput = document.getElementById("nome");
-    const emailInput = document.getElementById("email");
+    const form = document.getElementById("FormCadastro");
+    const maspInput = document.getElementById("masp");
     const passwordInput = document.getElementById("senha"); 
     const cargoSelect = document.getElementById("cargo");
     const btnCadastrar = document.querySelector(".btn-cadastrar");
 
-    
-    form.addEventListener("submit", (event) => {
-        const nome = nomeInput.value;
-        const senha = passwordInput.value;
-
-        if (nome.length < 3) {
-            alert("O nome deve ter pelo menos 3 caracteres.");
-            event.preventDefault(); 
-            return;
-        }
-
-        if (senha.length < 8) {
-            alert("Sua senha é muito curta. Use pelo menos 8 caracteres.");
-            event.preventDefault(); 
-            return;
-        }
-
-        console.log("Cadastro realizado com sucesso para: " + nome);
-        
-        alert("Cadastro realizado com sucesso para: " + nome);
-    });
-
-    
+    // ==========================================
+    // MOSTRAR/OCULTAR SENHA
+    // ==========================================
     const togglePasswordBtn = document.querySelector('.toggle-password');
     if (togglePasswordBtn && passwordInput) {
         togglePasswordBtn.addEventListener('click', () => {
@@ -38,24 +17,53 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // === CÓDIGO DO BOTÃO QUE MUDA A COR (RN04) ===
-    function validarFormularioPreenchido() {
-        // Se os 3 campos tiverem valor preenchido
-        if (nomeInput.value.trim() !== "" && passwordInput.value.trim() !== "" && cargoSelect.value !== "") {
-            btnCadastrar.classList.remove("bloqueado");
-            btnCadastrar.classList.add("ativo"); // Altera a cor do botão para cor verde
-        } else {
-            btnCadastrar.classList.remove("ativo");
-            btnCadastrar.classList.add("bloqueado"); // Altera a cor do botão para cor cinza
-        }
+    // ==========================================
+    // MÁSCARA DO MASP (9999999-9)
+    // ==========================================
+    if (maspInput) {
+        maspInput.addEventListener("input", function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 7) {
+                value = value.replace(/^(\d{7})(\d)/, '$1-$2');
+            }
+            e.target.value = value;
+            validarFormularioPreenchido();
+        });
     }
 
+    if (form) {
+        form.addEventListener("submit", (event) => {
+            const masp = maspInput ? maspInput.value.trim() : '';
+            const senha = passwordInput ? passwordInput.value : '';
+
+            if (masp.length !== 9) {
+                alert("O MASP deve estar completo (ex: 1234567-8).");
+                event.preventDefault(); 
+                return;
+            }
+
+            if (senha.length < 8) {
+                alert("A sua senha é muito curta. Use pelo menos 8 caracteres.");
+                event.preventDefault(); 
+                return;
+            }
+        });
+    }
+
+    function validarFormularioPreenchido() {
+        if (btnCadastrar && maspInput && passwordInput && cargoSelect) {
+            if (maspInput.value.trim().length === 9 && passwordInput.value.trim() !== "" && cargoSelect.value !== "") {
+                btnCadastrar.classList.remove("bloqueado");
+                btnCadastrar.classList.add("ativo"); 
+            } else {
+                btnCadastrar.classList.remove("ativo");
+                btnCadastrar.classList.add("bloqueado"); 
+            }
+        }
+    }
     
     validarFormularioPreenchido();
-
    
-    nomeInput.addEventListener("input", validarFormularioPreenchido);
-    emailInput.addEventListener("input", validarFormularioPreenchido);
-    passwordInput.addEventListener("input", validarFormularioPreenchido);
-    cargoSelect.addEventListener("change", validarFormularioPreenchido);
+    if(passwordInput) passwordInput.addEventListener("input", validarFormularioPreenchido);
+    if(cargoSelect) cargoSelect.addEventListener("change", validarFormularioPreenchido);
 });
