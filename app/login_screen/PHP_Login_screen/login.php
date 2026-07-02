@@ -1,3 +1,4 @@
+
 <?php
 // Inicia a sessão antes de qualquer output HTML
 session_start();
@@ -118,4 +119,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </script>
 </body>
 </html>
+
+
 

@@ -20,7 +20,11 @@ body {
 
 nav {
 
-    background-color: #3b82f6; 
+    background-color: #3b82f6;
+
+    width: 100%;
+
+    box-sizing: border-box;
 
     padding: 1.5rem;
 

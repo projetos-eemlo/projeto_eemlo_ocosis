@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Nova Ocorrência</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: white; margin: 0; padding: 0; color: #333; display: flex; align-items: center; }
+.container { width: 95%; max-width: 100%; box-sizing: border-box; background: white; padding: 30px; border-radius: 0;}
+        
+        /* Menu Superior */
+        .navbar { background-color: #b8510d; color: white; padding: 10px; display: flex; gap: 20px; font-size: 14px; font-weight: bold; margin-bottom: 20px; border-radius: 4px; }
+        
+        h2 { color: #222; margin-bottom: 20px; }
+        
+        /* Seções */
+        .section-aluno { background-color: #f7e6b5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .section-title { font-weight: bold; margin-bottom: 15px; color: #555; }
+        
+        /* Grid Layout para os campos */
+        .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; }
+        .grid-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], input[type="date"], input[type="time"], select, textarea {
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: 100%;
+        }
+        
+        /* Checkboxes */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        
+        /* Linha Outros Tipos */
+        .outros-inline { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        /* Botões */
+        .btn-add { background-color: #2f8f37; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+        .btn-submit { background-color: #2e7d32; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        .btn-submit:hover { background-color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="navbar">
+        <div>1. Login / Cadastro</div>
+        <div>2. Nova Ocorrência</div>
+        <div>3. Pesquisa e Turmas</div>
+        <div>4. Perfil do Aluno</div>
+    </div>
+
+    <h2>2. Registrar Nova Ocorrência</h2>
+
+    <form action="processa_ocorrencia.php" method="POST">
+        
+        <div class="section-aluno">
+            <div class="section-title">Dados do Aluno</div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="nome_aluno">Nome Completo do Aluno:</label>
+                    <input type="text" id="nome_aluno" name="nome_aluno" placeholder="Ex: João Silva Sauro" required>
+                </div>
+                <div class="form-group">
+                    <label for="simade">Nº SIMADE:</label>
+                    <input type="text" id="simade" name="simade" placeholder="Ex: 123456789" required>
+                </div>
+                <div class="form-group">
+                    <label for="data_nascimento">Data de Nascimento:</label>
+                    <input type="date" id="data_nascimento" name="data_nascimento" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Detalhes da Ocorrência</div>
+        
+        <div class="grid-row">
+            <div class="form-group">
+                <label for="data_ocorrencia">Data (Permite retroativa):</label>
+                <input type="date" id="data_ocorrencia" name="data_ocorrencia" required>
+            </div>
+            <div class="form-group">
+                <label for="horario_ocorrencia">Horário da Ocorrência:</label>
+                <input type="time" id="horario_ocorrencia" name="horario_ocorrencia" required>
+            </div>
+            <div class="form-group">
+                <label for="turma">Turma do Aluno:</label>
+                <select id="turma" name="turma" required>
+                    <option value="">Selecione...</option>
+                    <option value="1º Ano A">1º Ano A</option>
+                    <option value="1º Ano B">1º Ano B</option>
+                    <option value="2º Ano A">2º Ano A</option>
+                    <option value="3º Ano A">3º Ano A</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label for="materia">Matéria (Se ocorreu em sala):</label>
+                <input type="text" id="materia" name="materia" placeholder="Ex: Matemática">
+            </div>
+            <div class="form-group">
+                <label for="professor">Professor(a) do Horário:</label>
+                <input type="text" id="professor" name="professor" placeholder="Nome do professor">
+            </div>
+        </div>
+
+        <label>Tipo(s) de Infração (Selecione um ou mais):</label>
+        <div class="checkbox-group">
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Atraso"> Atraso</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Uso de celular"> Uso de celular</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Desrespeito"> Desrespeito</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Agressão física"> Agressão física</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Uniforme incorreto"> Uniforme incorreto</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Fuga da sala"> Fuga da sala</div>
+            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Outros"> Outros</div>
+        </div>
+
+        <div class="outros-inline">
+            <input type="text" name="outro_tipo" placeholder="Outro tipo de infração...">
+            <button type="button" class="btn-add">Adicionar à Lista</button>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="descricao">Descrição Detalhada do Fato:</label>
+            <textarea id="descricao" name="descricao" rows="5" placeholder="Descreva o que aconteceu..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-submit">Salvar Ocorrência</button>
+
+    </form>
+</div>
+<script>
+    // Seleciona o botão e adiciona a ação de clique
+    document.querySelector('.btn-add').addEventListener('click', function() {
+        // Pega o campo de texto e o valor digitado
+        let inputOutro = document.querySelector('input[name="outro_tipo"]');
+        let valor = inputOutro.value.trim();
+        
+        // Se o campo não estiver vazio
+        if (valor !== "") {
+            let container = document.querySelector('.checkbox-group');
+            
+            // Cria uma nova div com o checkbox
+            let novaDiv = document.createElement('div');
+            novaDiv.className = 'checkbox-item';
+            novaDiv.innerHTML = `<input type="checkbox" name="infracoes[]" value="Outros: ${valor}" checked> ${valor}`;
+            
+            // Adiciona na tela e limpa o campo de texto
+            container.appendChild(novaDiv);
+            inputOutro.value = ""; 
+        } else {
+            alert("Por favor, digite o nome da infração antes de adicionar.");
+        }
+    });
+</script>
+
+</body>
+</html>
