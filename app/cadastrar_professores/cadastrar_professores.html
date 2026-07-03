@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="cadastrar_professores.css">
+    <title>Cadastro professores</title>
+</head>
+<body>
+    <div class="Header">
+        <a href="../login_page/login.html">1.Login\Cadastro</a>
+        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
+        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar alunos</a>
+        <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrência</a>
+        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil do aluno</a>
+    </div>
+    <div class="professores" id="container-professores">
+           <button class="Csv">CSV</button> 
+        <div class="professores-header">
+            
+            <div class="header-left">
+                <input type="checkbox" id="professores-todos" name="professores-todos">
+                <label for="professores-todos" id="label-todos">Selecionar Todos</label>
+            </div>
+            
+        </div>
+    </div>
+    <div class="botoes-inferiores">
+        <button id="btn-cadastrar" class="btn-primary" disabled>Cadastrar</button>
+        <button id="btn-editar" class="btn-secondary">Editar</button>
+        <button id="btn-excluir" class="btn-danger" disabled>Retirar</button>
+    </div>
+
+
+</body>
+</html>
