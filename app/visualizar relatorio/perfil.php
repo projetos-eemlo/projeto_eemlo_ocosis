@@ -16,76 +16,108 @@ $modoDemonstracao = false;
 
 try {
     // 3. CONEXÃO REAL
-    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8", $db_user, $db_pass);
+    $pdo = new PDO("mysql:host=$db_host;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // 4. CONSULTA DO ALUNO (Ajustada para o ocosis.sql com JOIN para pegar a turma)
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+    // 4. CONSULTA DO ALUNO (alunos + turma, igual ao ocosis.sql)
     $sqlAluno = $pdo->prepare("
-        SELECT 
-            a.id_aluno AS id, 
-            a.nome_aluno AS nome, 
-            a.num_simade AS simade, 
-            a.dt_nascimento AS data_nascimento, 
-            t.desc_turma AS turma_atual
+        SELECT
+            a.id_aluno       AS id,
+            a.nome_aluno     AS nome,
+            a.num_simade     AS simade,
+            a.dt_nascimento  AS data_nascimento,
+            t.desc_turma     AS turma_atual
         FROM alunos a
         LEFT JOIN turma t ON a.id_turma = t.id_turma
         WHERE a.id_aluno = :id
     ");
     $sqlAluno->execute(['id' => $aluno_id]);
-    $aluno = $sqlAluno->fetch(PDO::FETCH_ASSOC);
+    $aluno = $sqlAluno->fetch();
 
-    if ($aluno && isset($aluno['data_nascimento'])) {
-        $aluno['nascimento'] = date('d/m/Y', strtotime($aluno['data_nascimento']));
-    }
-    
     if (!$aluno) {
         throw new Exception("Aluno não encontrado no banco de dados.");
     }
 
-    // 5. CONSULTA DAS OCORRÊNCIAS (Ajustada mapeando os nomes para o seu código)
-    // Nota: Ajuste os nomes das colunas de ocorrências abaixo caso o seu grupo mude no futuro
+    $aluno['nascimento'] = isset($aluno['data_nascimento'])
+        ? date('d/m/Y', strtotime($aluno['data_nascimento']))
+        : '—';
+
+    // 5. CONSULTA DAS OCORRÊNCIAS DO ALUNO
+    // - id_disciplina -> nome da matéria (JOIN com disciplinas)
+    // - id_funcionario -> nome do professor (JOIN com funcionarios)
+    // - as infrações marcadas ficam em ocorrencia_tipos (N:N com tipo_ocorrencia);
+    //   por isso GROUP_CONCAT + GROUP BY, já que uma ocorrência pode ter várias infrações
+    // - status e notificar_responsavel JÁ EXISTEM na tabela ocorrencias (não é mais mock)
     $sqlOcorrencias = $pdo->prepare("
-        SELECT 
-            id_ocorrencia   AS id,
-            id_aluno        AS aluno_id,
-            data_ocorrencia AS data_registro,
-            horario,
-            disciplina      AS materia_professor,
-            id_tipo_infracao AS infracoes_ids,
-            desc_ocorrencia  AS infracoes_texto
-        FROM ocorrencias 
-        WHERE id_aluno = :aluno_id
-        ORDER BY data_ocorrencia DESC, horario DESC
+        SELECT
+            o.id_ocorrencia         AS id,
+            o.data_ocorrencia       AS data_registro,
+            o.horario                AS horario,
+            d.desc_disciplina        AS disciplina,
+            fu.nome_funcionario      AS professor,
+            o.desc_ocorrencia        AS descricao,
+            o.status                 AS status,
+            o.notificar_responsavel  AS notif_responsavel,
+            GROUP_CONCAT(t.num_item ORDER BY t.num_item SEPARATOR ', ')       AS infracoes_ids,
+            GROUP_CONCAT(t.desc_ocorrencia ORDER BY t.num_item SEPARATOR '; ') AS infracoes_texto
+        FROM ocorrencias o
+        LEFT JOIN disciplinas       d  ON o.id_disciplina = d.id_disciplina
+        LEFT JOIN funcionarios      fu ON o.id_funcionario = fu.id_funcionario
+        LEFT JOIN ocorrencia_tipos  ot ON ot.id_ocorrencia = o.id_ocorrencia
+        LEFT JOIN tipo_ocorrencia   t  ON t.id_tipo_ocorrencia = ot.id_tipo_ocorrencia
+        WHERE o.id_aluno = :aluno_id
+        GROUP BY o.id_ocorrencia
+        ORDER BY o.data_ocorrencia DESC, o.horario DESC
     ");
     $sqlOcorrencias->execute(['aluno_id' => $aluno_id]);
-    $ocorrencias = $sqlOcorrencias->fetchAll(PDO::FETCH_ASSOC);
+    $ocorrencias = $sqlOcorrencias->fetchAll();
 
-    // Monta o histórico no formato esperado pelo HTML
+    // Monta o histórico no formato esperado pelo HTML original
     $historicoOcorrencias = [];
     foreach ($ocorrencias as $row) {
+        $materiaProfessor = trim(
+            ($row['disciplina'] ?? '—') . ' / ' . ($row['professor'] ?? '—'),
+            ' /'
+        );
+        if ($materiaProfessor === '') {
+            $materiaProfessor = '—';
+        }
+
+        // Array de IDs de infração (pra marcar os checkboxes certos no modal de edição)
+        $infracoesArr = $row['infracoes_ids']
+            ? array_map('intval', explode(',', $row['infracoes_ids']))
+            : [];
+
         $historicoOcorrencias[] = [
             'id'                => $row['id'],
             'data_formatada'    => date('d/m/Y', strtotime($row['data_registro'])),
             'hora_formatada'    => substr($row['horario'], 0, 5),
-            'materia_professor' => $row['materia_professor'] ?? '—',
+            'materia_professor' => $materiaProfessor,
+            'disciplina'        => $row['disciplina'] ?? '',
+            'professor'         => $row['professor'] ?? '',
+            'descricao'         => $row['descricao'] ?? '',
             'infracoes_ids'     => $row['infracoes_ids'] ?? '',
-            'infracoes_texto'   => $row['infracoes_texto'] ?? '—',
-            // status e notif_responsavel não existem ainda no schema
-            'status'            => 'pendente',
-            'notif_responsavel' => 0,
+            'infracoes_arr'     => $infracoesArr,
+            'infracoes_texto'   => $row['infracoes_texto'] ?? ($row['descricao'] ?: '—'),
+            'status'            => $row['status'],           // 'pendente' | 'resolvida' — vem direto do banco
+            'notif_responsavel' => (int) $row['notif_responsavel'],
         ];
     }
 
-    $totalOcorrencias     = count($historicoOcorrencias);
-    $totalPendentes       = $totalOcorrencias;
-    $maisReincidente      = $historicoOcorrencias[0]['infracoes_texto'] ?? 'Nenhuma infração registrada';
-    $totalPendentesGlobal = $totalPendentes;
+    $totalOcorrencias = count($historicoOcorrencias);
+    $totalPendentes   = count(array_filter($historicoOcorrencias, fn($o) => $o['status'] === 'pendente'));
+    $maisReincidente  = $historicoOcorrencias[0]['infracoes_texto'] ?? 'Nenhuma infração registrada';
+
+    // Total de ocorrências pendentes no sistema todo (badge da navbar)
+    $totalPendentesGlobal = (int) $pdo
+        ->query("SELECT COUNT(*) FROM ocorrencias WHERE status = 'pendente'")
+        ->fetchColumn();
 
 } catch (Exception $e) {
-    // SE O BANCO NÃO ESTIVER LIGADO, ENTRA NO SEU MODO DE DEMONSTRAÇÃO (MANTIDO IGUAL)
+    // SE O BANCO NÃO ESTIVER LIGADO, ENTRA NO MODO DE DEMONSTRAÇÃO (MANTIDO IGUAL AO ORIGINAL)
     $modoDemonstracao = true;
-    
-    // ... (pode manter todo o seu array de dados fictícios da Fernanda Lima aqui dentro do catch)
+
     $mockAlunos = [
         101 => ['id' => 101, 'nome' => 'Fernanda Lima',      'simade' => '20231101', 'nascimento' => '12/03/2011', 'turma_atual' => '2º Ano B'],
         102 => ['id' => 102, 'nome' => 'Maria Eduarda',      'simade' => '20231102', 'nascimento' => '05/07/2012', 'turma_atual' => '1º Ano A'],
@@ -95,11 +127,11 @@ try {
     ];
 
     $mockOcorrencias = [
-        101 => [['id' => 1, 'data_formatada' => '15/05/2026', 'hora_formatada' => '10:00', 'materia_professor' => 'Inglês / Prof. William',    'infracoes_ids' => '7, 8', 'infracoes_texto' => 'Chegou atrasado, após o horário de entrada permitido; Fez uso do celular ou outro aparelho eletrônico durante as aulas', 'status' => 'pendente', 'notif_responsavel' => 1]],
-        102 => [['id' => 2, 'data_formatada' => '10/05/2026', 'hora_formatada' => '09:15', 'materia_professor' => 'Português / Profª Sandra',   'infracoes_ids' => '8, 2', 'infracoes_texto' => 'Fez uso do celular ou outro aparelho eletrônico durante as aulas; Desrespeitou o(a) professor(a)',                          'status' => 'pendente', 'notif_responsavel' => 1]],
-        103 => [['id' => 3, 'data_formatada' => '28/04/2026', 'hora_formatada' => '11:40', 'materia_professor' => 'Química / Prof. Eduardo',    'infracoes_ids' => '3',    'infracoes_texto' => 'Agrediu o(a) colega',                                                                                       'status' => 'pendente', 'notif_responsavel' => 1]],
-        104 => [['id' => 4, 'data_formatada' => '20/04/2026', 'hora_formatada' => '08:30', 'materia_professor' => 'Matemática / Prof. Marcos',  'infracoes_ids' => '2',    'infracoes_texto' => 'Desrespeitou o(a) professor(a)',                                                                            'status' => 'pendente', 'notif_responsavel' => 1]],
-        105 => [['id' => 5, 'data_formatada' => '15/04/2026', 'hora_formatada' => '13:50', 'materia_professor' => 'Física / Prof. Carlos',      'infracoes_ids' => '8',    'infracoes_texto' => 'Fez uso do celular ou outro aparelho eletrônico durante as aulas',                                          'status' => 'pendente', 'notif_responsavel' => 1]],
+        101 => [['id' => 1, 'data_formatada' => '15/05/2026', 'hora_formatada' => '10:00', 'materia_professor' => 'Inglês / Prof. William',    'disciplina' => 'Inglês',    'professor' => 'Prof. William',  'descricao' => 'Chegou atrasado e estava com celular em mãos.',        'infracoes_ids' => '7, 8', 'infracoes_arr' => [7, 8], 'infracoes_texto' => 'Chegou atrasado, após o horário de entrada permitido; Fez uso do celular ou outro aparelho eletrônico durante as aulas', 'status' => 'pendente', 'notif_responsavel' => 1]],
+        102 => [['id' => 2, 'data_formatada' => '10/05/2026', 'hora_formatada' => '09:15', 'materia_professor' => 'Português / Profª Sandra',   'disciplina' => 'Português', 'professor' => 'Profª Sandra',   'descricao' => 'Fez uso indevido do smartphone.',                     'infracoes_ids' => '8, 2', 'infracoes_arr' => [8, 2], 'infracoes_texto' => 'Fez uso do celular ou outro aparelho eletrônico durante as aulas; Desrespeitou o(a) professor(a)',                          'status' => 'pendente', 'notif_responsavel' => 1]],
+        103 => [['id' => 3, 'data_formatada' => '28/04/2026', 'hora_formatada' => '11:40', 'materia_professor' => 'Química / Prof. Eduardo',    'disciplina' => 'Química',   'professor' => 'Prof. Eduardo',  'descricao' => 'Envolvido em briga com colega.',                      'infracoes_ids' => '3',    'infracoes_arr' => [3],    'infracoes_texto' => 'Agrediu o(a) colega',                                                                                       'status' => 'pendente', 'notif_responsavel' => 1]],
+        104 => [['id' => 4, 'data_formatada' => '20/04/2026', 'hora_formatada' => '08:30', 'materia_professor' => 'Matemática / Prof. Marcos',  'disciplina' => 'Matemática','professor' => 'Prof. Marcos',   'descricao' => 'Respondeu de forma inadequada ao professor.',         'infracoes_ids' => '2',    'infracoes_arr' => [2],    'infracoes_texto' => 'Desrespeitou o(a) professor(a)',                                                                            'status' => 'pendente', 'notif_responsavel' => 1]],
+        105 => [['id' => 5, 'data_formatada' => '15/04/2026', 'hora_formatada' => '13:50', 'materia_professor' => 'Física / Prof. Carlos',      'disciplina' => 'Física',    'professor' => 'Prof. Carlos',   'descricao' => 'Uso de celular durante a prova.',                     'infracoes_ids' => '8',    'infracoes_arr' => [8],    'infracoes_texto' => 'Fez uso do celular ou outro aparelho eletrônico durante as aulas',                                          'status' => 'pendente', 'notif_responsavel' => 1]],
     ];
 
     $aluno = $mockAlunos[$aluno_id] ?? null;
@@ -490,7 +522,22 @@ try {
                     </tr>
                 <?php else: ?>
                     <?php foreach ($historicoOcorrencias as $oc): ?>
-                        <tr data-id="<?= $oc['id'] ?>">
+                        <tr
+                            data-id="<?= $oc['id'] ?>"
+                            data-occ='<?= htmlspecialchars(json_encode([
+                                'id'                => $oc['id'],
+                                'aluno'             => $aluno['nome'],
+                                'turma'             => $aluno['turma_atual'] ?? '',
+                                'data'              => $oc['data_formatada'],
+                                'hora'              => $oc['hora_formatada'],
+                                'status'            => $oc['status'],
+                                'disciplina'        => $oc['disciplina'] ?? '',
+                                'professor'         => $oc['professor'] ?? '',
+                                'descricao'         => $oc['descricao'] ?? '',
+                                'infracoes'         => $oc['infracoes_arr'] ?? [],
+                                'notif_responsavel' => $oc['notif_responsavel'],
+                            ]), ENT_QUOTES, 'UTF-8') ?>'
+                        >
                             <td><?= $oc['data_formatada'] ?></td>
                             <td><?= $oc['hora_formatada'] ?></td>
                             <td><?= htmlspecialchars($oc['materia_professor'] ?? '—') ?></td>
@@ -548,6 +595,7 @@ try {
         <p class="modal-subtitulo" id="modal-subtitulo"></p>
 
         <form id="form-editar-ocorrencia">
+            <input type="hidden" id="modalOccId" name="id">
             <div class="modal-corpo">
 
                 <!-- Status -->

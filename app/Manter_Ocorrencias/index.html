@@ -5,8 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrar Nova Ocorrência</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: white; margin: 0; padding: 0; color: #333; display: flex; align-items: center; }
-.container { width: 95%; max-width: 100%; box-sizing: border-box; background: white; padding: 30px; border-radius: 0;}
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: white; 
+            margin: 0; 
+            padding: 0; 
+            color: #333; 
+        }
+        .container { 
+            width: 100%; 
+            max-width: 100%; 
+            box-sizing: border-box; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 0; 
+        }
+
+        .secao-titulo {
+            color: #1a4ba5;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 25px 0 15px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .linha-formulario {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .campo-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo-grupo label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="date"], select, textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fcfcfc;
+            font-size: 14px;
+        }
+
+        .rotulo-lista {
+            font-size: 13px;
+            color: #555;
+            display: block;
+            margin: 20px 0 10px 0;
+        }
+
+        .lista-infracoes {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .item-infracao {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-infracao:last-child {
+            border-bottom: none;
+        }
+
+        .item-infracao:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .item-infracao input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .item-infracao label {
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .caixa-notificacao {
+            border: 1px solid #ffcc80;
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .caixa-notificacao input {
+            margin-top: 4px;
+        }
+
+        .caixa-notificacao strong {
+            color: #b76200;
+            font-size: 14px;
+        }
+
+        .caixa-notificacao .subtexto {
+            font-size: 13px;
+            color: #555;
+            font-style: italic;
+        }
         
         /* Menu Superior */
         .navbar { background-color: #b8510d; color: white; padding: 10px; display: flex; gap: 20px; font-size: 14px; font-weight: bold; margin-bottom: 20px; border-radius: 4px; }
@@ -73,64 +185,90 @@
             </div>
         </div>
 
-        <div class="section-title">Detalhes da Ocorrência</div>
-        
-        <div class="grid-row">
-            <div class="form-group">
-                <label for="data_ocorrencia">Data (Permite retroativa):</label>
-                <input type="date" id="data_ocorrencia" name="data_ocorrencia" required>
-            </div>
-            <div class="form-group">
-                <label for="horario_ocorrencia">Horário da Ocorrência:</label>
-                <input type="time" id="horario_ocorrencia" name="horario_ocorrencia" required>
-            </div>
-            <div class="form-group">
-                <label for="turma">Turma do Aluno:</label>
-                <select id="turma" name="turma" required>
-                    <option value="">Selecione...</option>
-                    <option value="1º Ano A">1º Ano A</option>
-                    <option value="1º Ano B">1º Ano B</option>
-                    <option value="2º Ano A">2º Ano A</option>
-                    <option value="3º Ano A">3º Ano A</option>
-                </select>
-            </div>
-        </div>
+        <div class="secao-titulo">DETALHES DA OCORRÊNCIA</div>
 
-        <div class="grid-2">
-            <div class="form-group">
-                <label for="materia">Matéria (Se ocorreu em sala):</label>
-                <input type="text" id="materia" name="materia" placeholder="Ex: Matemática">
-            </div>
-            <div class="form-group">
-                <label for="professor">Professor(a) do Horário:</label>
-                <input type="text" id="professor" name="professor" placeholder="Nome do professor">
-            </div>
-        </div>
+<div class="linha-formulario">
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Data *</label>
+        <input type="date" name="data_ocorrencia" required>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Horário (aula)</label>
+        <select name="horario_ocorrencia">
+            <option value="1º Horário">1º Horário</option>
+            <option value="2º Horário" selected>2º Horário</option>
+            <option value="3º Horário">3º Horário</option>
+            <option value="4º Horário">4º Horário</option>
+            <option value="5º Horário">5º Horário</option>
+        </select>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Turma</label>
+        <select name="turma">
+            <option value="1º Ano A">1º Ano A</option>
+            <option value="2º Ano A" selected>2º Ano A</option>
+            <option value="3º Ano A">3º Ano A</option>
+        </select>
+    </div>
+</div>
 
-        <label>Tipo(s) de Infração (Selecione um ou mais):</label>
-        <div class="checkbox-group">
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Atraso"> Atraso</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Uso de celular"> Uso de celular</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Desrespeito"> Desrespeito</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Agressão física"> Agressão física</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Uniforme incorreto"> Uniforme incorreto</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Fuga da sala"> Fuga da sala</div>
-            <div class="checkbox-item"><input type="checkbox" name="infracoes[]" value="Outros"> Outros</div>
-        </div>
+<div class="linha-formulario">
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Matéria / Disciplina</label>
+        <select name="materia">
+            <option value="Português" selected>Português</option>
+            <option value="Matemática">Matemática</option>
+            <option value="História">História</option>
+            <option value="História">Geografia</option>
+            <option value="História">Filosofia</option>
+            <option value="História">Biologia</option>
+            <option value="História">Artes</option>
+            <option value="História">Sociologia</option>
+            <option value="História">Química</option>
+            <option value="História">Inglês</option>
+            <option value="História">Soluçoês Matemáticas</option>
+            <option value="História">Educação Física</option>
+            <option value="História">Educação Digital</option>
+            <option value="História">Intervenção Cidadã</option>
+        </select>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Professor(a)</label>
+        <select name="professor">
+            <option value="Profª. Maria" selected>Profª. Maria</option>
+            <option value="Prof. João">Prof. João</option>
+        </select>
+    </div>
+</div>
 
-        <div class="outros-inline">
-            <input type="text" name="outro_tipo" placeholder="Outro tipo de infração...">
-            <button type="button" class="btn-add">Adicionar à Lista</button>
-        </div>
+<label class="rotulo-lista">Tipo(s) de Infração</label>
+<div class="lista-infracoes">
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Indisciplina durante a aula"> <label>1. Indisciplina durante a aula de</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Desrespeitou o(a) professor(a)"> <label>2. Desrespeitou o(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Agrediu o(a) colega"> <label>3. Agrediu o(a) colega</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não trouxe o material necessário"> <label>4. Não trouxe o material necessário</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não fez as atividades"> <label>5. Não fez as atividades e/ou trabalho solicitado</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Atividades incompletas"> <label>6. Tem deixado as atividades de sala incompletas</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Chegou atrasado na entrada"> <label>7. Chegou atrasado, após o horário de entrada permitido</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Chegou atrasado na sala"> <label>8. Chegou atrasado na sala, no horário do(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Praticou bullying"> <label>9. Praticou bullying</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Atrapalhou o andamento das aulas"> <label>10. Atrapalhou o bom andamento das aulas com brincadeiras inadequadas/comportamento inconveniente</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Uso do celular"> <label>11. Fez uso do celular ou outro aparelho eletrônico durante as aulas</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não estava usando uniforme"> <label>12. Não estava usando uniforme</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Roupas inadequadas"> <label>13. Estava usando roupas inadequadas para o ambiente escolar</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Matando aula"> <label>14. Estava "matando aula" do(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Boatos e fofocas"> <label>15. Se envolveu em boatos e fofocas, causando transtornos na convivência escolar</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Outros"> <label>17. Outros (especificado abaixo)</label></div>
+</div>
 
-        <div class="form-group" style="margin-bottom: 20px;">
-            <label for="descricao">Descrição Detalhada do Fato:</label>
-            <textarea id="descricao" name="descricao" rows="5" placeholder="Descreva o que aconteceu..."></textarea>
-        </div>
+<div class="campo-grupo" style="margin-top: 20px;">
+    <label>Descrição Detalhada (observações internas)</label>
+    <textarea name="descricao" rows="4"></textarea>
+</div>
 
-        <button type="submit" class="btn-submit">Salvar Ocorrência</button>
-
-    </form>
+<div class="caixa-notificacao">
+    <input type="checkbox" name="notificar_responsavel" id="notificar">
+    <label for="notificar"><strong>16. Notificar responsável</strong><br><span class="subtexto">"É preciso que o(a) responsável compareça à escola e procure a coordenação."</span></label>
 </div>
 <script>
     // Seleciona o botão e adiciona a ação de clique
