@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("FormCadastro");
     const maspInput = document.getElementById("masp");
     const passwordInput = document.getElementById("senha"); 
-    const cargoSelect = document.getElementById("cargo");
+    const cargoSelect = document.getElementById("id_tipo_func");
     const btnCadastrar = document.querySelector(".btn-cadastrar");
 
     // ==========================================
