@@ -16,7 +16,7 @@ try {
 if ($_SERVER['REQUEST_METHOD'] == 'POST'){
     $masp_com_mascara = trim($_POST['masp'] ?? '');
     $senha = $_POST['senha'] ?? '';
-    $id_tipo_func = $_POST['id_tipo_func'] ?? '';
+    $id_tipo_func = trim($_POST['id_tipo_func'] ?? '');
 
     // LIMPEZA: Tira o traço para gravar apenas os 8 números no banco!
     $masp_limpo = str_replace('-', '', $masp_com_mascara);
