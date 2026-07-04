@@ -92,16 +92,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 `<strong>${escapeHtml(oc.aluno)}</strong> · ${escapeHtml(oc.data)} · ${escapeHtml(oc.hora)} · ${escapeHtml(oc.turma)}`;
 
             formEditar.reset();
-           // 🔄 SUBSTITUA ISSO:
-// modalOccId.value = oc.id;
+            modalOccId.value = oc.id; // reset() limpa o hidden também, então seta de novo
 
-// 🚀 POR ISTO (Busca o campo diretamente no momento do clique):
-const campoId = document.getElementById('modalOccId') || document.querySelector('#form-editar-ocorrencia input[name="id"]');
-if (campoId) {
-    campoId.value = oc.id;
-} else {
-    console.error("O campo oculto com o ID da ocorrência não foi encontrado no HTML!");
-}
             // Status
             const radio = formEditar.querySelector(`input[name="status"][value="${oc.status}"]`);
             if (radio) radio.checked = true;
@@ -152,19 +144,31 @@ if (campoId) {
         modalOverlay.removeAttribute('hidden'); // volta pro modal de edição
     });
 
-    btnConfirmarSim.addEventListener('click', () => {
+    btnConfirmarSim.addEventListener('click', async () => {
         confOverlay.setAttribute('hidden', 'true');
 
-        // TODO: substituir pela chamada real ao back-end, por exemplo:
-        // const formData = new FormData(formEditar);
-        // fetch('atualizar_ocorrencia.php', {
-        //     method: 'POST',
-        //     body: new URLSearchParams(formData),
-        // }).then(() => window.location.reload()).catch(...);
-        // Por enquanto, é só uma simulação em tela (sem persistir no banco).
+        const formData = new FormData(formEditar);
+        formData.append('ajax_action', 'atualizar_ocorrencia');
 
-        fecharModal();
-        mostrarToast('Ocorrência atualizada com sucesso!');
+        try {
+            const resp = await fetch(window.location.pathname + window.location.search, {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await resp.json();
+
+            if (data.ok) {
+                fecharModal();
+                mostrarToast('Ocorrência atualizada com sucesso!');
+                // Recarrega a página pra mostrar os dados já atualizados vindos do banco
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                mostrarToast('Erro ao salvar: ' + (data.erro || 'tente novamente.'));
+            }
+        } catch (err) {
+            console.error('Erro ao salvar ocorrência:', err);
+            mostrarToast('Erro de conexão ao salvar.');
+        }
     });
 
     /* ============ IMPRESSÃO — FOLHA DE OCORRÊNCIA ============ */
