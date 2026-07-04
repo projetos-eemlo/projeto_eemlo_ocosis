@@ -25,7 +25,7 @@
     --shadow-modal: 0 15px 35px rgba(0, 0, 0, 0.25);
     --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.08) inset;
     --border-radius-sm: 4px;
-    --border-radius-md: 12px; /* Cantos arredondados mais modernos para os modais */
+    --border-radius-md: 12px; 
     --transition: all 0.2s ease-in-out;
 }
 
@@ -39,9 +39,6 @@ body {
     padding: 20px;
 }
 
-/* =========================================
-   Header (Barra de Navegação)
-   ========================================= */
 .Header {
     width: 100%;
     max-width: 1200px;
@@ -69,10 +66,11 @@ body {
 .Header a:hover {
     background-color: var(--color-primary-dark);
 }
+
 .professores {
     width: 100%;
     max-width: 1200px;
-    height: 560px; /* Mantido os 80px a mais que pediu */
+    height: 560px; 
     margin-bottom: 25px;
     background-color: #ffffff;
     border-radius: var(--border-radius-sm);
@@ -81,7 +79,7 @@ body {
     padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 20px; /* Respiro confortável entre linhas */
+    gap: 20px; 
     position: relative;
     overflow-y: auto; 
 }
@@ -97,7 +95,6 @@ body {
     cursor: pointer;
 }
 
-/* Cabeçalho Fixo do Scroll */
 .professores-header {
     display: flex;
     align-items: center;
@@ -123,6 +120,7 @@ body {
     gap: 10px;
     background-color: #ffffff;
 }
+
 .Csv{
     width: 50px;
     height: 35px;
@@ -131,7 +129,13 @@ body {
     border-radius: var(--border-radius-sm);
     font-weight: bold;
     font-size: 13px;
+    cursor: pointer;
 }
+
+.Csv:hover {
+    background-color: var(--color-upload-hover);
+}
+
 .botoes-inferiores {
     width: 100%;
     max-width: 1200px;
@@ -168,4 +172,141 @@ body {
 .botoes-inferiores button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* =========================================
+   ADICIONAIS PARA OS MODAIS E LISTAGEM
+   ========================================= */
+
+.professor-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 16px; 
+    border-radius: var(--border-radius-sm);
+    border-bottom: 1px solid var(--color-bg-light);
+    transition: var(--transition);
+    overflow: hidden; 
+}
+
+.professor-item:hover {
+    background-color: var(--color-blue-light);
+}
+
+.professor-item.salvo-sucesso {
+    background-color: var(--color-primary) !important;
+    border-color: transparent !important;
+    opacity: 0;
+    transform: scale(0.95) translateX(30px); 
+    pointer-events: none; 
+    transition: background-color 0.2s ease, opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s !important;
+}
+
+.professor-item.salvo-sucesso span,
+.professor-item.salvo-sucesso strong {
+    color: #ffffff !important;
+    transition: color 0.2s ease;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 40px; 
+    border-radius: var(--border-radius-md);
+    width: 90%;
+    max-width: 550px;
+    box-shadow: var(--shadow-modal);
+    text-align: center;
+}
+
+.modal-content h3 {
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+}
+
+.modal-content p {
+    color: #555;
+    margin-bottom: 25px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.modal-content button {
+    padding: 14px 22px;
+    font-size: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-content button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mini-lista {
+    max-height: 180px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 2px solid var(--color-border);
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--color-text-dark);
+    box-shadow: var(--shadow-input);
+}
+
+.mini-lista div {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+    line-height: 1.4;
+}
+
+.mini-lista div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.confirm-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 30px;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    font-size: 14px;
+    z-index: 9999;
 }
