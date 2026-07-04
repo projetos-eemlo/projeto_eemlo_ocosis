@@ -54,9 +54,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$id_tipo_func, $masp_limpo, $hashSenha, $cargo_nome]); 
     
-            echo "<script>alert('Cadastro realizado com sucesso!'); window.location.href = '../login.html';</script>";
-            
-        } catch (PDOException $e) {
+            $_SESSION['masp_logado'] = $masp_limpo;
+            $_SESSION['cargo_logado'] = $cargo_nome;
+
+echo "<script>
+                localStorage.setItem('masp_logado', '$masp_limpo');
+                localStorage.setItem('cargo_logado', '$cargo_nome');
+                alert('Cadastro realizado com sucesso!'); 
+                
+                window.location.href = '../../MANTER_OCORRENCIAS/index.html';</script>";
+
+            }catch (PDOException $e) {
             if ($e->getCode() == 23000) { 
                 echo "<script>alert('Este MASP já está cadastrado no sistema.'); window.history.back();</script>";
             } else {

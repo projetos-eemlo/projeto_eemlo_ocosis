@@ -31,10 +31,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
             $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; 
             $_SESSION['funcionario_masp'] = $funcionario['masp']; 
-            $_SESSION['cargo_funcionario'] = $funcionario['cargo_funcionario']; 
-            
+            $_SESSION['cargo_funcionario'] = $funcionario['cargo_funcionario'];
+
+            // Pega os dados exatos do banco para passar para o HTML
+            $masp_limpo = $funcionario['masp'];
+            $cargo_nome = $funcionario['cargo_funcionario'];
+
+            // ECOA O SCRIPT QUE SALVA NO NAVEGADOR E REDIRECIONA ENTRANDO NA PASTA DELE
+            echo "<script>
+                localStorage.setItem('masp_logado', '$masp_limpo');
+                localStorage.setItem('cargo_logado', '$cargo_nome');
+                
+                // Caminho corrigido recuando duas pastas e entrando em MANTER_OCORRENCIAS
+                window.location.href = '../../MANTER_OCORRENCIAS/index.html';
+            </script>";
+            exit;
+
             // Redireciona para o Painel
-            header("Location: ../cadastro.html");
+            header("Location: ../login.html");
             exit;
  
         } else {

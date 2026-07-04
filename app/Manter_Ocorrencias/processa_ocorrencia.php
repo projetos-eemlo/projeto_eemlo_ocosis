@@ -1,19 +1,26 @@
 <?php
-// Configurações de conexão com o banco de dados
-$host     = "localhost";
-$usuario  = "root";      // Padrão do XAMPP
-$senha    = "";          // Padrão do XAMPP (vazio)
-$banco    = "ocosis";
+session_start();
+$host = '127.0.0.1';
+$dbname = 'ocosisteste'; 
+$user = 'root'; 
+$pass = '';
 
-// 1. Cria a conexão usando PDO (mais seguro e moderno)
 try {
-    $conexao = new PDO("mysql:host=$host;dbname=$banco;charset=utf8", $usuario, $senha);
-    // Configura o PDO para lançar exceções em caso de erro
-    $conexao->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
 } catch (PDOException $e) {
-    die("Erro na conexão com o banco de dados: " . $e->getMessage());
-    exit;
+    die("Erro de conexão: " . $e->getMessage()); 
 }
+
+if(!isset($_SESSION['masp_logado'])) {
+    echo "<script>alert('Você precisa fazer login primeiro!'); window.location.href = '../login.html';</script>";
+    exit; // Expulsa o invasor
+}
+
+// Se chegou até aqui, é porque está logado!
+$masp_do_usuario = $_SESSION['masp_logado'];
+$cargo_do_usuario = $_SESSION['cargo_logado'];
+
 
 // Verifica se o formulário foi enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -52,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 VALUES 
                 (:nome_aluno, :simade, :data_nascimento, :data_ocorrencia, :horario_ocorrencia, :turma, :materia, :professor, :infracoes, :descricao)";
         
-        $stmt = $conexao->prepare($sql);
+        $stmt = $pdo->prepare($sql);
 
         // 3. Vincula os valores aos parâmetros do SQL
         $stmt->bindParam(':nome_aluno', $nome_aluno);
