@@ -12,14 +12,15 @@ try {
     die("Erro de conexão: " . $e->getMessage()); 
 }
 
-if(!isset($_SESSION['masp_logado'])) {
-    echo "<script>alert('Você precisa fazer login primeiro!'); window.location.href = '../login.html';</script>";
-    exit; // Expulsa o invasor
+// CONSERTO AQUI: Mudado de 'masp_logado' para 'funcionario_masp'
+if(!isset($_SESSION['funcionario_masp'])) {
+    echo "<script>alert('Você precisa fazer login primeiro!'); window.location.href = '../login_screen/login.html';</script>";
+    exit; 
 }
 
-// Se chegou até aqui, é porque está logado!
-$masp_do_usuario = $_SESSION['masp_logado'];
-$cargo_do_usuario = $_SESSION['cargo_logado'];
+// Se chegou até aqui, é porque está logado! Ajustado os nomes abaixo também:
+$masp_do_usuario = $_SESSION['funcionario_masp'];
+$cargo_do_usuario = $_SESSION['cargo_funcionario'];
 
 
 // Verifica se o formulário foi enviado

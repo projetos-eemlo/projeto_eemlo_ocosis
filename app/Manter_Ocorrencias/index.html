@@ -161,6 +161,7 @@
         <div>2. Nova Ocorrência</div>
         <div>3. Pesquisa e Turmas</div>
         <div>4. Perfil do Aluno</div>
+        <a class="navbar" href="../login_screen/PHP_Login_screen/logout.php">Sair (Logout)</a>
     </div>
 
     <h2>2. Registrar Nova Ocorrência</h2>
@@ -301,17 +302,19 @@
     // SCRIPT PARA LER QUEM ESTÁ LOGADO SEM PRECISAR DE PHP NESTA PÁGINA
     document.addEventListener("DOMContentLoaded", function() {
         // Puxa os dados que o register2.php salvou
-        const masp = localStorage.getItem('masp_logado');
-        const cargo = localStorage.getItem('cargo_logado');
+        const masp = sessionStorage.getItem('masp_logado');
+        const cargo = sessionStorage.getItem('cargo_logado');
 
         // Se não tiver MASP salvo, expulsa de volta pro login
-        if (!masp) {
-            alert("Você precisa fazer login ou cadastro primeiro!");
-            window.location.href = "../login.html";
-        } else {
-            // Se tiver logado, escreve na tela
-            document.getElementById('info-usuario').innerHTML = `Logado como: <strong>${cargo}</strong> (MASP: ${masp})`;
-        }
+        // Se não tiver MASP salvo, expulsa de volta pro login
+if (!masp) {
+    alert("Você precisa fazer login ou cadastro primeiro!");
+    // CORRIGIDO: Agora sobe apenas uma pasta para encontrar a login_screen
+    window.location.href = "../login_screen/login.html"; 
+} else {
+    // Se tiver logado, escreve na tela
+    document.getElementById('info-usuario').innerHTML = `Logado como: <strong>${cargo}</strong> (MASP: ${masp})`;
+}
     });
     
 </script>

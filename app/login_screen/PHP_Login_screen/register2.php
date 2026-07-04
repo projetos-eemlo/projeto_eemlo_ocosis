@@ -58,8 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $_SESSION['cargo_logado'] = $cargo_nome;
 
 echo "<script>
-                localStorage.setItem('masp_logado', '$masp_limpo');
-                localStorage.setItem('cargo_logado', '$cargo_nome');
+                sessionStorage.setItem('masp_logado', '$masp_limpo');
+                sessionStorage.setItem('cargo_logado', '$cargo_nome');      
                 alert('Cadastro realizado com sucesso!'); 
                 
                 window.location.href = '../../MANTER_OCORRENCIAS/index.html';</script>";

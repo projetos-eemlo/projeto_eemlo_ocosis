@@ -29,36 +29,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($funcionario && password_verify($senha_digitada, $funcionario['senha_hash'])) {
             
+            // Grava os dados na Sessão do PHP para o processa_ocorrencia.php validar
             $_SESSION['funcionario_id'] = $funcionario['id_funcionario']; 
             $_SESSION['funcionario_masp'] = $funcionario['masp']; 
             $_SESSION['cargo_funcionario'] = $funcionario['cargo_funcionario'];
 
-            // Pega os dados exatos do banco para passar para o HTML
-            $masp_limpo = $funcionario['masp'];
+            // Pega os dados exatos do banco para passar para o HTML via sessionStorage
+            $masp_banco = $funcionario['masp'];
             $cargo_nome = $funcionario['cargo_funcionario'];
 
             // ECOA O SCRIPT QUE SALVA NO NAVEGADOR E REDIRECIONA ENTRANDO NA PASTA DELE
             echo "<script>
-                localStorage.setItem('masp_logado', '$masp_limpo');
-                localStorage.setItem('cargo_logado', '$cargo_nome');
+                sessionStorage.setItem('masp_logado', '$masp_banco');
+                sessionStorage.setItem('cargo_logado', '$cargo_nome');
                 
-                // Caminho corrigido recuando duas pastas e entrando em MANTER_OCORRENCIAS
+                // Redireciona recuando duas pastas e entrando em MANTER_OCORRENCIAS
                 window.location.href = '../../MANTER_OCORRENCIAS/index.html';
             </script>";
-            exit;
+            exit; // Finaliza aqui com sucesso!
 
-            // Redireciona para o Painel
-            header("Location: ../login.html");
-            exit;
- 
         } else {
+            // Senha incorreta
             header("Location: ../login.html?erro=1");
             exit;
         }
     } else {
+        // Campos vazios
         header("Location: ../login.html?erro=1");
         exit;
     }
-    
 }
 ?>
