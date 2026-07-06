@@ -1,0 +1,99 @@
+📄 DIRETRIZ DE ENGENHARIA E ARQUITETURA
+Projeto: OCOSIS - Sistema de Gestão Escolar
+Scrum Master / Líder Técnico: Lucas Moura
+Status da Diretriz: 🔴 CRÍTICO (Refatoração Obrigatória)
+
+1. Objetivo do Documento
+Este documento decreta um Code Freeze (Congelamento de novas funcionalidades) para a reestruturação da arquitetura base do sistema. O código atual apresenta falhas críticas de segurança na gestão de sessões e uma arquitetura desorganizada que mistura lógica de servidor com interfaces de utilizador.
+
+A partir desta data, a equipa de desenvolvimento deve adotar o Padrão de Arquitetura Limpa (MVC Simplificado) documentado abaixo.
+
+2. Regras de Ouro da Nova Arquitetura
+Ficheiro de Conexão Único: É terminantemente proibido declarar variáveis de banco de dados ($host, $user, $pass) dentro das páginas visuais ou ficheiros de login. Toda a conexão passa a ser centralizada no ficheiro config/conexao.php.
+
+Sessões 100% no Servidor: Fica proibida a injeção de credenciais, MASP ou dados sensíveis via JavaScript no sessionStorage do navegador. A autenticação deve usar exclusivamente as variáveis superglobais $_SESSION do PHP.
+
+Isolamento de Responsabilidades: - Pasta pages/: Contém apenas HTML e CSS. Não processa dados.
+
+Pasta actions/: Contém apenas PHP. Processa os dados do formulário e redireciona (sem usar echo de HTML).
+
+3. Código Oficial (O Molde a Seguir)
+Anexo A: O Motor de Conexão (config/conexao.php)
+Toda a equipa deve apagar as conexões espalhadas e utilizar apenas a requisição para este ficheiro isolado usando PDO (blindado contra SQL Injection):
+
+PHP
+<?php
+$host = '127.0.0.1';
+$dbname = 'ocosisteste';
+$user = 'root';
+$pass = '';
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
+    // Ativa o modo de segurança e erros para ambiente de desenvolvimento
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("<h3 style='color:red;'>Erro Crítico: Falha na comunicação com a base de dados.</h3>");
+}
+?>
+Anexo B: O Novo Controlador de Login (actions/auth_login.php)
+Este é o exemplo de como uma ação deve ser processada no backend. Nenhum JavaScript ou HTML foi misturado. Peguem nas funções de "Cadastrar Professores" e adaptem para este padrão estrutural:
+
+PHP
+<?php
+session_start();
+
+// 1. Puxa a conexão centralizada (Segurança e Manutenção)
+require_once '../config/conexao.php';
+
+// Bloqueia acessos diretos pela URL
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    header("Location: ../pages/login.php");
+    exit;
+}
+    
+// 2. Limpeza de dados de entrada
+$masp_bruto = trim($_POST['masp'] ?? '');
+$senha_digitada = $_POST['senha'] ?? '';
+
+// Remove a máscara do MASP caso exista
+$masp_limpo = str_replace('-', '', $masp_bruto);
+
+if (empty($masp_limpo) || empty($senha_digitada)) {
+    header("Location: ../pages/login.php?erro=" . urlencode("Preencha todos os campos obrigatórios."));
+    exit;
+}
+
+try {
+    // 3. Consulta Blindada com Prepared Statement
+    $sql = "SELECT id_funcionario, masp, senha_hash, cargo_funcionario FROM funcionarios WHERE masp = ? LIMIT 1";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$masp_limpo]);
+    $funcionario = $stmt->fetch();
+
+    // 4. Verificação de Senha Criptografada
+    if ($funcionario && password_verify($senha_digitada, $funcionario['senha_hash'])) {
+        
+        // 5. Sessão Segura via Servidor PHP
+        $_SESSION['funcionario_id'] = $funcionario['id_funcionario'];
+        $_SESSION['funcionario_masp'] = $funcionario['masp'];
+        $_SESSION['cargo_funcionario'] = $funcionario['cargo_funcionario'];
+
+        // Redirecionamento nativo pelo servidor
+        header("Location: ../pages/dashboard.php");
+        exit;
+
+    } else {
+        header("Location: ../pages/login.php?erro=" . urlencode("Credenciais inválidas. Tente novamente."));
+        exit;
+    }
+
+} catch (PDOException $e) {
+    // Em produção, os erros do banco não devem ser exibidos ao utilizador
+    header("Location: ../pages/login.php?erro=" . urlencode("Erro de servidor. A equipa de TI já foi notificada."));
+    exit;
+}
+?>
+Meta da Equipa (Sprint Atual): 1. Apagar o atual ficheiro de autenticação vulnerável e as conexões isoladas.
+2. Migrar todas as queries (inserts e selects) dos ficheiros visuais para a nova arquitetura limpa MVC.
