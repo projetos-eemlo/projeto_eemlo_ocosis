@@ -71,25 +71,48 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarTurmasParaFiltro();
     
 
-    // --- 2. LÓGICA DO FILTRO DE TURMAS ---
-    const filtroTurma = document.getElementById('filtroTurma');
-    filtroTurma.addEventListener('change', () => {
-        const turmaSelecionada = filtroTurma.options[filtroTurma.selectedIndex].text;
-        const rows = tbody.getElementsByTagName('tr');
-        let count = 0;
-
-        for (let i = 0; i < rows.length; i++) {
-            const rowTurmaText = rows[i].querySelector('.col-turma').textContent.trim();
-            
-            if (turmaSelecionada === "Todas as Turmas" || rowTurmaText === turmaSelecionada) {
-                rows[i].style.display = "";
-                count++;
-            } else {
-                rows[i].style.display = "none";
-            }
+    // --- 2. CARREGAR ALUNOS DA TURMA SELECIONADA ---
+    function carregarAlunos(idTurma) {
+        if (!idTurma) {
+            tabelaAlunosCorpo.innerHTML = '<tr><td colspan="3" style="text-align:center;">Selecione uma turma para ver os alunos.</td></tr>';
+            return;
         }
-        contador.textContent = count === 1 ? "1 aluno encontrado" : `${count} alunos encontrados`;
-    });
+
+        // 🔎 CORREÇÃO AQUI: Passando o id_turma via GET na URL para o PHP receber!
+        fetch(`buscar_alunos.php?id_turma=${idTurma}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erro na resposta do servidor');
+                }
+                return response.json();
+            })
+            .then(alunos => {
+                tabelaAlunosCorpo.innerHTML = ""; // Limpa a tabela antes de preencher
+
+                if (alunos.length === 0) {
+                    tabelaAlunosCorpo.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum aluno cadastrado nesta turma.</td></tr>';
+                    return;
+                }
+
+                // Preenche a tabela com os alunos retornados do banco
+                alunos.forEach(aluno => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${aluno.num_simade}</td>
+                        <td>${aluno.nome_aluno}</td>
+                        <td><button class="btn-perfil" data-simade="${aluno.num_simade}">Ver Perfil</button></td>
+                    `;
+                    tabelaAlunosCorpo.appendChild(row);
+                });
+
+                // Adiciona o evento de clique nos novos botões "Ver Perfil" criados
+                configurarBotoesPerfil();
+            })
+            .catch(error => {
+                console.error("Erro ao carregar alunos:", error);
+                tabelaAlunosCorpo.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Erro ao carregar os alunos.</td></tr>';
+            });
+    }
 
 
     // --- 3. NAVEGAÇÃO E DADOS REAIS DO PERFIL DO ALUNO ---
