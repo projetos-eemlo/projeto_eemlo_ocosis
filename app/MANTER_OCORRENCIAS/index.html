@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Nova Ocorrência</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: white; 
+            margin: 0; 
+            padding: 0; 
+            color: #333; 
+        }
+        .container { 
+            width: 100%; 
+            max-width: 100%; 
+            box-sizing: border-box; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 0; 
+        }
+
+        .secao-titulo {
+            color: #1a4ba5;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 25px 0 15px 0;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 5px;
+        }
+
+        .linha-formulario {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .campo-grupo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo-grupo label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"], input[type="date"], select, textarea {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fcfcfc;
+            font-size: 14px;
+        }
+
+        .rotulo-lista {
+            font-size: 13px;
+            color: #555;
+            display: block;
+            margin: 20px 0 10px 0;
+        }
+
+        .lista-infracoes {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .item-infracao {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-infracao:last-child {
+            border-bottom: none;
+        }
+
+        .item-infracao:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .item-infracao input[type="checkbox"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .item-infracao label {
+            font-size: 13px;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .caixa-notificacao {
+            border: 1px solid #ffcc80;
+            background-color: #fffde7;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .caixa-notificacao input {
+            margin-top: 4px;
+        }
+
+        .caixa-notificacao strong {
+            color: #b76200;
+            font-size: 14px;
+        }
+
+        .caixa-notificacao .subtexto {
+            font-size: 13px;
+            color: #555;
+            font-style: italic;
+        }
+        
+        /* Menu Superior */
+        .navbar { background-color: #b8510d; color: white; padding: 10px; display: flex; gap: 20px; font-size: 14px; font-weight: bold; margin-bottom: 20px; border-radius: 4px; }
+        
+        h2 { color: #222; margin-bottom: 20px; }
+        
+        /* Seções */
+        .section-aluno { background-color: #f7e6b5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        .section-title { font-weight: bold; margin-bottom: 15px; color: #555; }
+        
+        /* Grid Layout para os campos */
+        .grid-3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px; }
+        .grid-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        
+        .form-group { display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: bold; margin-bottom: 5px; }
+        input[type="text"], input[type="date"], input[type="time"], select, textarea {
+            padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: 100%;
+        }
+        
+        /* Checkboxes */
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .checkbox-item { display: flex; align-items: center; gap: 5px; font-size: 13px; }
+        
+        /* Linha Outros Tipos */
+        .outros-inline { display: flex; gap: 10px; margin-bottom: 20px; }
+        
+        /* Botões */
+        .btn-add { background-color: #2f8f37; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+        .btn-submit { background-color: #2e7d32; color: white; border: none; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 15px; }
+        .btn-submit:hover { background-color: #1b5e20; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="navbar">
+        <div>1. Login / Cadastro</div>
+        <div>2. Nova Ocorrência</div>
+        <div>3. Pesquisa e Turmas</div>
+        <div>4. Perfil do Aluno</div>
+        <a class="navbar" href="../login_screen/PHP_Login_screen/logout.php">Sair (Logout)</a>
+    </div>
+
+    <h2>2. Registrar Nova Ocorrência</h2>
+<p id="info-usuario" style="color: #666; font-size: 14px; margin-top: -15px; margin-bottom: 25px;"></p>
+    <form action="processa_ocorrencia.php" method="POST">
+        
+        <div class="section-aluno">
+            <div class="section-title">Dados do Aluno</div>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="nome_aluno">Nome Completo do Aluno:</label>
+                    <input type="text" id="nome_aluno" name="nome_aluno" placeholder="Ex: João Silva Sauro" required>
+                </div>
+                <div class="form-group">
+                    <label for="simade">Nº SIMADE:</label>
+                    <input type="text" id="simade" name="simade" placeholder="Ex: 123456789" required>
+                </div>
+                <div class="form-group">
+                    <label for="data_nascimento">Data de Nascimento:</label>
+                    <input type="date" id="data_nascimento" name="data_nascimento" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="secao-titulo">DETALHES DA OCORRÊNCIA</div>
+
+<div class="linha-formulario">
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Data *</label>
+        <input type="date" name="data_ocorrencia" required>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Horário (aula)</label>
+        <select name="horario_ocorrencia">
+            <option value="1º Horário">1º Horário</option>
+            <option value="2º Horário" selected>2º Horário</option>
+            <option value="3º Horário">3º Horário</option>
+            <option value="4º Horário">4º Horário</option>
+            <option value="5º Horário">5º Horário</option>
+        </select>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Turma</label>
+        <select name="turma">
+            <option value="1º Ano A">1º Ano A</option>
+            <option value="2º Ano A" selected>2º Ano A</option>
+            <option value="3º Ano A">3º Ano A</option>
+        </select>
+    </div>
+</div>
+
+<div class="linha-formulario">
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Matéria / Disciplina</label>
+        <select name="materia">
+            <option value="Português" selected>Português</option>
+            <option value="Matemática">Matemática</option>
+            <option value="História">História</option>
+            <option value="História">Geografia</option>
+            <option value="História">Filosofia</option>
+            <option value="História">Biologia</option>
+            <option value="História">Artes</option>
+            <option value="História">Sociologia</option>
+            <option value="História">Química</option>
+            <option value="História">Inglês</option>
+            <option value="História">Soluçoês Matemáticas</option>
+            <option value="História">Educação Física</option>
+            <option value="História">Educação Digital</option>
+            <option value="História">Intervenção Cidadã</option>
+        </select>
+    </div>
+    <div class="campo-grupo" style="flex: 1;">
+        <label>Professor(a)</label>
+        <select name="professor">
+            <option value="Profª. Maria" selected>Profª. Maria</option>
+            <option value="Prof. João">Prof. João</option>
+        </select>
+    </div>
+</div>
+
+<label class="rotulo-lista">Tipo(s) de Infração</label>
+<div class="lista-infracoes">
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Indisciplina durante a aula"> <label>1. Indisciplina durante a aula de</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Desrespeitou o(a) professor(a)"> <label>2. Desrespeitou o(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Agrediu o(a) colega"> <label>3. Agrediu o(a) colega</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não trouxe o material necessário"> <label>4. Não trouxe o material necessário</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não fez as atividades"> <label>5. Não fez as atividades e/ou trabalho solicitado</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Atividades incompletas"> <label>6. Tem deixado as atividades de sala incompletas</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Chegou atrasado na entrada"> <label>7. Chegou atrasado, após o horário de entrada permitido</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Chegou atrasado na sala"> <label>8. Chegou atrasado na sala, no horário do(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Praticou bullying"> <label>9. Praticou bullying</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Atrapalhou o andamento das aulas"> <label>10. Atrapalhou o bom andamento das aulas com brincadeiras inadequadas/comportamento inconveniente</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Uso do celular"> <label>11. Fez uso do celular ou outro aparelho eletrônico durante as aulas</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Não estava usando uniforme"> <label>12. Não estava usando uniforme</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Roupas inadequadas"> <label>13. Estava usando roupas inadequadas para o ambiente escolar</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Matando aula"> <label>14. Estava "matando aula" do(a) professor(a)</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Boatos e fofocas"> <label>15. Se envolveu em boatos e fofocas, causando transtornos na convivência escolar</label></div>
+    <div class="item-infracao"><input type="checkbox" name="infracoes[]" value="Outros"> <label>17. Outros (especificado abaixo)</label></div>
+</div>
+
+<div class="campo-grupo" style="margin-top: 20px;">
+    <label>Descrição Detalhada (observações internas)</label>
+    <textarea name="descricao" rows="4"></textarea>
+</div>
+
+<div class="caixa-notificacao">
+    <input type="checkbox" name="notificar_responsavel" id="notificar">
+    <label for="notificar"><strong>16. Notificar responsável</strong><br><span class="subtexto">"É preciso que o(a) responsável compareça à escola e procure a coordenação."</span></label>
+</div>
+<button type="submit" style="margin-top: 25px; margin-bottom: 20px; padding: 12px 25px; background-color: #048f54; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 14px; display: block;">Salvar Ocorrência</button>
+
+</form> </div>
+<script>
+    // Seleciona o botão e adiciona a ação de clique
+    document.querySelector('.btn-add').addEventListener('click', function() {
+        // Pega o campo de texto e o valor digitado
+        let inputOutro = document.querySelector('input[name="outro_tipo"]');
+        let valor = inputOutro.value.trim();
+        
+        // Se o campo não estiver vazio
+        if (valor !== "") {
+            let container = document.querySelector('.checkbox-group');
+            
+            // Cria uma nova div com o checkbox
+            let novaDiv = document.createElement('div');
+            novaDiv.className = 'checkbox-item';
+            novaDiv.innerHTML = `<input type="checkbox" name="infracoes[]" value="Outros: ${valor}" checked> ${valor}`;
+            
+            // Adiciona na tela e limpa o campo de texto
+            container.appendChild(novaDiv);
+            inputOutro.value = ""; 
+        } else {
+            alert("Por favor, digite o nome da infração antes de adicionar.");
+        }
+    });
+</script>
+<script>
+    // SCRIPT PARA LER QUEM ESTÁ LOGADO SEM PRECISAR DE PHP NESTA PÁGINA
+    document.addEventListener("DOMContentLoaded", function() {
+        // Puxa os dados que o register2.php salvou
+        const masp = sessionStorage.getItem('masp_logado');
+        const cargo = sessionStorage.getItem('cargo_logado');
+
+        // Se não tiver MASP salvo, expulsa de volta pro login
+        // Se não tiver MASP salvo, expulsa de volta pro login
+if (!masp) {
+    alert("Você precisa fazer login ou cadastro primeiro!");
+    // CORRIGIDO: Agora sobe apenas uma pasta para encontrar a login_screen
+    window.location.href = "../login_screen/login.html"; 
+} else {
+    // Se tiver logado, escreve na tela
+    document.getElementById('info-usuario').innerHTML = `Logado como: <strong>${cargo}</strong> (MASP: ${masp})`;
+}
+    });
+    
+</script>
+</body>
+</html>
+</body>
+</html>
