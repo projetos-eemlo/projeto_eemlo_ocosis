@@ -160,7 +160,7 @@
     $base_path = '../'; 
     $pagina_atual = 'nova_ocorrencia'; 
     include '../header.php'; 
-?>
+    ?>
 
     <h2>2. Registrar Nova Ocorrência</h2>
 <p id="info-usuario" style="color: #666; font-size: 14px; margin-top: -15px; margin-bottom: 25px;"></p>
