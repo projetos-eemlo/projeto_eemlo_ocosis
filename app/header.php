@@ -14,13 +14,12 @@ $totalPendentesGlobal = isset($totalPendentesGlobal) ? $totalPendentesGlobal : 5
     <div class="nav-left">
         <div class="logo-box"></div>
         
-        <a href="<?= $base ?>Manter_Ocorrencias/index.php" class="nav-link <?= ($pagina == 'nova_ocorrencia') ? 'active' : '' ?>">Nova Ocorrência</a>
+        <a href="<?= $base ?>Manter_Ocorrencias/index.html" class="nav-link <?= ($pagina == 'nova_ocorrencia') ? 'active' : '' ?>">Nova Ocorrência</a>
         
-        <a href="<?= $base ?>turmas_page/turmas.php" class="nav-link <?= ($pagina == 'turmas') ? 'active' : '' ?>">Pesquisa e Turmas</a>
+        <a href="<?= $base ?>turmas_page/turmas.html" class="nav-link <?= ($pagina == 'turmas') ? 'active' : '' ?>">Pesquisa e Turmas</a>
         
-        <a href="<?= $base ?>Cadastrar_alunos/Cadastrar_alunos.php" class="nav-link <?= ($pagina == 'cadastrar_alunos') ? 'active' : '' ?>">Cadastrar Alunos</a>
+        <a href="<?= $base ?>Cadastrar_alunos/Cadastrar_alunos.html" class="nav-link <?= ($pagina == 'cadastrar_alunos') ? 'active' : '' ?>">Cadastrar Alunos</a>
         
-        <a href="<?= $base ?>cadastrar_professores/cadastrar_professoress.php" class="nav-link <?= ($pagina == 'cadastrar_professores') ? 'active' : '' ?>">Cadastrar Professores</a>
         
         <a href="<?= $base ?>visualizar_relatorio/pendentes.php" class="nav-link <?= ($pagina == 'pendentes') ? 'active' : '' ?>">
             Ocorrências Pendentes <span class="unified-badge"><?= $totalPendentesGlobal ?></span>

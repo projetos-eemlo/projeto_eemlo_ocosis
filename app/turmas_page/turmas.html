@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pesquisa e Turmas</title>
+    <link rel="stylesheet" href="CSS/turmas.css">
+</head>
+<body>
+
+    <!-- Barra de Navegação -->
+    <nav class="navbar">
+        <div class="nav-left">
+            <div class="logo">
+                🏫 Ocorrências
+            </div>
+            <a href="#" class="nav-link">Nova Ocorrência</a>
+            <a href="#" class="nav-link active">Pesquisa e Turmas</a>
+            <a href="#" class="nav-link">
+                Ocorrências Pendentes <span class="badge-notification">5</span>
+            </a>
+        </div>
+        <div class="nav-right">
+            <button class="btn-sair">Sair</button>
+        </div>
+    </nav>
+
+    <!-- CONTEÚDO 1: TELA DE PESQUISA (Principal) -->
+    <main class="container" id="telaPesquisa">
+        <div class="page-header">
+            <h2>Pesquisa e Gestão de Turmas <span class="subtitle">Direção / Supervisão</span></h2>
+        </div>
+
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="filtroTurma" class="filter-label">Turma:</label>
+                <select id="filtroTurma" class="select-input">
+                    <option value="todas">Todas as Turmas</option>
+                    <!-- As outras turmas serão carregadas aqui via JavaScript -->
+                </select>
+                <button id="btnNovaTurma" class="btn-nova-turma">+ Nova Turma</button>
+            </div>
+            <div class="filter-results">
+                <span id="contadorAlunos">Carregando alunos...</span>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nº SIMADE</th>
+                        <th>Nome do Aluno</th>
+                        <th>Turma</th>
+                        <th>Ocorrências</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaAlunosBody">
+                    <!-- Preenchido via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- CONTEÚDO 2: PERFIL DO ALUNO -->
+    <main class="container" id="telaPerfil" style="display: none;">
+        <div class="perfil-header">
+            <div class="perfil-title-group">
+                <button id="btnVoltar" class="btn-outline">← Voltar</button>
+                <!-- Nome em azul e maiúsculo conforme o print -->
+                <h2>Perfil: <span id="nomeAlunoPerfil" class="text-blue" style="text-transform: uppercase;"></span></h2>
+            </div>
+            <button class="btn-dark-grey">Imprimir Todas</button>
+        </div>
+
+        <div class="perfil-cards">
+            <div class="card card-grey">
+                <p><strong>Nº SIMADE:</strong> <span id="simadePerfil"></span></p>
+                <p><strong>Nascimento:</strong> <span id="nascPerfil"></span></p>
+                <p><strong>Turma Atual:</strong> <span id="turmaPerfil"></span></p>
+            </div>
+            <div class="card card-orange">
+                <p class="card-title">Resumo do Ano Letivo</p>
+                <p><strong>Total de Ocorrências:</strong> <span id="totalOcorrenciasPerfil">0</span></p>
+                <p><strong>Pendentes:</strong> <span class="text-red font-bold" id="pendentesPerfil">0</span></p>
+                <p><strong>Mais reincidente:</strong> <span id="reincidentePerfil">-</span></p>
+            </div>
+        </div>
+
+        <h3 class="section-title">Histórico de Ocorrências</h3>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Horário</th>
+                        <th>Matéria / Professor</th>
+                        <th>Infrações</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaHistoricoOcorrencias">
+                    <!-- Preenchido via JavaScript com dados REAIS do banco -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- MODAL 1: CADASTRO DE TURMA -->
+    <div id="modalTurma" class="modal_fundo">
+        <div class="modal_conteudo">
+            <span class="fechar_modal">&times;</span>
+            <h2>Cadastrar Nova Turma</h2>
+            <form id="formCadastroTurma">
+                <div class="linha_form">
+                    <div class="col_form">
+                        <label>Nome / Descrição (ex: 3° Reg 1):</label>
+                        <input type="text" id="descTurma" class="input_modal" required>
+                    </div>
+                    <div class="col_form">
+                        <label>Ano Letivo:</label>
+                        <input type="number" id="anoLetivo" class="input_modal" required min="2024">
+                    </div>
+                </div>
+                <div class="linha_form">
+                    <div class="col_form">
+                        <label>Semestre Letivo:</label>
+                        <select id="semestreLetivo" class="input_modal" required>
+                            <option value="1">1º Semestre</option>
+                            <option value="2">2º Semestre</option>
+                        </select>
+                    </div>
+                    <div class="col_form">
+                        <label>Turno:</label>
+                        <select id="turno" class="input_modal" required>
+                            <option value="Manhã">Manhã</option>
+                            <option value="Tarde">Tarde</option>
+                            <option value="Noite">Noite</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn_salvar_turma">Salvar Turma</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDITAR OCORRÊNCIA (Novo Visual) -->
+    <div id="modalEditar" class="modal_fundo">
+        <div class="modal_conteudo modal_large">
+            <span class="fechar_modal close_editar">&times;</span>
+            <h2>Editar Ocorrência</h2>
+            <p class="modal-subtitle" id="subtituloModalEditar">João Silva Sauro · 15/04/2026 · 10:30 · 1º Ano A</p>
+            
+            <form id="formEditarOcorrencia">
+                <label class="form-label">Status</label>
+                <!-- Radio buttons simplificados do novo print -->
+                <div class="radio-group-simple">
+                    <label class="radio-label red-label">
+                        <input type="radio" name="statusOcorrencia" value="pendente" checked> 🔴 Pendente
+                    </label>
+                    <label class="radio-label green-label">
+                        <input type="radio" name="statusOcorrencia" value="resolvida"> 🟢 Resolvida
+                    </label>
+                </div>
+
+                <div class="linha_form">
+                    <div class="col_form">
+                        <label>Disciplina</label>
+                        <select class="input_modal" id="editDisciplina"><option>Física</option></select>
+                    </div>
+                    <div class="col_form">
+                        <label>Professor(a)</label>
+                        <select class="input_modal" id="editProfessor"><option>Prof. Carlos</option></select>
+                    </div>
+                </div>
+
+                <label class="form-label">Tipo(s) de Infração</label>
+                <div class="checkbox-list-clean">
+                    <label><input type="checkbox"> 1. Indisciplina durante a aula de</label>
+                    <label><input type="checkbox"> 2. Desrespeitou o(a) professor(a)</label>
+                    <label><input type="checkbox"> 7. Chegou atrasado, após o horário de entrada</label>
+                    <label class="text-blue"><input type="checkbox" checked> 11. Fez uso do celular ou outro aparelho eletrônico durante as aulas</label>
+                    <label><input type="checkbox"> 15. Se envolveu em boatos e fofocas</label>
+                </div>
+
+                <label class="form-label" style="margin-top: 15px;">Descrição / Observações</label>
+                <textarea class="input_modal textarea_modal" id="editObservacao">Aluno flagrado usando celular durante a aula.</textarea>
+
+                <div class="notificacao-box">
+                    <label class="font-bold">
+                        <input type="checkbox" checked> 16. Notificar responsável
+                    </label>
+                    <p class="text-small text-muted" style="margin-left: 22px;">Aparecerá na impressão da folha</p>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn-outline close_editar_btn">Cancelar</button>
+                    <button type="submit" class="btn-success">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="Script/turmas.js"></script>
+</body>
+</html>

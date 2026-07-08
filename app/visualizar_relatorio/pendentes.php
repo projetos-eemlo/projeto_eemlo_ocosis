@@ -422,11 +422,26 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
 </head>
 <body>
 
-<?php 
-    $base_path = '../'; 
-    $pagina_atual = 'pendentes'; // No pendentes.php
-    include '../header.php'; 
-?>
+<nav class="navbar">
+    <a href="index.php" class="navbar-brand">🏠 Ocorrências</a>
+    <ul class="navbar-nav">
+        <li><a href="nova_ocorrencia.php">Nova Ocorrência</a></li>
+        <li><a href="pesquisa_turmas.php">Pesquisa e Turmas</a></li>
+        <li>
+            <a href="pendentes.php">
+                Ocorrências Pendentes
+                <?php if ($totalPendentesGlobal > 0): ?>
+                    <span class="badge-nav"><?= $totalPendentesGlobal ?></span>
+                <?php endif; ?>
+            </a>
+        </li>
+    </ul>
+    <div class="navbar-actions">
+        <form method="POST" action="logout.php">
+            <button type="submit" class="btn-sair">Sair</button>
+        </form>
+    </div>
+</nav>
 
 <main class="main">
 
