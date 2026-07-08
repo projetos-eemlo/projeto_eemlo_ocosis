@@ -1,14 +1,83 @@
-nav {
-    background-color: #3b82f6; 
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
-    gap: 30px;
+/* Reset básico para o menu não ter margens indesejadas */
+body { margin: 0; }
+
+.unified-navbar {
+    background-color: #1a56db; /* Azul do Figma */
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+    height: 65px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.unified-navbar .nav-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+.logo-box {
+    width: 32px;
+    height: 32px;
+    background-color: white;
+    border-radius: 4px;
+    margin-right: 15px;
+}
+
+.unified-navbar a.nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    transition: background 0.2s;
+    box-sizing: border-box;
+}
+
+.unified-navbar a.nav-link:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+/* Estilo da página ATIVA (Fundo branco, texto azul) */
+.unified-navbar a.nav-link.active {
+    background-color: white;
+    color: #1a56db;
+    font-weight: bold;
+    border-radius: 6px 6px 0 0;
+    height: 85%;
+    margin-top: auto;
+    border-bottom: 3px solid #1a56db;
+}
+
+.unified-badge {
+    background-color: #e53e3e;
+    color: white;
+    font-size: 11px;
+    padding: 3px 7px;
+    border-radius: 50%;
+    margin-left: 8px;
     font-weight: bold;
 }
 
-nav a {
+.unified-btn-sair {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.5);
     color: white;
-    text-decoration: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.unified-btn-sair:hover {
+    background: white;
+    color: #1a56db;
 }

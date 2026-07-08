@@ -8,14 +8,11 @@
     <link rel="stylesheet" href="Cadastrar_alunos.css?v=1">
 </head>
 <body>
-    <div class="Header">
-        <a href="../login_screen/login.html">1.Login\Cadastro</a>
-        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
-        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar alunos</a>
-        <a href="../Manter_Ocorrencias/index.html">4.Nova Ocorrência</a>
-        <a href="../cadastrar_professores/cadastrar_professores.html">5.Cadastrar Professores</a>
-        <a href="../visualizar_relatorio/pendentes.php">6.Ocorrencias pendentes</a>
-    </div>
+    <?php 
+    $base_path = '../'; 
+    $pagina_atual = 'cadastrar_alunos'; 
+    include '../header.php'; 
+?>
     
     <div class="main-controls">
         <button id="btn-upload" class="upload">Upload CSV</button>

@@ -8,22 +8,11 @@
 </head>
 <body>
 
-    <!-- Barra de Navegação -->
-    <nav class="navbar">
-        <div class="nav-left">
-            <div class="logo">
-                🏫 Ocorrências
-            </div>
-            <a href="#" class="nav-link">Nova Ocorrência</a>
-            <a href="#" class="nav-link active">Pesquisa e Turmas</a>
-            <a href="#" class="nav-link">
-                Ocorrências Pendentes <span class="badge-notification">5</span>
-            </a>
-        </div>
-        <div class="nav-right">
-            <button class="btn-sair">Sair</button>
-        </div>
-    </nav>
+    <?php 
+    $base_path = '../'; 
+    $pagina_atual = 'turmas'; 
+    include '../header.php'; 
+?>
 
     <!-- CONTEÚDO 1: TELA DE PESQUISA (Principal) -->
     <main class="container" id="telaPesquisa">

@@ -7,13 +7,11 @@
     <title>Cadastro professores</title>
 </head>
 <body>
-    <div class="Header">
-        <a href="../login_page/login.html">1.Login\Cadastro</a>
-        <a href="../turmas_page/turmas.html">2.Nova Pesquisa e Turma</a>
-        <a href="../cadastrar_alunos/cadastrar_alunos.html">3.Cadastrar alunos</a>
-        <a href="../ocorrencias_page/ocorrencias.html">4.Nova Ocorrência</a>
-        <a href="../perfil_aluno/perfil_aluno.html">5.Perfil do aluno</a>
-    </div>
+    <?php 
+    $base_path = '../'; 
+    $pagina_atual = 'cadastrar_professores'; 
+    include '../header.php'; 
+?>
     
     <div class="professores" id="container-professores">
         <button id="btn-upload" class="Csv">CSV</button> 
