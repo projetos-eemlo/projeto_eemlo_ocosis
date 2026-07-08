@@ -2,7 +2,7 @@
 session_start();
 
 $host = '127.0.0.1';
-$dbname = 'ocosisteste'; 
+$dbname = 'ocosis'; 
 $user = 'root'; 
 $pass = '';
 
