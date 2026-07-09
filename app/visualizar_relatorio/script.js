@@ -288,4 +288,3 @@ function navegarParaPerfil(linha) {
     const link = linha.querySelector('.btn-perfil');
     if (link) window.location.href = link.href;
 }
-
