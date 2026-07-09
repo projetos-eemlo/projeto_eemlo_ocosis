@@ -1,24 +1,20 @@
 <?php
-
-$db_host = "localhost";
-$db_port = "3306";
-$db_name = "ocosis";
-$db_user = "root";
-$db_pass = "";
-
-try {
-    // CORRIGIDO: a porta ($db_port) precisa entrar na DSN, senão o PDO
-    // sempre tenta a porta padrão do MySQL (3306), ignorando o que você configurou.
-    $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("<div style='padding:20px;font-family:sans-serif;'><h3>Erro ao conectar ao banco de dados.</h3><p>" . htmlspecialchars($e->getMessage()) . "</p></div>");
-}
-
+/**
+ * OCOSIS — Perfil do Aluno / Histórico de Ocorrências
+ * Integrado com os arquivos compartilhados do projeto:
+ *   - pdo.php            -> conexão única com o banco (fica na mesma pasta)
+ *   - without_login.php  -> bloqueia acesso sem login (fica na mesma pasta)
+ *   - header.php         -> navbar unificada (fica na mesma pasta)
+ */
+ 
+require_once __DIR__ . '/pdo.php';
+// Obs.: o login desse sistema guarda o estado em sessionStorage (JS), não em
+// $_SESSION do PHP. Por isso a checagem de "logado ou não" é feita no
+// <script> logo no início do <body>, não aqui no servidor.
+ 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === 'atualizar_ocorrencia') {
     header('Content-Type: application/json; charset=utf-8');
-
+ 
     try {
         $id         = intval($_POST['id'] ?? 0);
         $status     = ($_POST['status'] ?? 'pendente') === 'resolvida' ? 'resolvida' : 'pendente';
@@ -27,16 +23,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
         $discNome   = trim($_POST['disciplina'] ?? '');
         $profNome   = trim($_POST['professor'] ?? '');
         $infracoes  = isset($_POST['infracoes']) ? array_map('intval', (array) $_POST['infracoes']) : [];
-
+ 
         if ($id === 0) {
             throw new Exception('ID da ocorrência inválido.');
         }
-
-        // CORRIGIDO: antes, um select vazio ("Selecione...") ou um nome que não
-        // batesse com o banco fazia o campo ser simplesmente ignorado no UPDATE
-        // (o valor antigo ficava intacto, sem avisar ninguém). Agora:
-        //  - campo vazio -> grava NULL (permite "limpar" a disciplina/professor)
-        //  - campo preenchido mas não encontrado no banco -> erro explícito
+ 
+        // Campo vazio -> grava NULL (permite "limpar" disciplina/professor).
+        // Campo preenchido mas não encontrado no banco -> erro explícito,
+        // em vez de silenciosamente manter o valor antigo.
         $idDisciplina = null;
         if ($discNome !== '') {
             $s = $pdo->prepare("SELECT id_disciplina FROM disciplinas WHERE desc_disciplina = :d LIMIT 1");
@@ -46,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                 throw new Exception("Disciplina '$discNome' não encontrada no banco de dados.");
             }
         }
-
+ 
         $idFuncionario = null;
         if ($profNome !== '') {
             $s = $pdo->prepare("SELECT id_funcionario FROM funcionarios WHERE nome_funcionario = :n LIMIT 1");
@@ -56,12 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                 throw new Exception("Professor(a) '$profNome' não encontrado(a) no banco de dados.");
             }
         }
-
+ 
         $pdo->beginTransaction();
-
-        // CORRIGIDO: id_disciplina e id_funcionario agora sempre entram na query
-        // (podendo ser NULL), em vez de serem adicionados condicionalmente ao SQL.
-        // Isso permite limpar o campo e evita depender do modo de "emulated prepares" do PDO.
+ 
         $sql = "UPDATE ocorrencias
                    SET status = :status,
                        desc_ocorrencia = :descricao,
@@ -69,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                        id_disciplina = :id_disciplina,
                        id_funcionario = :id_funcionario
                  WHERE id_ocorrencia = :id";
-
+ 
         $params = [
             'status'         => $status,
             'descricao'      => $descricao,
@@ -78,12 +69,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
             'id_funcionario' => $idFuncionario,
             'id'             => $id,
         ];
-
+ 
         $pdo->prepare($sql)->execute($params);
-
+ 
         // Refaz o vínculo de infrações (ocorrencia_tipos)
         $pdo->prepare("DELETE FROM ocorrencia_tipos WHERE id_ocorrencia = :id")->execute(['id' => $id]);
-
+ 
         if (!empty($infracoes)) {
             $stmtTipo   = $pdo->prepare("SELECT id_tipo_ocorrencia FROM tipo_ocorrencia WHERE num_item = :n");
             $stmtInsert = $pdo->prepare("INSERT INTO ocorrencia_tipos (id_ocorrencia, id_tipo_ocorrencia) VALUES (:oc, :tp)");
@@ -95,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                 }
             }
         }
-
+ 
         $pdo->commit();
         echo json_encode(['ok' => true]);
     } catch (Exception $e) {
@@ -107,16 +98,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
     }
     exit;
 }
-
+ 
 /* ════════════════════════════════════════════════════════════════
    CARREGAMENTO NORMAL DA PÁGINA
    ════════════════════════════════════════════════════════════════ */
 $aluno_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-
+ 
 if ($aluno_id === 0) {
     die("<div style='padding:20px; font-family:sans-serif;'><h3>Erro: Nenhum ID de aluno foi especificado para gerar o relatório.</h3><a href='pendentes.php'>Voltar para Pendentes</a></div>");
 }
-
+ 
 // Aluno + turma atual
 $sqlAluno = $pdo->prepare("
     SELECT
@@ -130,16 +121,16 @@ $sqlAluno = $pdo->prepare("
     WHERE a.id_aluno = :id
 ");
 $sqlAluno->execute(['id' => $aluno_id]);
-$aluno = $sqlAluno->fetch();
-
+$aluno = $sqlAluno->fetch(PDO::FETCH_ASSOC);
+ 
 if (!$aluno) {
     die("<div style='padding:20px; font-family:sans-serif;'><h3>Erro: Aluno não encontrado no banco de dados.</h3><a href='pendentes.php'>Voltar</a></div>");
 }
-
+ 
 $aluno['nascimento'] = isset($aluno['data_nascimento'])
     ? date('d/m/Y', strtotime($aluno['data_nascimento']))
     : '—';
-
+ 
 // Histórico de ocorrências do aluno (com infrações agregadas)
 $sqlOcorrencias = $pdo->prepare("
     SELECT
@@ -163,19 +154,19 @@ $sqlOcorrencias = $pdo->prepare("
     ORDER BY o.data_ocorrencia DESC, o.horario DESC
 ");
 $sqlOcorrencias->execute(['aluno_id' => $aluno_id]);
-$ocorrencias = $sqlOcorrencias->fetchAll();
-
+$ocorrencias = $sqlOcorrencias->fetchAll(PDO::FETCH_ASSOC);
+ 
 $historicoOcorrencias = [];
 foreach ($ocorrencias as $row) {
     $materiaProfessor = trim(($row['disciplina'] ?? '—') . ' / ' . ($row['professor'] ?? '—'), ' /');
     if ($materiaProfessor === '') {
         $materiaProfessor = '—';
     }
-
+ 
     $infracoesArr = $row['infracoes_ids']
         ? array_map('intval', explode(',', $row['infracoes_ids']))
         : [];
-
+ 
     $historicoOcorrencias[] = [
         'id'                => $row['id'],
         'data_formatada'    => date('d/m/Y', strtotime($row['data_registro'])),
@@ -191,26 +182,24 @@ foreach ($ocorrencias as $row) {
         'notif_responsavel' => (int) $row['notif_responsavel'],
     ];
 }
-
+ 
 $totalOcorrencias = count($historicoOcorrencias);
 $totalPendentes   = count(array_filter($historicoOcorrencias, fn($o) => $o['status'] === 'pendente'));
-
-// CORRIGIDO: antes pegava a infração da ocorrência mais RECENTE
-// (historicoOcorrencias[0]), que não é a mesma coisa que a infração
-// que mais SE REPETE no histórico do aluno. Agora conta a frequência
-// de cada tipo de infração e escolhe a de maior contagem de fato.
+ 
+// Conta a frequência de cada tipo de infração no histórico e escolhe
+// a de maior contagem (em vez de simplesmente pegar a mais recente).
 $contagemInfracoes = [];
 foreach ($historicoOcorrencias as $oc) {
     foreach ($oc['infracoes_arr'] as $numItem) {
         $contagemInfracoes[$numItem] = ($contagemInfracoes[$numItem] ?? 0) + 1;
     }
 }
-
+ 
 $maisReincidente = 'Nenhuma infração registrada';
 if (!empty($contagemInfracoes)) {
-    arsort($contagemInfracoes); // maior contagem primeiro
+    arsort($contagemInfracoes);
     $numItemTopo = array_key_first($contagemInfracoes);
-
+ 
     foreach ($historicoOcorrencias as $oc) {
         $idx = array_search($numItemTopo, $oc['infracoes_arr'], true);
         if ($idx !== false) {
@@ -220,18 +209,23 @@ if (!empty($contagemInfracoes)) {
         }
     }
 }
-
-// Total de ocorrências pendentes no sistema todo (badge da navbar)
+ 
+// Total de ocorrências pendentes no sistema todo (badge da navbar unificada)
 $totalPendentesGlobal = (int) $pdo->query("SELECT COUNT(*) FROM ocorrencias WHERE status = 'pendente'")->fetchColumn();
-
+ 
 // Disciplinas e professores reais (pra popular os <select> do modal de edição)
 $disciplinasDb = $pdo->query("SELECT desc_disciplina FROM disciplinas ORDER BY desc_disciplina")->fetchAll(PDO::FETCH_COLUMN);
 $professoresDb = $pdo->query("SELECT nome_funcionario FROM funcionarios WHERE cargo_funcionario LIKE 'Professor%' ORDER BY nome_funcionario")->fetchAll(PDO::FETCH_COLUMN);
-
-// Lista oficial de infrações (17 itens) — vem direto da tabela tipo_ocorrencia,
-// então fica sempre igual ao que está cadastrado no banco (sem duplicar/hardcodar).
+ 
+// Lista oficial de infrações — vem direto da tabela tipo_ocorrencia,
+// então fica sempre igual ao que está cadastrado no banco.
 $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_ocorrencia ORDER BY num_item")
     ->fetchAll(PDO::FETCH_KEY_PAIR);
+ 
+// Usado pelo header.php pra destacar o item certo no menu e montar os
+// caminhos relativos (perfil.php está uma pasta abaixo da raiz do app).
+$base_path   = '../';
+$pagina_atual = 'pendentes';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -246,36 +240,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f0f2f5; color: #2d3748; min-height: 100vh;
         }
-        /* ── NAVBAR ──────────────────────────────────────── */
-        .navbar {
-            background: #1a56db; height: 56px; display: flex; align-items: center;
-            padding: 0 2rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-        }
-        .navbar-brand {
-            color: #fff; font-size: 1rem; font-weight: 700; text-decoration: none;
-            display: flex; align-items: center; gap: 0.45rem; margin-right: 2.5rem; letter-spacing: -0.01em; white-space: nowrap;
-        }
-        .navbar-nav { display: flex; align-items: center; list-style: none; flex: 1; gap: 0; }
-        .navbar-nav li a {
-            display: flex; align-items: center; height: 56px; padding: 0 1.1rem; color: rgba(255,255,255,0.8);
-            text-decoration: none; font-size: 0.9rem; font-weight: 500; position: relative; transition: color 0.15s; white-space: nowrap;
-        }
-        .navbar-nav li a:hover { color: #fff; }
-        .navbar-nav li a.active { color: #fff; font-weight: 700; }
-        .navbar-nav li a.active::after {
-            content: ''; position: absolute; bottom: 0; left: 1.1rem; right: 1.1rem; height: 3px; background: #fff; border-radius: 3px 3px 0 0;
-        }
-        .badge-nav {
-            display: inline-flex; align-items: center; justify-content: center; background: #e53e3e; color: #fff;
-            font-size: 0.68rem; font-weight: 700; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; margin-left: 5px; line-height: 1;
-        }
-        .navbar-actions { margin-left: auto; }
-        .btn-sair {
-            background: transparent; color: #fff; border: 1.5px solid rgba(255,255,255,0.55);
-            padding: 0.35rem 1.1rem; border-radius: 7px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: background 0.15s, border-color 0.15s; font-family: inherit;
-        }
-        .btn-sair:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
-
+ 
         /* ── LAYOUT DE CONTEÚDO ───────────────────────────── */
         .main { max-width: 1120px; margin: 0 auto; padding: 2.25rem 1.5rem 3rem; }
         .top-actions { margin-bottom: 1.25rem; }
@@ -284,14 +249,14 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             padding: 0.4rem 1.2rem; border-radius: 7px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: background 0.15s;
         }
         .btn-voltar:hover { background: #f7fafc; }
-
+ 
         .profile-header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
         .profile-title { font-size: 1.65rem; font-weight: 700; color: #1a202c; }
         .btn-imprimir-todas {
             background: #4a5568; color: #fff; border: none; padding: 0.55rem 1.2rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.15s;
         }
         .btn-imprimir-todas:hover { background: #2d3748; }
-
+ 
         .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
         .card-info { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 0.75rem; }
         .card-resumo { background: #fffaf0; border: 1.5px solid #feebc8; }
@@ -299,7 +264,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
         .info-item { font-size: 0.92rem; color: #4a5568; }
         .info-item strong { color: #1a202c; font-weight: 600; }
         .text-danger-custom { color: #c53030; font-weight: 700; }
-
+ 
         .section-title { font-size: 1.15rem; font-weight: 700; color: #2d3748; margin-bottom: 1.25rem; }
         .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04); overflow: hidden; overflow-x: auto; }
         .ocorrencias-table { width: 100%; border-collapse: collapse; min-width: 850px; }
@@ -309,7 +274,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
         .ocorrencias-table tbody tr:last-child { border-bottom: none; }
         .ocorrencias-table tbody tr:hover { background: #f8fafd; }
         .ocorrencias-table td { padding: 1rem 1.1rem; font-size: 0.88rem; vertical-align: top; }
-
+ 
         .infracao-tag-container { display: flex; flex-direction: column; gap: 0.35rem; }
         .infracao-ids { display: flex; gap: 0.5rem; color: #1a56db; font-weight: 700; font-size: 0.85rem; }
         .infracao-texto { color: #4a5568; line-height: 1.4; }
@@ -319,7 +284,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
         .status-resolvida { background: #d4edda; color: #276749; }
         .sub-notif { font-size: 0.74rem; color: #dd6b20; font-weight: 600; white-space: nowrap; }
         .actions-cell { display: flex; gap: 0.4rem; }
-
+ 
         .btn-action-editar {
             background: #fff; color: #dd6b20; border: 1.5px solid #fbd38d; padding: 0.4rem 0.85rem;
             border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; transition: background 0.15s;
@@ -330,7 +295,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background 0.15s;
         }
         .btn-action-print:hover { background: #2d3748; }
-
+ 
         /* ── TOAST (feedback rápido) ──────────────────────── */
         .toast {
             position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -339,29 +304,29 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none;
         }
         .toast.toast-visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
-
+ 
         @media (max-width: 768px) {
             .cards-grid { grid-template-columns: 1fr; gap: 1rem; }
             .main { padding: 1.5rem 1rem 2.5rem; }
             .profile-title { font-size: 1.35rem; }
         }
-
+ 
         /* ── IMPRESSÃO DE UMA ÚNICA OCORRÊNCIA ─────────────── */
         body.imprimir-uma-ocorrencia .card-resumo,
         body.imprimir-uma-ocorrencia .section-title { display: none; }
         body.imprimir-uma-ocorrencia .cards-grid { grid-template-columns: 1fr; }
         body.imprimir-uma-ocorrencia .ocorrencias-table tbody tr { display: none; }
         body.imprimir-uma-ocorrencia .ocorrencias-table tbody tr.linha-imprimir-ativa { display: table-row; }
-
+ 
         @media print {
-            .navbar, .top-actions, .btn-imprimir-todas, .actions-cell, .toast {
+            .navbar, .unified-navbar, .top-actions, .btn-imprimir-todas, .actions-cell, .toast {
                 display: none !important;
             }
             body { background: #fff; }
             .main { padding: 0; max-width: 100%; }
             .table-card { box-shadow: none; border: 1px solid #e2e8f0; }
         }
-
+ 
         /* ── MODAL DE CONFIRMAÇÃO ────────────────────────── */
         .modal-confirmacao-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -389,7 +354,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             cursor: pointer; font-family: inherit; transition: background 0.15s;
         }
         .btn-confirmar-sim:hover { background: #1648c0; }
-
+ 
         /* ── MODAL DE EDIÇÃO ──────────────────────────────── */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -461,46 +426,48 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
     </style>
 </head>
 <body>
-
-<nav class="navbar">
-    <a href="index.php" class="navbar-brand">🏠 Ocorrências</a>
-    <ul class="navbar-nav">
-        <li><a href="nova_ocorrencia.php">Nova Ocorrência</a></li>
-        <li><a href="pesquisa_turmas.php">Pesquisa e Turmas</a></li>
-        <li>
-            <a href="pendentes.php">
-                Ocorrências Pendentes
-                <?php if ($totalPendentesGlobal > 0): ?>
-                    <span class="badge-nav"><?= $totalPendentesGlobal ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-    </ul>
-    <div class="navbar-actions">
-        <form method="POST" action="logout.php">
-            <button type="submit" class="btn-sair">Sair</button>
-        </form>
-    </div>
-</nav>
-
+ 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Mesma checagem usada nas outras páginas do sistema: o login guarda
+    // o estado no sessionStorage do navegador, não em $_SESSION do PHP.
+    const masp  = sessionStorage.getItem('masp_logado');
+    const cargo = sessionStorage.getItem('cargo_logado');
+ 
+    if (!masp) {
+        alert("Você precisa fazer login primeiro!");
+        // visualizar_relatorio/ está no mesmo nível de login_screen/, então "../" basta
+        window.location.href = "../login_screen/login.html";
+        return;
+    }
+ 
+    const infoUsuario = document.getElementById('info-usuario');
+    if (infoUsuario) {
+        infoUsuario.innerHTML = `Logado como: <strong>${cargo}</strong> (MASP: ${masp})`;
+    }
+});
+</script>
+ 
+<?php require __DIR__ . '/header.php'; ?>
+ 
 <main class="main">
-
+ 
     <div class="top-actions">
         <a href="pendentes.php" class="btn-voltar">← Voltar</a>
     </div>
-
+ 
     <div class="profile-header-container">
         <h1 class="profile-title">Perfil: <?= htmlspecialchars($aluno['nome']) ?></h1>
         <button type="button" class="btn-imprimir-todas">🖨️ Imprimir Todas</button>
     </div>
-
+ 
     <div class="cards-grid">
         <div class="card-info">
             <p class="info-item"><strong>Nº SIMADE:</strong> <?= htmlspecialchars($aluno['simade']) ?></p>
             <p class="info-item"><strong>Nascimento:</strong> <?= htmlspecialchars($aluno['nascimento']) ?></p>
             <p class="info-item"><strong>Turma Atual:</strong> <?= htmlspecialchars($aluno['turma_atual'] ?? '—') ?></p>
         </div>
-
+ 
         <div class="card-info card-resumo">
             <h2 class="card-resumo-title">Resumo do Ano Letivo</h2>
             <p class="info-item"><strong>Total de Ocorrências:</strong> <?= $totalOcorrencias ?></p>
@@ -508,9 +475,9 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
             <p class="info-item"><strong>Mais reincidente:</strong> <?= htmlspecialchars($maisReincidente) ?></p>
         </div>
     </div>
-
+ 
     <h2 class="section-title">Histórico de Ocorrências</h2>
-
+ 
     <div class="table-card">
         <table class="ocorrencias-table">
             <thead>
@@ -592,24 +559,24 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
         </table>
     </div>
 </main>
-
+ 
 <!-- ── MODAL EDITAR OCORRÊNCIA ─────────────────────────── -->
 <div class="modal-overlay" id="modal-overlay" hidden>
     <div class="modal-editar" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-
+ 
         <div class="modal-header">
             <h2 id="modal-titulo">Editar Ocorrência</h2>
             <button type="button" class="modal-fechar" id="modal-fechar" aria-label="Fechar">&times;</button>
         </div>
-
+ 
         <p class="modal-subtitulo" id="modal-subtitulo"></p>
-
+ 
         <form id="form-editar-ocorrencia">
             <!-- id="modal-occ-id" (com hífen) — precisa bater exatamente com o
                  seletor usado no perfil.js, senão o clique em "Editar" quebra -->
             <input type="hidden" id="modal-occ-id" name="id">
             <div class="modal-corpo">
-
+ 
                 <div class="campo-grupo">
                     <span class="campo-label">Status</span>
                     <div class="status-toggle">
@@ -621,7 +588,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
                         </label>
                     </div>
                 </div>
-
+ 
                 <div class="campos-duplos">
                     <div class="campo-grupo">
                         <label class="campo-label" for="modal-disciplina">Disciplina</label>
@@ -642,7 +609,7 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
                         </select>
                     </div>
                 </div>
-
+ 
                 <div class="campo-grupo">
                     <span class="campo-label">Tipo(s) de Infração</span>
                     <div class="infracoes-lista" id="modal-infracoes-lista">
@@ -654,12 +621,12 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
                         <?php endforeach; ?>
                     </div>
                 </div>
-
+ 
                 <div class="campo-grupo">
                     <label class="campo-label" for="modal-descricao">Descrição / Observações</label>
                     <textarea id="modal-descricao" name="descricao" class="campo-textarea" placeholder="Descreva o ocorrido..."></textarea>
                 </div>
-
+ 
                 <label class="notif-box">
                     <input type="checkbox" id="modal-notif" name="notif_responsavel" value="1">
                     <div class="notif-box-texto">
@@ -667,18 +634,18 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
                         <span>Aparecerá na impressão da folha</span>
                     </div>
                 </label>
-
+ 
             </div>
-
+ 
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" id="modal-cancelar">Cancelar</button>
                 <button type="submit" class="btn-salvar">Salvar Alterações</button>
             </div>
         </form>
-
+ 
     </div>
 </div>
-
+ 
 <!-- ── MODAL DE CONFIRMAÇÃO ───────────────────────────── -->
 <div class="modal-confirmacao-overlay" id="modal-confirmacao-overlay" hidden>
     <div class="modal-confirmacao" role="dialog" aria-modal="true" aria-labelledby="conf-titulo">
@@ -691,9 +658,10 @@ $tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_oc
         </div>
     </div>
 </div>
-
+ 
 <div id="toast" class="toast"></div>
-
+ 
 <script src="perfil.js"></script>
 </body>
 </html>
+ 
