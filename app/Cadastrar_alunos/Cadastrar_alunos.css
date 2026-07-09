@@ -1,45 +1,471 @@
-body{
-    background-color: rgb(230, 230, 230);
-/*======================
-        Header
-=======================
-*/
+/* =========================================
+   Reset e Configurações Globais
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-.Header{
-    height: 40px;
-    border-color: black;
-    border-style: solid ;
-    border-radius: 5px;
+
+:root {
+    --color-bg-light: #f8f9fa;
+    --color-text-dark: #212529;
+    --color-text-light: #ffffff;
+    --color-border: #dee2e6;
+    --color-primary: #1d52d4;
+    --color-primary-dark: #113ca4;
+    --color-blue-light: #edf2ff;
+    --color-info: #95c1d6;
+    --color-upload-green: #7fff00;
+    --color-upload-hover: #6ee600;
+    --color-secondary: #f1f3f5;
+    --color-danger: #dc3545;
+    --color-danger-light: #fff0f0;
+    --color-danger-border: #ffcaca;
+    
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+    --shadow-modal: 0 15px 35px rgba(0, 0, 0, 0.25);
+    --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.08) inset;
+    --border-radius-sm: 4px;
+    --border-radius-md: 12px; /* Cantos arredondados mais modernos para os modais */
+    --transition: all 0.2s ease-in-out;
+}
+
+body {
+    background-color: var(--color-bg-light);
+    color: var(--color-text-dark);
+    
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    
+}
+
+/* =========================================
+   Header (Barra de Navegação)
+   ========================================= */
+.Header {
+    width: 100%;
+    max-width: 1200px;
+    background-color: var(--color-primary);
+    border-radius: var(--border-radius-sm);
     display: flex;
     align-items: center;
-    justify-self: center;
-    gap: 20px;
-    padding: 3px;
-    background-color: rgb(20, 75, 253);
-    color: rgba(255, 255, 255, 0.863);
-     box-shadow: 10px  ;
-     box-shadow: 10px 10px 5px #33333375;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-bottom: 25px;
 }
-.Header a {
-    background-color: rgb(1, 60, 255);
-    margin: 3px;
-    border-radius: 3px;
-    padding: 10px;
-    cursor: pointer;
-    box-shadow: 3px black;
-}
-.Header a:hover{
-    background-color: rgb(39, 89, 255);
-    box-shadow: 0px 0px 10px 7px #00000050;
-}
-.upload{
-    background-color: chartreuse;
-    padding: 20px 25px 20px 25px;
-    margin-bottom: 100px;
-    border: solid black;
-    border-radius: 5px;
-    font: size 13px;;
-}
-.Section2 input{
 
+.Header a {
+    color: var(--color-text-light);
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.Header a:hover {
+    background-color: var(--color-primary-dark);
+}
+
+/* =========================================
+   Controles Principais
+   ========================================= */
+.main-controls {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    margin-top: 35px;
+    justify-self: center;
+}
+
+.upload {
+    background-color: var(--color-upload-green);
+    color: #000000;
+    padding: 12px 24px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
+}
+
+.upload:hover {
+    background-color: var(--color-upload-hover);
+    transform: translateY(-1px);
+}
+
+.search {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-input);
+    transition: var(--transition);
+    background-color: #ffffff;
+}
+
+.search:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
+}
+
+select.turmas {
+    min-width: 140px;
+    padding: 12px;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-border);
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+select.turmas:focus {
+    outline: none;
+    border-color: var(--color-primary);
+}
+
+/* =========================================
+   Área de Alunos (TRAVADA COM ROLAGEM INTERNA)
+   ========================================= */
+.alunos {
+    width: 100%;
+    max-width: 1200px;
+    height: 560px; /* Mantido os 80px a mais que pediu */
+    margin-bottom: 25px;
+    background-color: #ffffff;
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Respiro confortável entre linhas */
+    position: relative;
+    overflow-y: auto; 
+    justify-self: center;
+}
+
+.alunos input[type="checkbox"], 
+.alunos label#label-todos {
+    display: none;
+}
+
+.alunos.modo-edicao input[type="checkbox"], 
+.alunos.modo-edicao label#label-todos {
+    display: inline-block;
+    cursor: pointer;
+}
+
+/* Cabeçalho Fixo do Scroll */
+.aluno-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--color-bg-light);
+    color: var(--color-primary);
+    font-weight: bold;
+    font-size: 14px;
+    min-height: 35px;
+    width: 100%;
+    position: sticky;
+    top: -24px; 
+    background-color: #ffffff; 
+    z-index: 10; 
+    margin-top: -24px; 
+    padding-top: 24px; 
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #ffffff;
+}
+
+#turma-selecionada-info {
+    background-color: var(--color-primary) !important;
+    color: #ffffff !important;
+    padding: 8px 16px;
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: bold;
+    display: none; 
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    border: none;
+    white-space: nowrap;
+}
+
+#turma-selecionada-info.visivel {
+    display: block !important; 
+}
+
+.aluno-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 16px; 
+    border-radius: var(--border-radius-sm);
+    border-bottom: 1px solid var(--color-bg-light);
+    transition: var(--transition);
+    overflow: hidden; 
+}
+
+.aluno-item:hover {
+    background-color: var(--color-blue-light);
+}
+
+/* =========================================
+   ANIMAÇÕES DE SUCESSO DO SISTEMA
+   ========================================= */
+/* Cadastro CSV: Desliza e some */
+.aluno-item.salvo-sucesso {
+    background-color: var(--color-primary) !important;
+    border-color: transparent !important;
+    opacity: 0;
+    transform: scale(0.95) translateX(30px); 
+    pointer-events: none; 
+    transition: background-color 0.2s ease, opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s !important;
+}
+
+.aluno-item.salvo-sucesso span,
+.aluno-item.salvo-sucesso strong {
+    color: #ffffff !important;
+    transition: color 0.2s ease;
+}
+
+/* Transferência: Pisca em verde suave e fica na tela */
+.aluno-item.transferido-sucesso {
+    background-color: #d4edda !important; 
+    border-color: #c3e6cb !important;
+    transition: background-color 0.5s ease !important;
+}
+
+/* =========================================
+   Botões Inferiores
+   ========================================= */
+.botoes-inferiores {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    justify-self: center;
+}
+
+.botoes-inferiores button {
+    padding: 12px 24px;
+    border-radius: var(--border-radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: var(--transition);
+    box-shadow: var(--shadow-soft);
+}
+
+.btn-primary { background-color: var(--color-primary); color: var(--color-text-light); }
+.btn-primary:hover { background-color: var(--color-primary-dark); }
+
+.btn-secondary { background-color: #ffffff; color: var(--color-primary); border-color: var(--color-primary) !important; }
+.btn-secondary:hover { background-color: var(--color-blue-light); }
+
+.btn-info { background-color: var(--color-info); color: white; border-color: var(--color-info) !important;}
+.btn-info:hover { background-color: #79a6ba; }
+
+.btn-danger { background-color: var(--color-danger); color: white; }
+.btn-danger:hover { background-color: #bd2130; }
+
+.botoes-inferiores button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* =========================================
+   INTERFACES DE MODAIS (REPROJETADOS)
+   ========================================= */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: var(--transition);
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-content {
+    background-color: #ffffff;
+    padding: 40px; 
+    border-radius: var(--border-radius-md);
+    width: 90%;
+    max-width: 550px; /* Expandido para dar mais espaço */
+    box-shadow: var(--shadow-modal);
+    text-align: center;
+}
+
+.modal-content h3 {
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+}
+
+.modal-content p {
+    color: #555;
+    margin-bottom: 25px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Botões robustos internos dos modais */
+.modal-content button {
+    padding: 14px 22px;
+    font-size: 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-content button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Formatação dos Selects em Cascata */
+.filtros-cascata select {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    font-size: 15px;
+    background-color: #f8f9fa;
+    color: var(--color-text-dark);
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: auto; /* Garante a setinha nativa do browser */
+}
+
+.filtros-cascata select:focus {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(29, 82, 212, 0.15);
+    outline: none;
+    background-color: #ffffff;
+}
+
+/* Modal de Período antigo (Estrutura de botões verticais) */
+.opcoes-periodo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.btn-periodo {
+    background-color: var(--color-secondary);
+    border: 1px solid var(--color-border);
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+    color: var(--color-text-dark);
+    font-size: 15px;
+}
+
+.btn-periodo:hover {
+    background-color: var(--color-blue-light);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+#fechar-modal {
+    width: 100%; 
+    margin-top: 10px;
+}
+
+/* =========================================
+   AS MINI-DIVS DE COMPARAÇÃO (SCROLL DE NOMES)
+   ========================================= */
+/* Padrão para a lista de aprovados (Elegíveis) */
+.mini-lista-alunos {
+    max-height: 180px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    border: 2px solid var(--color-border);
+    padding: 15px 20px;
+    border-radius: 8px;
+    text-align: left;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--color-text-dark);
+    box-shadow: var(--shadow-input);
+}
+
+.mini-lista-alunos div {
+    padding-bottom: 8px;
+    border-bottom: 1px solid #dee2e6;
+    line-height: 1.4;
+}
+
+.mini-lista-alunos div:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Classe utilitária para esconder blocos (Ex: Container de Não Transferidos) */
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+   Mensagens de Notificação Flutuante
+   ========================================= */
+.confirm-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-primary);
+    color: white;
+    padding: 12px 30px;
+    border-radius: var(--border-radius-sm);
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    font-size: 14px;
+    z-index: 9999;
 }
