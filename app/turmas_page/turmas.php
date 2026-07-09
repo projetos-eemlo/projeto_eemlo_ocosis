@@ -8,26 +8,13 @@
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="nav-left">
-            <div class="logo">
-                🏫 Ocorrências
-            </div>
-            <a href="../Manter_Ocorrencias/index.html" class="nav-link">Nova Ocorrência</a>
-            <a href="../turmas_page/turmas.html" class="nav-link active">Pesquisa e Turmas</a>
-            <a href="../Cadastrar_alunos/Cadastrar_alunos.html" class="nav-link">Cadastrar Alunos</a>
-            <a href="../cadastrar_professores/cadastrar_professores.html" class="nav-link">Cadastrar Professores</a>
-            <a href="../visualizar_relatorio/pendentes.php" class="nav-link">
-                Ocorrências Pendentes <span class="badge-notification">5</span>
-            </a>
-        </div>
-        <div class="nav-right">
-            <form action="../login_screen/PHP_Login_screen/logout.php" method="POST" style="margin: 0;">
-                <button type="submit" class="btn-sair">Sair</button>
-            </form>
-        </div>
-    </nav>
+    <?php 
+    $base_path = '../'; 
+    $pagina_atual = 'turmas'; 
+    include '../header.php'; 
+?>
 
+    <!-- CONTEÚDO 1: TELA DE PESQUISA (Principal) -->
     <main class="container" id="telaPesquisa">
         <div class="page-header">
             <h2>Pesquisa e Gestão de Turmas <span class="subtitle">Direção / Supervisão</span></h2>
@@ -38,7 +25,8 @@
                 <label for="filtroTurma" class="filter-label">Turma:</label>
                 <select id="filtroTurma" class="select-input">
                     <option value="todas">Todas as Turmas</option>
-                    </select>
+                    <!-- As outras turmas serão carregadas aqui via JavaScript -->
+                </select>
                 <button id="btnNovaTurma" class="btn-nova-turma">+ Nova Turma</button>
             </div>
             <div class="filter-results">
@@ -58,15 +46,18 @@
                     </tr>
                 </thead>
                 <tbody id="tabelaAlunosBody">
-                    </tbody>
+                    <!-- Preenchido via JavaScript -->
+                </tbody>
             </table>
         </div>
     </main>
 
+    <!-- CONTEÚDO 2: PERFIL DO ALUNO -->
     <main class="container" id="telaPerfil" style="display: none;">
         <div class="perfil-header">
             <div class="perfil-title-group">
                 <button id="btnVoltar" class="btn-outline">← Voltar</button>
+                <!-- Nome em azul e maiúsculo conforme o print -->
                 <h2>Perfil: <span id="nomeAlunoPerfil" class="text-blue" style="text-transform: uppercase;"></span></h2>
             </div>
             <button class="btn-dark-grey">Imprimir Todas</button>
@@ -100,11 +91,13 @@
                     </tr>
                 </thead>
                 <tbody id="tabelaHistoricoOcorrencias">
-                    </tbody>
+                    <!-- Preenchido via JavaScript com dados REAIS do banco -->
+                </tbody>
             </table>
         </div>
     </main>
 
+    <!-- MODAL 1: CADASTRO DE TURMA -->
     <div id="modalTurma" class="modal_fundo">
         <div class="modal_conteudo">
             <span class="fechar_modal">&times;</span>
@@ -142,6 +135,7 @@
         </div>
     </div>
 
+    <!-- MODAL 2: EDITAR OCORRÊNCIA (Novo Visual) -->
     <div id="modalEditar" class="modal_fundo">
         <div class="modal_conteudo modal_large">
             <span class="fechar_modal close_editar">&times;</span>
@@ -150,6 +144,7 @@
             
             <form id="formEditarOcorrencia">
                 <label class="form-label">Status</label>
+                <!-- Radio buttons simplificados do novo print -->
                 <div class="radio-group-simple">
                     <label class="radio-label red-label">
                         <input type="radio" name="statusOcorrencia" value="pendente" checked> 🔴 Pendente

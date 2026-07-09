@@ -1,38 +1,54 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <title>Acesso ao Sistema</title>
+    <script src="JS_login_screen/login.js" defer></script>
+    <link rel="stylesheet" href="CSS_login_screen/login.css">
+    <style>
+        #error-msg {
+            display: none;
+            color: red; 
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
-    <nav>
-        <a>Login/ Cadastro</a>
-        <a>Cadastro Usuário</a>
-        <a>Nova Ocorrência</a>
-        <a>Pesquise e Turmas</a>
-        <a>Perfil do Aluno</a>
-    </nav>
+    
 
-    <main>
-        <div class="login-container">
+    <main class="container">
+        <div class="login-card login-container">
             <h2>1. Acesso ao Sistema</h2>
-            <h3>Entrar</h3>
-            <form action="#" method="POST">
-                <label for="username">E-mail ou Matricula:</label>
-                <input type="text" id="username" name="username" placeholder="Digite seu e-mail " required>
+            <hr class="divider">
+            
+            <h3 class="subtitle">Entrar</h3>
+            <hr class="divider">
 
-                <label for="password">Senha:</label>
-                <input type="password" id="password" name="password" placeholder="Digite sua senha" required>
+            <form id="loginForm" method="POST" action="PHP_Login_screen/logar.php">
+                <div class="input-group">
+                    <label for="masp">MASP (Matrícula):</label>
+                    <input type="text" id="masp" name="masp" maxlength="9" placeholder="Digite seu MASP" required>
+                </div>
 
-                <div class="button-group">
-                    <button type="submit" class="btn-entrar">Entrar</button>
-                    <a href="cadastro.html" class="btn-cadastro"> Solicitar Cadastro</a>
+                <div class="input-group">
+                    <label for="password">Senha:</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="senha" placeholder="Digite sua senha" required>
+                        <button type="button" class="btn-show-password">Mostrar</button>
+                    </div>
+                </div>
+
+                <div class="error-message" id="error-msg">
+                    MASP ou senha incorretos.
+                </div>
+
+                <div class="actions button-group">
+                <button type="submit" class="btn-entrar">Entrar</button>
+                <a href="cadastro.html" class="btn-cadastro" style="text-decoration: none; display: inline-block; text-align: center;">Solicitar Cadastro</a>
                 </div>
             </form>
         </div>
-    </main>    
-    <script src="JS/login.js"></script>
+    </main>
 </body>
 </html>
