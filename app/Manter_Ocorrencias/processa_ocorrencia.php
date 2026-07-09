@@ -1,16 +1,8 @@
 <?php
 session_start();
-$host = '127.0.0.1';
-$dbname = 'ocosis'; 
-$user = 'root'; 
-$pass = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
-} catch (PDOException $e) {
-    die("Erro de conexão: " . $e->getMessage()); 
-}
+
+require_once '../pdo.php';
 
 // CONSERTO AQUI: Mudado de 'masp_logado' para 'funcionario_masp'
 if(!isset($_SESSION['funcionario_masp'])) {
@@ -75,10 +67,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->bindParam(':descricao', $descricao);
 
         // 4. Executa o comando
+
         $stmt->execute();
 
-        echo "<h2>Ocorrência salva no banco de dados com sucesso!</h2>";
-        echo "<br><a href='index.html'>Voltar para o formulário</a>";
+        
+        echo "<script>
+                alert('Ocorrência salva com sucesso!');
+                window.location.href = 'index.html';
+              </script>";
+        exit;
 
     } catch (PDOException $e) {
         echo "Erro ao salvar no banco de dados: " . $e->getMessage();
