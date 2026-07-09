@@ -123,35 +123,35 @@ input {
 
 
 .button-group {
-
     display: flex;
-
+    flex-direction: row; 
+    justify-content: space-between;
+    width: 100%;
     gap: 15px;
-
     margin-top: 10px;
-
 }
 
 
 
 
+.actions, .button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 10px;
+}
 
-.btn-entrar, .btn-cadastro, .btn-cadastrar {
 
+.btn-entrar, .btn-cadastro, .btn-cadastrar, .btn-voltar {
     flex: 1;
-
-    padding: 10px;
-
+    padding: 10px 20px;
     border: none;
-
-    border-radius: 5px;
-
+    border-radius: 8px;
     cursor: pointer;
-
-    font-size: 14px;
-
+    font-size: 16px;
     font-weight: bold;
-
+    text-align: center;
+    transition: background 0.2s;
 }
 
 
@@ -270,4 +270,15 @@ body {
 
     padding: 20px;
 
+}
+
+
+
+.btn-voltar {
+    background-color: #10b981; 
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
 }
