@@ -2,7 +2,7 @@
 session_start();
 
 $host = '127.0.0.1';
-$dbname = 'ocosis'; 
+$dbname = 'ocosisteste'; 
 $user = 'root'; 
 $pass = '';
 
@@ -22,7 +22,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($masp_limpo) && !empty($senha_digitada)) {
         
-        $sql = "SELECT * FROM funcionarios WHERE masp = :masp LIMIT 1";
+        $sql = "SELECT * FROM funcionarios WHERE id_funcionario = :masp";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['masp' => $masp_limpo]);
         $funcionario = $stmt->fetch(PDO::FETCH_ASSOC);

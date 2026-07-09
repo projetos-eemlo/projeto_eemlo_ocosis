@@ -12,15 +12,15 @@ try {
     die("Erro de conexão: " . $e->getMessage()); 
 }
 
-// CONSERTO AQUI: Mudado de 'masp_logado' para 'funcionario_masp'
+// Verifica se o funcionário está devidamente autenticado
 if(!isset($_SESSION['funcionario_masp'])) {
     echo "<script>alert('Você precisa fazer login primeiro!'); window.location.href = '../login_screen/login.html';</script>";
     exit; 
 }
 
-// Se chegou até aqui, é porque está logado! Ajustado os nomes abaixo também:
+// Se chegou até aqui, está logado! Ajustado com proteção caso o cargo esteja vazio:
 $masp_do_usuario = $_SESSION['funcionario_masp'];
-$cargo_do_usuario = $_SESSION['cargo_funcionario'];
+$cargo_do_usuario = isset($_SESSION['cargo_funcionario']) ? $_SESSION['cargo_funcionario'] : 'Não informado';
 
 
 // Verifica se o formulário foi enviado
@@ -29,8 +29,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Coleta e limpa os dados
     $nome_aluno       = htmlspecialchars(trim($_POST['nome_aluno']));
     $simade           = htmlspecialchars(trim($_POST['simade']));
-    $data_nascimento  = $_POST['data_nascimento'];
-    $data_ocorrencia  = $_POST['data_ocorrencia'];
+    
+    // Tratamento para enviar NULL real se as datas vierem em branco
+    $data_nascimento  = !empty($_POST['data_nascimento']) ? $_POST['data_nascimento'] : null;
+    $data_ocorrencia  = !empty($_POST['data_ocorrencia']) ? $_POST['data_ocorrencia'] : date('Y-m-d');
+    
     $horario_ocorrencia = $_POST['horario_ocorrencia'];
     $turma            = $_POST['turma'];
     $materia          = htmlspecialchars(trim($_POST['materia']));
@@ -39,7 +42,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Processa os checkboxes de infrações
     $infracoes_array = isset($_POST['infracoes']) ? $_POST['infracoes'] : [];
-    $outro_tipo      = htmlspecialchars(trim($_POST['outro_tipo']));
+    
+    // CORREÇÃO: Evita erro se o campo 'outro_tipo' não for enviado ou enviado vazio
+    $outro_tipo      = htmlspecialchars(trim($_POST['outro_tipo'] ?? ''));
     
     if (!empty($outro_tipo)) {
         $infracoes_array[] = "Outros: " . $outro_tipo;
@@ -48,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Transforma o array de infrações em uma única string separada por vírgulas para o banco
     $infracoes_string = implode(", ", $infracoes_array);
 
-    // Validação simples de campos obrigatórios
+    // Validação de campos obrigatórios
     if (empty($nome_aluno) || empty($simade) || empty($data_ocorrencia) || empty($turma)) {
         die("Por favor, preencha todos os campos obrigatórios.");
     }
