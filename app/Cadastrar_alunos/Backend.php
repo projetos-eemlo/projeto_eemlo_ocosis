@@ -5,7 +5,7 @@ header('Content-Type: application/json');
 // CONEXÃO COM A BASE DE DADOS (PDO)
 // ==========================================
 $host = 'localhost';
-$dbname = 'ocosis'; 
+$dbname = 'ocosisteste'; 
 $user = 'root'; 
 $pass = '';     
 
