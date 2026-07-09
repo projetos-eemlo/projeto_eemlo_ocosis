@@ -143,81 +143,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const tbodyHistorico = document.getElementById('tabelaHistoricoOcorrencias');
 
     function atribuirEventosPerfil() {
-        const botoesPerfil = document.querySelectorAll('.btn-ver-perfil');
-        
-        botoesPerfil.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const simade = e.target.getAttribute('data-simade');
-                
-                if(tbodyHistorico) tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center;">Carregando dados do banco...</td></tr>';
-                
-                if(telaPesquisa) telaPesquisa.style.display = 'none';
-                if(telaPerfil) telaPerfil.style.display = 'block';
-
-                fetch(`php/buscar_perfil_aluno.php?simade=${simade}`)
-                .then(response => response.json())
-                .then(data => {
-                    if(data.sucesso) {
-                        const aluno = data.aluno;
-                        const ocorrencias = data.ocorrencias;
-
-                        if(document.getElementById('nomeAlunoPerfil')) document.getElementById('nomeAlunoPerfil').textContent = aluno.nome_aluno;
-                        if(document.getElementById('simadePerfil')) document.getElementById('simadePerfil').textContent = aluno.num_simade;
-                        if(document.getElementById('nascPerfil')) document.getElementById('nascPerfil').textContent = aluno.dt_nascimento || '--/--/----';
-                        if(document.getElementById('turmaPerfil')) document.getElementById('turmaPerfil').textContent = aluno.desc_turma || 'Sem Turma';
-                        
-                        if(document.getElementById('totalOcorrenciasPerfil')) document.getElementById('totalOcorrenciasPerfil').textContent = ocorrencias.length;
-                        if(document.getElementById('pendentesPerfil')) document.getElementById('pendentesPerfil').textContent = ocorrencias.length; 
-                        
-                        if(!tbodyHistorico) return;
-                        tbodyHistorico.innerHTML = '';
-                        
-                        if(ocorrencias.length > 0) {
-                            if(document.getElementById('reincidentePerfil')) document.getElementById('reincidentePerfil').textContent = ocorrencias[0].tipo_infracao;
-
-                            ocorrencias.forEach(oc => {
-                                const tr = document.createElement('tr');
-                                const materiaProf = (oc.desc_disciplina && oc.nome_funcionario) 
-                                    ? `${oc.desc_disciplina} / ${oc.nome_funcionario}` 
-                                    : 'Não informado';
-                                
-                                tr.innerHTML = `
-                                    <td>${oc.data_formatada}</td>
-                                    <td>${oc.horario || '--:--'}</td>
-                                    <td>${materiaProf}</td>
-                                    <td>
-                                        <span class="text-blue font-bold">Registro</span><br>
-                                        <span class="text-small">${oc.tipo_infracao || 'Sem descrição específica'}</span>
-                                    </td>
-                                    <td>
-                                        <span class="status-dot red"></span> Pendente<br>
-                                        <span class="text-small text-orange">Notif. responsável</span>
-                                    </td>
-                                    <td class="action-buttons">
-                                        <button class="btn-edit btnAbrirModalEditar" 
-                                            data-nome="${aluno.nome_aluno}" 
-                                            data-data="${oc.data_formatada}"
-                                            data-turma="${aluno.desc_turma}">Editar</button>
-                                        <button class="btn-icon">🖨️</button>
-                                    </td>
-                                `;
-                                tbodyHistorico.appendChild(tr);
-                            });
-                        } else {
-                            if(document.getElementById('reincidentePerfil')) document.getElementById('reincidentePerfil').textContent = '-';
-                            tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748b;">Nenhuma ocorrência registrada para este aluno.</td></tr>';
-                        }
-                    } else {
-                        alert("Erro ao buscar dados: " + data.mensagem);
-                        if(btnVoltar) btnVoltar.click();
-                    }
-                })
-                .catch(error => {
-                    console.error("Erro no fetch:", error);
-                    if(tbodyHistorico) tbodyHistorico.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Erro de conexão com o banco de dados.</td></tr>';
-                });
-            });
+    const botoesPerfil = document.querySelectorAll('.btn-ver-perfil');
+    
+    botoesPerfil.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            // Pega o SIMADE do aluno que foi clicado
+            const simade = e.target.getAttribute('data-simade');
+            
+            if (simade) {
+                // REDIRECIONA para a nova página passando o SIMADE na URL
+                // Ajuste o caminho '../perfil_aluno.php' para onde o arquivo do seu colega realmente estiver
+                window.location.href = `../visualizar_relatorio/perfil.php?simade=${simade}`;
+            } else {
+                alert("Erro: SIMADE do aluno não encontrado.");
+            }
         });
+    });
     }
 
     if(btnVoltar) {
