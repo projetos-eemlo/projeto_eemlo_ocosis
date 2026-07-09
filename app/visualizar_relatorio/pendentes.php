@@ -111,102 +111,6 @@ $tiposInfracaoImpressao = $pdo->query("SELECT num_item, desc_ocorrencia FROM tip
         min-height: 100vh;
     }
 
-    /* ── NAVBAR ────────────────────────────────────────── */
-    .navbar {
-        background: #1a56db;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        padding: 0 2rem;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
-    }
-
-    .navbar-brand {
-        color: #fff;
-        font-size: 1rem;
-        font-weight: 700;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.45rem;
-        margin-right: 2.5rem;
-        letter-spacing: -0.01em;
-        white-space: nowrap;
-    }
-
-    .navbar-nav {
-        display: flex;
-        align-items: center;
-        list-style: none;
-        flex: 1;
-        gap: 0;
-    }
-
-    .navbar-nav li a {
-        display: flex;
-        align-items: center;
-        height: 56px;
-        padding: 0 1.1rem;
-        color: rgba(255,255,255,0.8);
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 500;
-        position: relative;
-        transition: color 0.15s;
-        white-space: nowrap;
-    }
-
-    .navbar-nav li a:hover { color: #fff; }
-
-    .navbar-nav li a.active { color: #fff; font-weight: 700; }
-
-    .navbar-nav li a.active::after {
-        content: '';
-        position: absolute;
-        bottom: 0; left: 1.1rem; right: 1.1rem;
-        height: 3px;
-        background: #fff;
-        border-radius: 3px 3px 0 0;
-    }
-
-    .badge-nav {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #e53e3e;
-        color: #fff;
-        font-size: 0.68rem;
-        font-weight: 700;
-        min-width: 18px;
-        height: 18px;
-        padding: 0 4px;
-        border-radius: 999px;
-        margin-left: 5px;
-        line-height: 1;
-    }
-
-    .navbar-actions { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
-
-    #info-usuario { color: rgba(255,255,255,0.85); font-size: 0.82rem; white-space: nowrap; }
-
-    .btn-sair {
-        background: transparent;
-        color: #fff;
-        border: 1.5px solid rgba(255,255,255,0.55);
-        padding: 0.35rem 1.1rem;
-        border-radius: 7px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background 0.15s, border-color 0.15s;
-        font-family: inherit;
-    }
-
-    .btn-sair:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
-
     /* ── LAYOUT ─────────────────────────────────────────── */
     .main {
         max-width: 1120px;
@@ -652,27 +556,15 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 
-<nav class="navbar">
-    <a href="index.php" class="navbar-brand">🏠 Ocorrências</a>
-    <ul class="navbar-nav">
-        <li><a href="nova_ocorrencia.php">Nova Ocorrência</a></li>
-        <li><a href="pesquisa_turmas.php">Pesquisa e Turmas</a></li>
-        <li>
-            <a href="pendentes.php" class="active">
-                Ocorrências Pendentes
-                <?php if ($totalPendentes > 0): ?>
-                    <span class="badge-nav"><?= $totalPendentes ?></span>
-                <?php endif; ?>
-            </a>
-        </li>
-    </ul>
-    <div class="navbar-actions">
-        <span id="info-usuario"></span>
-        <form method="POST" action="logout.php">
-            <button type="submit" class="btn-sair">Sair</button>
-        </form>
-    </div>
-</nav>
+<?php
+// Navbar unificada do projeto (nav.php fica na raiz).
+// visualizar_relatorio/pendentes.php está um nível abaixo da raiz.
+$base_path            = '../';
+$pagina_atual         = 'pendentes';
+$totalPendentesGlobal = $totalPendentes;
+
+include $base_path . 'nav.php';
+?>
 
 <main class="main">
     <div class="page-header">
