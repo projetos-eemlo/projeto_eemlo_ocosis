@@ -16,7 +16,7 @@ $totalPendentesGlobal = isset($totalPendentesGlobal) ? $totalPendentesGlobal : 5
         
         <a href="<?= $base ?>Manter_Ocorrencias/index.html" class="nav-link <?= ($pagina == 'nova_ocorrencia') ? 'active' : '' ?>">Nova Ocorrência</a>
         
-        <a href="<?= $base ?>turmas_page/turmas.html" class="nav-link <?= ($pagina == 'turmas') ? 'active' : '' ?>">Pesquisa e Turmas</a>
+        <a href="<?= $base ?>turmas_page/turmas.php" class="nav-link <?= ($pagina == 'turmas') ? 'active' : '' ?>">Pesquisa e Turmas</a>
         
         <a href="<?= $base ?>Cadastrar_alunos/Cadastrar_alunos.html" class="nav-link <?= ($pagina == 'cadastrar_alunos') ? 'active' : '' ?>">Cadastrar Alunos</a>
         
