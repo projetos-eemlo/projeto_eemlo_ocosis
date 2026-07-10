@@ -453,7 +453,7 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
  
-<?php require __DIR__ . '/header.php'; ?>
+<?php require __DIR__ . '/../header.php'; ?>
  
 <main class="main">
  
