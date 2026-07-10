@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST'){
             $stmt = $pdo->prepare($sql);
             $stmt->execute([$id_tipo_func, $masp_limpo, $hashSenha, $cargo_nome]); 
     
+            // Armazenando os dados na sessão e no sessionStorage
             $_SESSION['masp_logado'] = $masp_limpo;
             $_SESSION['cargo_logado'] = $cargo_nome;
 

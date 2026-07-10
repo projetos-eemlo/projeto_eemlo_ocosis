@@ -74,7 +74,7 @@ main {
 
 .login-container {
 
-    background: #fcfcfc; 
+    background: #ffffff; 
 
     padding: 30px;
 
@@ -196,6 +196,7 @@ h2, h3 {
 
     margin-bottom: 15px;
 
+    text-align: center;
 }
 
 
@@ -230,7 +231,7 @@ select {
 
 .btn-cadastrar.ativo{
 
-    background-color: #10b981;
+    background-color: #1dc84d;
 
     cursor: pointer;
     
@@ -275,7 +276,7 @@ body {
 
 
 .btn-voltar {
-    background-color: #10b981; 
+    background-color:#969696; 
     color: white;
     display: flex;
     align-items: center;
