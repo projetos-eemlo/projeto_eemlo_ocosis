@@ -1,6 +1,6 @@
 <?php
 $host = 'localhost';
-$dbname = 'ocosis';
+$dbname = 'ocosisteste';
 $user = 'root'; // Seu usuário do banco
 $pass = '';     // Sua senha do banco (se tiver)
 

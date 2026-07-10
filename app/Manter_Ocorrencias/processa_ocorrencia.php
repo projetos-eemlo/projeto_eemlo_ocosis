@@ -18,74 +18,90 @@ if(!isset($_SESSION['funcionario_masp'])) {
     exit; 
 }
 
-// Se chegou até aqui, está logado! Ajustado com proteção caso o cargo esteja vazio:
-$masp_do_usuario = $_SESSION['funcionario_masp'];
-$cargo_do_usuario = isset($_SESSION['cargo_funcionario']) ? $_SESSION['cargo_funcionario'] : 'Não informado';
+// Busca o id_funcionario baseado no MASP da sessão
+$stmtFunc = $pdo->prepare("SELECT id_funcionario FROM funcionarios WHERE masp = ?");
+$stmtFunc->execute([$_SESSION['funcionario_masp']]);
+$funcionario = $stmtFunc->fetch(PDO::FETCH_ASSOC);
 
+if (!$funcionario) {
+    die("Erro: Funcionário não encontrado no sistema.");
+}
+$id_funcionario_logado = $funcionario['id_funcionario'];
 
 // Verifica se o formulário foi enviado
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Coleta e limpa os dados
+    // Coleta e limpa os dados do Aluno
     $nome_aluno       = htmlspecialchars(trim($_POST['nome_aluno']));
     $simade           = htmlspecialchars(trim($_POST['simade']));
-    
-    // Tratamento para enviar NULL real se as datas vierem em branco
     $data_nascimento  = !empty($_POST['data_nascimento']) ? $_POST['data_nascimento'] : null;
-    $data_ocorrencia  = !empty($_POST['data_ocorrencia']) ? $_POST['data_ocorrencia'] : date('Y-m-d');
     
-    $horario_ocorrencia = $_POST['horario_ocorrencia'];
-    $turma            = $_POST['turma'];
-    $materia          = htmlspecialchars(trim($_POST['materia']));
-    $professor        = htmlspecialchars(trim($_POST['professor']));
-    $descricao        = htmlspecialchars(trim($_POST['descricao']));
+    // Coleta os dados da Ocorrência
+    $data_ocorrencia  = !empty($_POST['data_ocorrencia']) ? $_POST['data_ocorrencia'] : date('Y-m-d');
+    $horario          = $_POST['horario_ocorrencia']; 
+    $id_turma         = intval($_POST['turma']); // Recebe o ID numérico vindo do HTML
+    $disciplina       = htmlspecialchars(trim($_POST['materia'])); 
+    $desc_ocorrencia  = htmlspecialchars(trim($_POST['descricao'])); 
     
     // Processa os checkboxes de infrações
     $infracoes_array = isset($_POST['infracoes']) ? $_POST['infracoes'] : [];
-    
-    // CORREÇÃO: Evita erro se o campo 'outro_tipo' não for enviado ou enviado vazio
     $outro_tipo      = htmlspecialchars(trim($_POST['outro_tipo'] ?? ''));
     
     if (!empty($outro_tipo)) {
         $infracoes_array[] = "Outros: " . $outro_tipo;
     }
     
-    // Transforma o array de infrações em uma única string separada por vírgulas para o banco
     $infracoes_string = implode(", ", $infracoes_array);
 
     // Validação de campos obrigatórios
-    if (empty($nome_aluno) || empty($simade) || empty($data_ocorrencia) || empty($turma)) {
+    if (empty($nome_aluno) || empty($simade) || empty($data_ocorrencia) || empty($id_turma)) {
         die("Por favor, preencha todos os campos obrigatórios.");
     }
 
     try {
-        // 2. Prepara o comando SQL (PreparedStatement evita Injeção de SQL)
+        $pdo->beginTransaction();
+
+        // PASSO 1: Garantir que o aluno exista na tabela de alunos (Ajustado com colunas reais)
+        $stmtAlunoCheck = $pdo->prepare("SELECT id_aluno FROM alunos WHERE num_simade = ?");
+        $stmtAlunoCheck->execute([$simade]);
+        $alunoExistente = $stmtAlunoCheck->fetch(PDO::FETCH_ASSOC);
+
+        if ($alunoExistente) {
+            $id_aluno = $alunoExistente['id_aluno'];
+        } else {
+            // Inserção usando os nomes exatos: nome_aluno, num_simade, dt_nascimento
+            $stmtInsertAluno = $pdo->prepare("INSERT INTO alunos (nome_aluno, num_simade, dt_nascimento, id_turma) VALUES (?, ?, ?, ?)");
+            $stmtInsertAluno->execute([$nome_aluno, $simade, $data_nascimento, $id_turma]);
+            $id_aluno = $pdo->lastInsertId();
+        }
+
+        // PASSO 2: Inserir na tabela ocorrencias
         $sql = "INSERT INTO ocorrencias 
-                (nome_aluno, simade, data_nascimento, data_ocorrencia, horario_ocorrencia, turma, materia, professor, infracoes, descricao) 
+                (id_aluno, id_funcionario, id_turma, id_tipo_infracao, data_ocorrencia, horario, disciplina, desc_ocorrencia, data_registro_sistema) 
                 VALUES 
-                (:nome_aluno, :simade, :data_nascimento, :data_ocorrencia, :horario_ocorrencia, :turma, :materia, :professor, :infracoes, :descricao)";
+                (:id_aluno, :id_funcionario, :id_turma, :id_tipo_infracao, :data_ocorrencia, :horario, :disciplina, :desc_ocorrencia, NOW())";
         
         $stmt = $pdo->prepare($sql);
 
-        // 3. Vincula os valores aos parâmetros do SQL
-        $stmt->bindParam(':nome_aluno', $nome_aluno);
-        $stmt->bindParam(':simade', $simade);
-        $stmt->bindParam(':data_nascimento', $data_nascimento);
+        $stmt->bindParam(':id_aluno', $id_aluno, PDO::PARAM_INT);
+        $stmt->bindParam(':id_funcionario', $id_funcionario_logado, PDO::PARAM_INT);
+        $stmt->bindParam(':id_turma', $id_turma, PDO::PARAM_INT);
+        $stmt->bindParam(':id_tipo_infracao', $infracoes_string); 
         $stmt->bindParam(':data_ocorrencia', $data_ocorrencia);
-        $stmt->bindParam(':horario_ocorrencia', $horario_ocorrencia);
-        $stmt->bindParam(':turma', $turma);
-        $stmt->bindParam(':materia', $materia);
-        $stmt->bindParam(':professor', $professor);
-        $stmt->bindParam(':infracoes', $infracoes_string);
-        $stmt->bindParam(':descricao', $descricao);
+        $stmt->bindParam(':horario', $horario);
+        $stmt->bindParam(':disciplina', $disciplina);
+        $stmt->bindParam(':desc_ocorrencia', $desc_ocorrencia);
 
-        // 4. Executa o comando
         $stmt->execute();
+        $pdo->commit();
 
-        echo "<h2>Ocorrência salva no banco de dados com sucesso!</h2>";
-        echo "<br><a href='index.html'>Voltar para o formulário</a>";
+        echo "<script>
+                alert('Ocorrência salva com sucesso!');
+                window.location.href = 'index.html';
+              </script>";
 
     } catch (PDOException $e) {
+        $pdo->rollBack();
         echo "Erro ao salvar no banco de dados: " . $e->getMessage();
     }
 

@@ -22,7 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!empty($masp_limpo) && !empty($senha_digitada)) {
         
-        $sql = "SELECT * FROM funcionarios WHERE id_funcionario = :masp";
+        // CORREÇÃO AQUI: Voltamos a buscar pela coluna 'masp'
+        $sql = "SELECT * FROM funcionarios WHERE masp = :masp";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(['masp' => $masp_limpo]);
         $funcionario = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -49,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit; // Finaliza aqui com sucesso!
 
         } else {
-            // Senha incorreta
+            // Senha incorreta ou MASP não encontrado
             header("Location: ../login.html?erro=1");
             exit;
         }

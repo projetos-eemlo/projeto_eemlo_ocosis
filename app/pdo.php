@@ -5,7 +5,7 @@
 //$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $host = 'localhost';
-$dbname = 'ocosis';
+$dbname = 'ocosisteste';
 $username = 'root';
 $password = '';
 
