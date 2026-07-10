@@ -12,8 +12,9 @@ $totalPendentesGlobal = isset($totalPendentesGlobal) ? $totalPendentesGlobal : 5
 
 <nav class="unified-navbar">
     <div class="nav-left">
-        <div class="logo-box"></div>
-        
+    <div class="logo-box">
+        <img src="<?= $base ?>../assets/logo.png" alt="Logo E.E. Maria de Lourdes de Oliveira" class="logo-img">
+    </div>
         <a href="<?= $base ?>Manter_Ocorrencias/index.html" class="nav-link <?= ($pagina == 'nova_ocorrencia') ? 'active' : '' ?>">Nova Ocorrência</a>
         
         <a href="<?= $base ?>turmas_page/turmas.php" class="nav-link <?= ($pagina == 'turmas') ? 'active' : '' ?>">Pesquisa e Turmas</a>
