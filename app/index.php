@@ -5,7 +5,7 @@ session_start();
 <html>
 <head>
     <title> Fabiana Santos - b16238d0</title>
-    <?php require_once "bootstrap.php"; ?>
+   <?//php require_once "bootstrap.php"; ?>
 </head>
 <body>
 <div class="container">
