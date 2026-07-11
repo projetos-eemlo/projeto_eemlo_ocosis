@@ -24,10 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
         $id     = intval($_POST['id'] ?? 0);
         $status = $_POST['status'] ?? 'pendente';
 
-        // No banco (ocosis.sql) a coluna `status` só aceita ENUM('pendente','resolvida').
-        // O modal desta tela ainda oferece 'entregue' / 'fora_do_prazo' (legado da versão
-        // anterior); por enquanto qualquer valor diferente de 'pendente' é tratado como
-        // 'resolvida' pra não quebrar a gravação. Ajustar aqui se o ENUM crescer no futuro.
+        // A coluna `status` só aceita ENUM('pendente','resolvida').
         $status = ($status === 'pendente') ? 'pendente' : 'resolvida';
 
         if ($id === 0) {
@@ -47,6 +44,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
 
 /* ════════════════════════════════════════════════════════════════
    CARREGAMENTO NORMAL DA PÁGINA — OCORRÊNCIAS PENDENTES REAIS
+   ════════════════════════════════════════════════════════════════
+   OBS: em `ocorrencias`, `id_tipo_ocorrencia` é uma FK direta (1 infração
+   por ocorrência) — não existe tabela de ligação N:N, então o JOIN é
+   simples, sem GROUP_CONCAT/GROUP BY.
    ════════════════════════════════════════════════════════════════ */
 $sqlPendentes = $pdo->query("
     SELECT
@@ -61,17 +62,15 @@ $sqlPendentes = $pdo->query("
         o.desc_ocorrencia        AS descricao,
         o.notificar_responsavel  AS notificar_responsavel,
         o.status                 AS status,
-        GROUP_CONCAT(ti.num_item ORDER BY ti.num_item)               AS infracoes_ids,
-        GROUP_CONCAT(ti.desc_ocorrencia ORDER BY ti.num_item SEPARATOR '; ') AS infracoes_texto
+        ti.id_tipo_ocorrencia    AS infracao_id,
+        ti.desc_ocorrencia       AS infracao_texto
     FROM ocorrencias o
     JOIN alunos             a  ON a.id_aluno = o.id_aluno
     LEFT JOIN turma         t  ON t.id_turma = a.id_turma
     LEFT JOIN disciplinas   d  ON d.id_disciplina = o.id_disciplina
     LEFT JOIN funcionarios  fu ON fu.id_funcionario = o.id_funcionario
-    LEFT JOIN ocorrencia_tipos ot ON ot.id_ocorrencia = o.id_ocorrencia
-    LEFT JOIN tipo_ocorrencia  ti ON ti.id_tipo_ocorrencia = ot.id_tipo_ocorrencia
+    LEFT JOIN tipo_ocorrencia ti ON ti.id_tipo_ocorrencia = o.id_tipo_ocorrencia
     WHERE o.status = 'pendente'
-    GROUP BY o.id_ocorrencia
     ORDER BY o.data_ocorrencia DESC, o.horario DESC
 ");
 
@@ -86,8 +85,8 @@ foreach ($sqlPendentes->fetchAll() as $row) {
         'hora'                  => substr($row['hora'], 0, 5),
         'disciplina'            => $row['disciplina'] ?? '',
         'professor'             => $row['professor'] ?? '',
-        'infracoes'             => $row['infracoes_ids'] ? array_map('intval', explode(',', $row['infracoes_ids'])) : [],
-        'infracoes_texto'       => $row['infracoes_texto'] ?? '',
+        'infracoes'             => $row['infracao_id'] !== null ? [(int) $row['infracao_id']] : [],
+        'infracoes_texto'       => $row['infracao_texto'] ?? '',
         'descricao'             => $row['descricao'] ?? '',
         'notificar_responsavel' => (bool) $row['notificar_responsavel'],
         'resp_convocado'        => (bool) $row['notificar_responsavel'], // mesma flag do banco
@@ -97,7 +96,7 @@ foreach ($sqlPendentes->fetchAll() as $row) {
 
 // Lista oficial de infrações vinda do banco (não hardcoded), usada na legenda
 // da tabela e na folha de impressão.
-$tiposInfracao = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_ocorrencia ORDER BY num_item")
+$tiposInfracao = $pdo->query("SELECT id_tipo_ocorrencia, desc_ocorrencia FROM tipo_ocorrencia ORDER BY id_tipo_ocorrencia")
     ->fetchAll(PDO::FETCH_KEY_PAIR);
 
 /* ── FUNÇÕES AUXILIARES ─────────────────────────────────────── */
