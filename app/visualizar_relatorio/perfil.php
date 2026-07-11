@@ -7,8 +7,6 @@ $db_user = "root";
 $db_pass = "";
 
 try {
-    // CORRIGIDO: a porta ($db_port) precisa entrar na DSN, senão o PDO
-    // sempre tenta a porta padrão do MySQL (3306), ignorando o que você configurou.
     $pdo = new PDO("mysql:host=$db_host;port=$db_port;dbname=$db_name;charset=utf8mb4", $db_user, $db_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -19,7 +17,7 @@ try {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === 'atualizar_ocorrencia') {
     header('Content-Type: application/json; charset=utf-8');
- 
+
     try {
         $id         = intval($_POST['id'] ?? 0);
         $status     = ($_POST['status'] ?? 'pendente') === 'resolvida' ? 'resolvida' : 'pendente';
@@ -27,12 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
         $notif      = isset($_POST['notif_responsavel']) ? 1 : 0;
         $discNome   = trim($_POST['disciplina'] ?? '');
         $profNome   = trim($_POST['professor'] ?? '');
-        $infracoes  = isset($_POST['infracoes']) ? array_map('intval', (array) $_POST['infracoes']) : [];
- 
+
+        // `ocorrencias` guarda 1 único id_tipo_ocorrencia (FK direta, sem
+        // tabela de ligação), então aqui só pegamos a primeira infração
+        // marcada, mesmo que o form mande mais de uma.
+        $infracoesPost = isset($_POST['infracoes']) ? array_map('intval', (array) $_POST['infracoes']) : [];
+        $idTipoOcorrencia = $infracoesPost[0] ?? null;
+
         if ($id === 0) {
             throw new Exception('ID da ocorrência inválido.');
         }
- 
+
         // Campo vazio -> grava NULL (permite "limpar" disciplina/professor).
         // Campo preenchido mas não encontrado no banco -> erro explícito,
         // em vez de silenciosamente manter o valor antigo.
@@ -45,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                 throw new Exception("Disciplina '$discNome' não encontrada no banco de dados.");
             }
         }
- 
+
         $idFuncionario = null;
         if ($profNome !== '') {
             $s = $pdo->prepare("SELECT id_funcionario FROM funcionarios WHERE nome_funcionario = :n LIMIT 1");
@@ -55,64 +58,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['ajax_action'] ?? '') === '
                 throw new Exception("Professor(a) '$profNome' não encontrado(a) no banco de dados.");
             }
         }
- 
-        $pdo->beginTransaction();
- 
+
+        // Se o usuário marcou uma infração, valida que ela existe.
+        if ($idTipoOcorrencia !== null) {
+            $s = $pdo->prepare("SELECT id_tipo_ocorrencia FROM tipo_ocorrencia WHERE id_tipo_ocorrencia = :t LIMIT 1");
+            $s->execute(['t' => $idTipoOcorrencia]);
+            if ($s->fetchColumn() === false) {
+                throw new Exception("Tipo de infração inválido.");
+            }
+        }
+
         $sql = "UPDATE ocorrencias
                    SET status = :status,
                        desc_ocorrencia = :descricao,
                        notificar_responsavel = :notif,
                        id_disciplina = :id_disciplina,
-                       id_funcionario = :id_funcionario
+                       id_funcionario = :id_funcionario,
+                       id_tipo_ocorrencia = :id_tipo_ocorrencia
                  WHERE id_ocorrencia = :id";
- 
+
         $params = [
-            'status'         => $status,
-            'descricao'      => $descricao,
-            'notif'          => $notif,
-            'id_disciplina'  => $idDisciplina,
-            'id_funcionario' => $idFuncionario,
-            'id'             => $id,
+            'status'             => $status,
+            'descricao'          => $descricao,
+            'notif'              => $notif,
+            'id_disciplina'      => $idDisciplina,
+            'id_funcionario'     => $idFuncionario,
+            'id_tipo_ocorrencia' => $idTipoOcorrencia,
+            'id'                 => $id,
         ];
- 
+
         $pdo->prepare($sql)->execute($params);
- 
-        // Refaz o vínculo de infrações (ocorrencia_tipos)
-        $pdo->prepare("DELETE FROM ocorrencia_tipos WHERE id_ocorrencia = :id")->execute(['id' => $id]);
- 
-        if (!empty($infracoes)) {
-            $stmtTipo   = $pdo->prepare("SELECT id_tipo_ocorrencia FROM tipo_ocorrencia WHERE num_item = :n");
-            $stmtInsert = $pdo->prepare("INSERT INTO ocorrencia_tipos (id_ocorrencia, id_tipo_ocorrencia) VALUES (:oc, :tp)");
-            foreach ($infracoes as $numItem) {
-                $stmtTipo->execute(['n' => $numItem]);
-                $idTipo = $stmtTipo->fetchColumn();
-                if ($idTipo) {
-                    $stmtInsert->execute(['oc' => $id, 'tp' => $idTipo]);
-                }
-            }
-        }
- 
-        $pdo->commit();
+
         echo json_encode(['ok' => true]);
     } catch (Exception $e) {
-        if ($pdo->inTransaction()) {
-            $pdo->rollBack();
-        }
         http_response_code(400);
         echo json_encode(['ok' => false, 'erro' => $e->getMessage()]);
     }
     exit;
 }
- 
+
 /* ════════════════════════════════════════════════════════════════
    CARREGAMENTO NORMAL DA PÁGINA
    ════════════════════════════════════════════════════════════════ */
 $aluno_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
- 
+
 if ($aluno_id === 0) {
     die("<div style='padding:20px; font-family:sans-serif;'><h3>Erro: Nenhum ID de aluno foi especificado para gerar o relatório.</h3><a href='pendentes.php'>Voltar para Pendentes</a></div>");
 }
- 
+
 // Aluno + turma atual
 $sqlAluno = $pdo->prepare("
     SELECT
@@ -127,16 +120,19 @@ $sqlAluno = $pdo->prepare("
 ");
 $sqlAluno->execute(['id' => $aluno_id]);
 $aluno = $sqlAluno->fetch(PDO::FETCH_ASSOC);
- 
+
 if (!$aluno) {
     die("<div style='padding:20px; font-family:sans-serif;'><h3>Erro: Aluno não encontrado no banco de dados.</h3><a href='pendentes.php'>Voltar</a></div>");
 }
- 
+
 $aluno['nascimento'] = isset($aluno['data_nascimento'])
     ? date('d/m/Y', strtotime($aluno['data_nascimento']))
     : '—';
- 
-// Histórico de ocorrências do aluno (com infrações agregadas)
+
+// Histórico de ocorrências do aluno.
+// `ocorrencias.id_tipo_ocorrencia` é FK direta pra `tipo_ocorrencia`
+// (1 infração por ocorrência, sem tabela de ligação), então o JOIN
+// aqui é simples — sem GROUP_CONCAT/GROUP BY.
 $sqlOcorrencias = $pdo->prepare("
     SELECT
         o.id_ocorrencia         AS id,
@@ -147,31 +143,27 @@ $sqlOcorrencias = $pdo->prepare("
         o.desc_ocorrencia        AS descricao,
         o.status                 AS status,
         o.notificar_responsavel  AS notif_responsavel,
-        GROUP_CONCAT(t.num_item ORDER BY t.num_item SEPARATOR ', ')       AS infracoes_ids,
-        GROUP_CONCAT(t.desc_ocorrencia ORDER BY t.num_item SEPARATOR '; ') AS infracoes_texto
+        ti.id_tipo_ocorrencia    AS infracao_id,
+        ti.desc_ocorrencia       AS infracao_texto
     FROM ocorrencias o
-    LEFT JOIN disciplinas       d  ON o.id_disciplina = d.id_disciplina
-    LEFT JOIN funcionarios      fu ON o.id_funcionario = fu.id_funcionario
-    LEFT JOIN ocorrencia_tipos  ot ON ot.id_ocorrencia = o.id_ocorrencia
-    LEFT JOIN tipo_ocorrencia   t  ON t.id_tipo_ocorrencia = ot.id_tipo_ocorrencia
+    LEFT JOIN disciplinas      d  ON o.id_disciplina = d.id_disciplina
+    LEFT JOIN funcionarios     fu ON o.id_funcionario = fu.id_funcionario
+    LEFT JOIN tipo_ocorrencia  ti ON ti.id_tipo_ocorrencia = o.id_tipo_ocorrencia
     WHERE o.id_aluno = :aluno_id
-    GROUP BY o.id_ocorrencia
     ORDER BY o.data_ocorrencia DESC, o.horario DESC
 ");
 $sqlOcorrencias->execute(['aluno_id' => $aluno_id]);
 $ocorrencias = $sqlOcorrencias->fetchAll(PDO::FETCH_ASSOC);
- 
+
 $historicoOcorrencias = [];
 foreach ($ocorrencias as $row) {
     $materiaProfessor = trim(($row['disciplina'] ?? '—') . ' / ' . ($row['professor'] ?? '—'), ' /');
     if ($materiaProfessor === '') {
         $materiaProfessor = '—';
     }
- 
-    $infracoesArr = $row['infracoes_ids']
-        ? array_map('intval', explode(',', $row['infracoes_ids']))
-        : [];
- 
+
+    $infracoesArr = $row['infracao_id'] !== null ? [(int) $row['infracao_id']] : [];
+
     $historicoOcorrencias[] = [
         'id'                => $row['id'],
         'data_formatada'    => date('d/m/Y', strtotime($row['data_registro'])),
@@ -180,53 +172,51 @@ foreach ($ocorrencias as $row) {
         'disciplina'        => $row['disciplina'] ?? '',
         'professor'         => $row['professor'] ?? '',
         'descricao'         => $row['descricao'] ?? '',
-        'infracoes_ids'     => $row['infracoes_ids'] ?? '',
+        'infracoes_ids'     => $row['infracao_id'] !== null ? (string) $row['infracao_id'] : '',
         'infracoes_arr'     => $infracoesArr,
-        'infracoes_texto'   => $row['infracoes_texto'] ?? ($row['descricao'] ?: '—'),
+        'infracoes_texto'   => $row['infracao_texto'] ?? ($row['descricao'] ?: '—'),
         'status'            => $row['status'],
         'notif_responsavel' => (int) $row['notif_responsavel'],
     ];
 }
- 
+
 $totalOcorrencias = count($historicoOcorrencias);
 $totalPendentes   = count(array_filter($historicoOcorrencias, fn($o) => $o['status'] === 'pendente'));
- 
+
 // Conta a frequência de cada tipo de infração no histórico e escolhe
 // a de maior contagem (em vez de simplesmente pegar a mais recente).
 $contagemInfracoes = [];
 foreach ($historicoOcorrencias as $oc) {
-    foreach ($oc['infracoes_arr'] as $numItem) {
-        $contagemInfracoes[$numItem] = ($contagemInfracoes[$numItem] ?? 0) + 1;
+    foreach ($oc['infracoes_arr'] as $idInfracao) {
+        $contagemInfracoes[$idInfracao] = ($contagemInfracoes[$idInfracao] ?? 0) + 1;
     }
 }
- 
+
 $maisReincidente = 'Nenhuma infração registrada';
 if (!empty($contagemInfracoes)) {
     arsort($contagemInfracoes);
-    $numItemTopo = array_key_first($contagemInfracoes);
- 
+    $idTopo = array_key_first($contagemInfracoes);
+
     foreach ($historicoOcorrencias as $oc) {
-        $idx = array_search($numItemTopo, $oc['infracoes_arr'], true);
-        if ($idx !== false) {
-            $textos = explode(';', $oc['infracoes_texto']);
-            $maisReincidente = trim($textos[$idx] ?? $oc['infracoes_texto']);
+        if (in_array($idTopo, $oc['infracoes_arr'], true)) {
+            $maisReincidente = $oc['infracoes_texto'];
             break;
         }
     }
 }
- 
+
 // Total de ocorrências pendentes no sistema todo (badge da navbar unificada)
 $totalPendentesGlobal = (int) $pdo->query("SELECT COUNT(*) FROM ocorrencias WHERE status = 'pendente'")->fetchColumn();
- 
+
 // Disciplinas e professores reais (pra popular os <select> do modal de edição)
 $disciplinasDb = $pdo->query("SELECT desc_disciplina FROM disciplinas ORDER BY desc_disciplina")->fetchAll(PDO::FETCH_COLUMN);
 $professoresDb = $pdo->query("SELECT nome_funcionario FROM funcionarios WHERE cargo_funcionario LIKE 'Professor%' ORDER BY nome_funcionario")->fetchAll(PDO::FETCH_COLUMN);
- 
+
 // Lista oficial de infrações — vem direto da tabela tipo_ocorrencia,
 // então fica sempre igual ao que está cadastrado no banco.
-$tiposInfracaoModal = $pdo->query("SELECT num_item, desc_ocorrencia FROM tipo_ocorrencia ORDER BY num_item")
+$tiposInfracaoModal = $pdo->query("SELECT id_tipo_ocorrencia, desc_ocorrencia FROM tipo_ocorrencia ORDER BY id_tipo_ocorrencia")
     ->fetchAll(PDO::FETCH_KEY_PAIR);
- 
+
 // Usado pelo header.php pra destacar o item certo no menu e montar os
 // caminhos relativos (perfil.php está uma pasta abaixo da raiz do app).
 $base_path   = '../';
@@ -245,7 +235,7 @@ $pagina_atual = 'pendentes';
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f0f2f5; color: #2d3748; min-height: 100vh;
         }
- 
+
         /* ── LAYOUT DE CONTEÚDO ───────────────────────────── */
         .main { max-width: 1120px; margin: 0 auto; padding: 2.25rem 1.5rem 3rem; }
         .top-actions { margin-bottom: 1.25rem; }
@@ -254,14 +244,14 @@ $pagina_atual = 'pendentes';
             padding: 0.4rem 1.2rem; border-radius: 7px; font-size: 0.88rem; font-weight: 600; text-decoration: none; transition: background 0.15s;
         }
         .btn-voltar:hover { background: #f7fafc; }
- 
+
         .profile-header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
         .profile-title { font-size: 1.65rem; font-weight: 700; color: #1a202c; }
         .btn-imprimir-todas {
             background: #4a5568; color: #fff; border: none; padding: 0.55rem 1.2rem; border-radius: 8px; font-size: 0.88rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.15s;
         }
         .btn-imprimir-todas:hover { background: #2d3748; }
- 
+
         .cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2.5rem; }
         .card-info { background: #fff; border-radius: 12px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.04); display: flex; flex-direction: column; gap: 0.75rem; }
         .card-resumo { background: #fffaf0; border: 1.5px solid #feebc8; }
@@ -269,7 +259,7 @@ $pagina_atual = 'pendentes';
         .info-item { font-size: 0.92rem; color: #4a5568; }
         .info-item strong { color: #1a202c; font-weight: 600; }
         .text-danger-custom { color: #c53030; font-weight: 700; }
- 
+
         .section-title { font-size: 1.15rem; font-weight: 700; color: #2d3748; margin-bottom: 1.25rem; }
         .table-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.07), 0 0 0 1px rgba(0,0,0,0.04); overflow: hidden; overflow-x: auto; }
         .ocorrencias-table { width: 100%; border-collapse: collapse; min-width: 850px; }
@@ -279,7 +269,7 @@ $pagina_atual = 'pendentes';
         .ocorrencias-table tbody tr:last-child { border-bottom: none; }
         .ocorrencias-table tbody tr:hover { background: #f8fafd; }
         .ocorrencias-table td { padding: 1rem 1.1rem; font-size: 0.88rem; vertical-align: top; }
- 
+
         .infracao-tag-container { display: flex; flex-direction: column; gap: 0.35rem; }
         .infracao-ids { display: flex; gap: 0.5rem; color: #1a56db; font-weight: 700; font-size: 0.85rem; }
         .infracao-texto { color: #4a5568; line-height: 1.4; }
@@ -289,7 +279,7 @@ $pagina_atual = 'pendentes';
         .status-resolvida { background: #d4edda; color: #276749; }
         .sub-notif { font-size: 0.74rem; color: #dd6b20; font-weight: 600; white-space: nowrap; }
         .actions-cell { display: flex; gap: 0.4rem; }
- 
+
         .btn-action-editar {
             background: #fff; color: #dd6b20; border: 1.5px solid #fbd38d; padding: 0.4rem 0.85rem;
             border-radius: 6px; font-size: 0.82rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; transition: background 0.15s;
@@ -300,7 +290,7 @@ $pagina_atual = 'pendentes';
             cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: background 0.15s;
         }
         .btn-action-print:hover { background: #2d3748; }
- 
+
         /* ── TOAST (feedback rápido) ──────────────────────── */
         .toast {
             position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(20px);
@@ -309,20 +299,20 @@ $pagina_atual = 'pendentes';
             opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none;
         }
         .toast.toast-visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
- 
+
         @media (max-width: 768px) {
             .cards-grid { grid-template-columns: 1fr; gap: 1rem; }
             .main { padding: 1.5rem 1rem 2.5rem; }
             .profile-title { font-size: 1.35rem; }
         }
- 
+
         /* ── IMPRESSÃO DE UMA ÚNICA OCORRÊNCIA ─────────────── */
         body.imprimir-uma-ocorrencia .card-resumo,
         body.imprimir-uma-ocorrencia .section-title { display: none; }
         body.imprimir-uma-ocorrencia .cards-grid { grid-template-columns: 1fr; }
         body.imprimir-uma-ocorrencia .ocorrencias-table tbody tr { display: none; }
         body.imprimir-uma-ocorrencia .ocorrencias-table tbody tr.linha-imprimir-ativa { display: table-row; }
- 
+
         @media print {
             .navbar, .unified-navbar, .top-actions, .btn-imprimir-todas, .actions-cell, .toast {
                 display: none !important;
@@ -331,7 +321,7 @@ $pagina_atual = 'pendentes';
             .main { padding: 0; max-width: 100%; }
             .table-card { box-shadow: none; border: 1px solid #e2e8f0; }
         }
- 
+
         /* ── MODAL DE CONFIRMAÇÃO ────────────────────────── */
         .modal-confirmacao-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.55);
@@ -359,7 +349,7 @@ $pagina_atual = 'pendentes';
             cursor: pointer; font-family: inherit; transition: background 0.15s;
         }
         .btn-confirmar-sim:hover { background: #1648c0; }
- 
+
         /* ── MODAL DE EDIÇÃO ──────────────────────────────── */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -405,7 +395,7 @@ $pagina_atual = 'pendentes';
         .infracoes-lista { border: 1.5px solid #e2e8f0; border-radius: 8px; max-height: 190px; overflow-y: auto; padding: 0.25rem 0; }
         .infracao-item { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.5rem 0.9rem; cursor: pointer; font-size: 0.87rem; color: #2d3748; transition: background 0.12s; }
         .infracao-item:hover { background: #f8fafd; }
-        .infracao-item input[type="checkbox"] { accent-color: #1a56db; margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; }
+        .infracao-item input[type="radio"] { accent-color: #1a56db; margin-top: 2px; flex-shrink: 0; width: 15px; height: 15px; }
         .campo-textarea {
             width: 100%; padding: 0.6rem 0.9rem; border: 1.5px solid #e2e8f0; border-radius: 8px;
             font-size: 0.9rem; font-family: inherit; color: #2d3748; resize: vertical; min-height: 80px; transition: border-color 0.15s;
@@ -431,48 +421,48 @@ $pagina_atual = 'pendentes';
     </style>
 </head>
 <body>
- 
+
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     // Mesma checagem usada nas outras páginas do sistema: o login guarda
     // o estado no sessionStorage do navegador, não em $_SESSION do PHP.
     const masp  = sessionStorage.getItem('masp_logado');
     const cargo = sessionStorage.getItem('cargo_logado');
- 
+
     if (!masp) {
         alert("Você precisa fazer login primeiro!");
         // visualizar_relatorio/ está no mesmo nível de login_screen/, então "../" basta
         window.location.href = "../login_screen/login.html";
         return;
     }
- 
+
     const infoUsuario = document.getElementById('info-usuario');
     if (infoUsuario) {
         infoUsuario.innerHTML = `Logado como: <strong>${cargo}</strong> (MASP: ${masp})`;
     }
 });
 </script>
- 
+
 <?php require __DIR__ . '/../header.php'; ?>
- 
+
 <main class="main">
- 
+
     <div class="top-actions">
         <a href="pendentes.php" class="btn-voltar">← Voltar</a>
     </div>
- 
+
     <div class="profile-header-container">
         <h1 class="profile-title">Perfil: <?= htmlspecialchars($aluno['nome']) ?></h1>
         <button type="button" class="btn-imprimir-todas">🖨️ Imprimir Todas</button>
     </div>
- 
+
     <div class="cards-grid">
         <div class="card-info">
             <p class="info-item"><strong>Nº SIMADE:</strong> <?= htmlspecialchars($aluno['simade']) ?></p>
             <p class="info-item"><strong>Nascimento:</strong> <?= htmlspecialchars($aluno['nascimento']) ?></p>
             <p class="info-item"><strong>Turma Atual:</strong> <?= htmlspecialchars($aluno['turma_atual'] ?? '—') ?></p>
         </div>
- 
+
         <div class="card-info card-resumo">
             <h2 class="card-resumo-title">Resumo do Ano Letivo</h2>
             <p class="info-item"><strong>Total de Ocorrências:</strong> <?= $totalOcorrencias ?></p>
@@ -480,9 +470,9 @@ document.addEventListener("DOMContentLoaded", function() {
             <p class="info-item"><strong>Mais reincidente:</strong> <?= htmlspecialchars($maisReincidente) ?></p>
         </div>
     </div>
- 
+
     <h2 class="section-title">Histórico de Ocorrências</h2>
- 
+
     <div class="table-card">
         <table class="ocorrencias-table">
             <thead>
@@ -527,9 +517,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 <div class="infracao-tag-container">
                                     <div class="infracao-ids">
                                         <?php if ($oc['infracoes_ids'] !== ''): ?>
-                                            <?php foreach (explode(',', $oc['infracoes_ids']) as $id): ?>
-                                                <span><?= htmlspecialchars(trim($id)) ?></span>
-                                            <?php endforeach; ?>
+                                            <span><?= htmlspecialchars($oc['infracoes_ids']) ?></span>
                                         <?php else: ?>
                                             <span>—</span>
                                         <?php endif; ?>
@@ -564,24 +552,24 @@ document.addEventListener("DOMContentLoaded", function() {
         </table>
     </div>
 </main>
- 
+
 <!-- ── MODAL EDITAR OCORRÊNCIA ─────────────────────────── -->
 <div class="modal-overlay" id="modal-overlay" hidden>
     <div class="modal-editar" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
- 
+
         <div class="modal-header">
             <h2 id="modal-titulo">Editar Ocorrência</h2>
             <button type="button" class="modal-fechar" id="modal-fechar" aria-label="Fechar">&times;</button>
         </div>
- 
+
         <p class="modal-subtitulo" id="modal-subtitulo"></p>
- 
+
         <form id="form-editar-ocorrencia">
             <!-- id="modal-occ-id" (com hífen) — precisa bater exatamente com o
                  seletor usado no perfil.js, senão o clique em "Editar" quebra -->
             <input type="hidden" id="modal-occ-id" name="id">
             <div class="modal-corpo">
- 
+
                 <div class="campo-grupo">
                     <span class="campo-label">Status</span>
                     <div class="status-toggle">
@@ -593,7 +581,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         </label>
                     </div>
                 </div>
- 
+
                 <div class="campos-duplos">
                     <div class="campo-grupo">
                         <label class="campo-label" for="modal-disciplina">Disciplina</label>
@@ -614,24 +602,26 @@ document.addEventListener("DOMContentLoaded", function() {
                         </select>
                     </div>
                 </div>
- 
+
                 <div class="campo-grupo">
-                    <span class="campo-label">Tipo(s) de Infração</span>
+                    <span class="campo-label">Tipo de Infração</span>
+                    <!-- Radio (seleção única): o banco só permite 1 infração por
+                         ocorrência (id_tipo_ocorrencia é FK direta, não N:N) -->
                     <div class="infracoes-lista" id="modal-infracoes-lista">
-                        <?php foreach ($tiposInfracaoModal as $numItem => $descInf): ?>
+                        <?php foreach ($tiposInfracaoModal as $idTipo => $descInf): ?>
                             <label class="infracao-item">
-                                <input type="checkbox" name="infracoes[]" value="<?= $numItem ?>">
-                                <span><strong><?= $numItem ?>.</strong> <?= htmlspecialchars($descInf) ?></span>
+                                <input type="radio" name="infracoes[]" value="<?= $idTipo ?>">
+                                <span><strong><?= $idTipo ?>.</strong> <?= htmlspecialchars($descInf) ?></span>
                             </label>
                         <?php endforeach; ?>
                     </div>
                 </div>
- 
+
                 <div class="campo-grupo">
                     <label class="campo-label" for="modal-descricao">Descrição / Observações</label>
                     <textarea id="modal-descricao" name="descricao" class="campo-textarea" placeholder="Descreva o ocorrido..."></textarea>
                 </div>
- 
+
                 <label class="notif-box">
                     <input type="checkbox" id="modal-notif" name="notif_responsavel" value="1">
                     <div class="notif-box-texto">
@@ -639,18 +629,18 @@ document.addEventListener("DOMContentLoaded", function() {
                         <span>Aparecerá na impressão da folha</span>
                     </div>
                 </label>
- 
+
             </div>
- 
+
             <div class="modal-footer">
                 <button type="button" class="btn-cancelar" id="modal-cancelar">Cancelar</button>
                 <button type="submit" class="btn-salvar">Salvar Alterações</button>
             </div>
         </form>
- 
+
     </div>
 </div>
- 
+
 <!-- ── MODAL DE CONFIRMAÇÃO ───────────────────────────── -->
 <div class="modal-confirmacao-overlay" id="modal-confirmacao-overlay" hidden>
     <div class="modal-confirmacao" role="dialog" aria-modal="true" aria-labelledby="conf-titulo">
@@ -663,10 +653,9 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     </div>
 </div>
- 
+
 <div id="toast" class="toast"></div>
- 
+
 <script src="perfil.js"></script>
 </body>
 </html>
- 
